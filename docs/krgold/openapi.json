@@ -1,0 +1,2352 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "NH투자증권 Open API — 국내금현물 (KR Gold)",
+    "version": "v1",
+    "description": "NH투자증권 Open API 중 **국내금현물 (KR Gold)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+  },
+  "servers": [
+    {
+      "url": "https://api.nhplug.com:8443",
+      "description": "운영 · 나무 (실거래)"
+    },
+    {
+      "url": "https://moapi.nhplug.com:8443",
+      "description": "운영 모의투자 · 나무"
+    },
+    {
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "개발 · 나무 (실거래)"
+    },
+    {
+      "url": "https://devmoapi.nhplug.com:8443",
+      "description": "개발 모의투자 · 나무"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": [],
+      "ClientId": [],
+      "ClientSecret": []
+    }
+  ],
+  "x-environments": {
+    "portal": {
+      "나무": "https://www.nhplug.com"
+    },
+    "rest": {
+      "운영_나무": "https://api.nhplug.com:8443",
+      "운영모의_나무": "https://moapi.nhplug.com:8443",
+      "개발_나무": "https://devapi.nhplug.com:8443",
+      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    },
+    "websocket": {
+      "운영_나무": "wss://api.nhplug.com:7070",
+      "운영모의_나무": "wss://moapi.nhplug.com:17070",
+      "개발_나무": "wss://devapi.nhplug.com:7070",
+      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+    },
+    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+  },
+  "tags": [
+    {
+      "name": "주문 (Order)"
+    },
+    {
+      "name": "조회 (Inquiry)"
+    },
+    {
+      "name": "시세 (Market Data)"
+    },
+    {
+      "name": "실시간 (Realtime)"
+    }
+  ],
+  "paths": {
+    "/krgold/order/v1/goldBuy": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krgoldOrderGoldBuy",
+        "summary": "금현물 매수주문",
+        "description": "\n\n원본 시트: API_국내_금현물_주문_매수",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문수량 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "orr_amt": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문금액 / 길이 18"
+                      },
+                      "orr_cnd_dit_cd": {
+                        "type": "string",
+                        "description": "주문조건구분코드 / 길이 2 / 00.없음 01.IOC 02.FOK"
+                      },
+                      "ivs_uag_yn": {
+                        "type": "string",
+                        "description": "투자용도여부 / 길이 1 / 1.산업용 2.투자용"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr",
+                      "orr_cnd_dit_cd",
+                      "ivs_uag_yn"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/order/v1/goldSell": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krgoldOrderGoldSell",
+        "summary": "금현물 매도주문",
+        "description": "\n\n원본 시트: API_국내_금현물_주문_매도",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문수량 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "orr_amt": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문금액 / 길이 18"
+                      },
+                      "orr_cnd_dit_cd": {
+                        "type": "string",
+                        "description": "주문조건구분코드 / 길이 2 / 00.없음 01.IOC 02.FOK"
+                      },
+                      "ivs_uag_yn": {
+                        "type": "string",
+                        "description": "투자용도여부 / 길이 1 / 1.산업용 2.투자용"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr",
+                      "orr_cnd_dit_cd",
+                      "ivs_uag_yn"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/order/v1/goldModify": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krgoldOrderGoldModify",
+        "summary": "금현물 정정주문",
+        "description": "\n\n원본 시트: API_국내_금현물_주문_정정",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "org_mkt_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "원시장주문번호 / 길이 10"
+                      },
+                      "all_pat_dit_cd": {
+                        "type": "string",
+                        "description": "전체일부구분코드 / 길이 1 / 1.잔량(전체) 2.일부"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "cor_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "정정수량 / 길이 18"
+                      },
+                      "cor_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "정정가격 / 길이 15.3"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "org_mkt_orr_no",
+                      "all_pat_dit_cd",
+                      "iem_cd",
+                      "cor_pr"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/order/v1/goldCancel": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krgoldOrderGoldCancel",
+        "summary": "금현물 취소주문",
+        "description": "\n\n원본 시트: API_국내_금현물_주문_취소",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "org_mkt_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "원시장주문번호 / 길이 10"
+                      },
+                      "all_pat_dit_cd": {
+                        "type": "string",
+                        "description": "전체일부구분코드 / 길이 1 / 1.잔량(전체) 2.일부"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "cor_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "정정수량 / 길이 18"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "org_mkt_orr_no",
+                      "all_pat_dit_cd",
+                      "iem_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/inquiry/v1/goldOrderableQuantity": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krgoldInquiryGoldOrderableQuantity",
+        "summary": "금현물 주문가능수량조회",
+        "description": "\n\n원본 시트: API_국내_금현물_조회_주문가능수량",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "sby_dit_cd": {
+                        "type": "string",
+                        "description": "매매구분코드 / 길이 1 / 1.매도 2.매수"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "sby_dit_cd",
+                      "iem_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_pbl_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능수량_IO / 길이 10"
+                          },
+                          "orr_pbl_amt9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능금액9_IO / 길이 18"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krgold/inquiry/v1/goldExecution": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krgoldInquiryGoldExecution",
+        "summary": "금현물 주문체결조회",
+        "description": "\n\n원본 시트: API_국내_금현물_조회_체결",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "orr_dt": {
+                        "type": "string",
+                        "description": "주문일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "itg_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "통합주문번호 / 길이 10"
+                      },
+                      "ost_cns_dit": {
+                        "type": "string",
+                        "description": "체결구분 / 길이 1 / 0.전체 1.미체결 2.체결"
+                      },
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 길이 17 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      }
+                    },
+                    "required": [
+                      "orr_dt",
+                      "act_no",
+                      "ost_cns_dit"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "통합주문번호 / 길이 11"
+                          },
+                          "orr_mkt_cd_nm": {
+                            "type": "string",
+                            "description": "주문시장코드명 / 길이 50"
+                          },
+                          "org_itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "원통합주문번호 / 길이 11"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 50"
+                          },
+                          "sby_dit_cd_nm": {
+                            "type": "string",
+                            "description": "매매구분코드명 / 길이 50"
+                          },
+                          "lon_dt": {
+                            "type": "string",
+                            "description": "대출일자 / 길이 8"
+                          },
+                          "cfd_lon_cd": {
+                            "type": "string",
+                            "description": "신용대출코드 / 길이 20 / 00.일반거래 01.유통융자 02.자기융자 03.유통대주 04.자기대주 10.매입자금대출"
+                          },
+                          "nmn_pr_tp_cd_nm": {
+                            "type": "string",
+                            "description": "호가유형코드명_IO / 길이 30"
+                          },
+                          "orr_cnd_dit_cd_nm": {
+                            "type": "string",
+                            "description": "주문조건구분코드명_IO / 길이 60"
+                          },
+                          "orr_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문수량 / 길이 19"
+                          },
+                          "orr_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "주문가격 / 길이 15.3"
+                          },
+                          "tot_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총체결수량_IO / 길이 23"
+                          },
+                          "cns_avg_uit_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "체결평균단가 / 길이 15.3"
+                          },
+                          "cns_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결금액 / 길이 16"
+                          },
+                          "cns_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결건수 / 길이 19"
+                          },
+                          "ny_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "미체결수량_IO / 길이 23"
+                          },
+                          "can_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "취소수량 / 길이 19"
+                          },
+                          "orr_mdi": {
+                            "type": "string",
+                            "description": "주문매체_IO / 길이 20"
+                          },
+                          "orr_rjt_rsn_cd_nm": {
+                            "type": "string",
+                            "description": "주문거부사유코드명_IO / 길이 4"
+                          },
+                          "rmt_mkt_cd": {
+                            "type": "string",
+                            "description": "요청시장코드 / 길이 3 / SOR/KRX/NXT"
+                          },
+                          "sor_mkt_sli_yn": {
+                            "type": "string",
+                            "description": "SOR시장분할여부 / 길이 1 / Y.분할 N.미분할"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krgold/inquiry/v1/goldDepositAndBalance": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krgoldInquiryGoldDepositAndBalance",
+        "summary": "금현물 예수금및잔고",
+        "description": "\n\n원본 시트: API_국내_금현물_조회_잔고",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 길이 151 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      },
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      }
+                    },
+                    "required": [
+                      "act_no"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dca": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "예수금 / 길이 18"
+                          },
+                          "nxt_dd_dca": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "익일예수금_IO / 길이 15 / D+1 예수금"
+                          },
+                          "nxt2_dd_dca": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "익익일예수금 / 길이 18 / D+2 예수금"
+                          },
+                          "nas_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "순자산금액 / 길이 18"
+                          },
+                          "tot_aet_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총자산금액 / 길이 18"
+                          },
+                          "tot_byn_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총매수금액 / 길이 18"
+                          },
+                          "tot_eal_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총평가금액 / 길이 18"
+                          },
+                          "orr_pbl_amt4": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능금액4_IO / 길이 18 / 100%주문가능금액"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 60"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "tp_cd_nm": {
+                            "type": "string",
+                            "description": "유형코드명_IO / 길이 30"
+                          },
+                          "itg_bnc_qty": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "통합잔고수량 / 길이 21.6"
+                          },
+                          "ny_stl_qty": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "미결제수량 / 길이 21.6"
+                          },
+                          "rsdl_qty": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "잔량수량 / 길이 21.6"
+                          },
+                          "phs_pr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매입가격 / 길이 18"
+                          },
+                          "now_pr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "현재가격 / 길이 18"
+                          },
+                          "eal_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "평가금액 / 길이 18"
+                          },
+                          "eal_pls_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "평가손익금액 / 길이 18"
+                          },
+                          "sll_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도금액 / 길이 18"
+                          },
+                          "sll_pls_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도손익금액_IO / 길이 18"
+                          },
+                          "pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "수익율 / 길이 15.9"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krgold/quote/v1/goldCurrent": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krgoldQuoteGoldCurrent",
+        "summary": "금현물 현재가",
+        "description": "\n\n원본 시트: API_국내_금현물_시세_현재가",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "shrn_iscd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 9"
+                          },
+                          "hts_kor_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 40"
+                          },
+                          "stop": {
+                            "type": "string",
+                            "description": "거래구분 / 길이 1 / 0.정상 이외 정지"
+                          },
+                          "stck_sdpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "기준가 / 길이 9"
+                          },
+                          "stck_sspr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "대용가 / 길이 9"
+                          },
+                          "stck_prdy_clpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "전일종가 / 길이 9"
+                          },
+                          "stck_mxpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "상한가 / 길이 9"
+                          },
+                          "stck_llam": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "하한가 / 길이 9"
+                          },
+                          "d5_hgpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "5일고가 / 길이 9"
+                          },
+                          "d5_hgpr_date": {
+                            "type": "string",
+                            "description": "5일고가일 / 길이 8"
+                          },
+                          "d5_lwpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "5일저가 / 길이 9"
+                          },
+                          "d5_lwpr_date": {
+                            "type": "string",
+                            "description": "5일저가일 / 길이 8"
+                          },
+                          "d20_hgpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "20일고가 / 길이 9"
+                          },
+                          "d20_hgpr_date": {
+                            "type": "string",
+                            "description": "20일고가일 / 길이 8"
+                          },
+                          "d20_lwpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "20일저가 / 길이 9"
+                          },
+                          "d20_lwpr_date": {
+                            "type": "string",
+                            "description": "20일저가일 / 길이 8"
+                          },
+                          "w52_hgpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "52주최고가 / 길이 9"
+                          },
+                          "w52_hgpr_date": {
+                            "type": "string",
+                            "description": "52주최고가일 / 길이 8"
+                          },
+                          "w52_lwpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "52주최저가 / 길이 9"
+                          },
+                          "w52_lwpr_date": {
+                            "type": "string",
+                            "description": "52주최저가일 / 길이 8"
+                          },
+                          "bsop_hour": {
+                            "type": "string",
+                            "description": "체결시간 / 길이 8"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "현재가 / 길이 9"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                          },
+                          "prdy_vrss": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "등락폭 / 길이 9"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "stck_oprc": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시가 / 길이 9"
+                          },
+                          "stck_hgpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "고가 / 길이 9"
+                          },
+                          "stck_lwpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "저가 / 길이 9"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래량 / 길이 12"
+                          },
+                          "acml_tr_pbmn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래대금 / 길이 10"
+                          },
+                          "min_askp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도호가 / 길이 9"
+                          },
+                          "min_bidp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수호가 / 길이 9"
+                          },
+                          "h_bsop_hour": {
+                            "type": "string",
+                            "description": "호가시간 / 길이 8"
+                          },
+                          "askp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도1차선호가 / 길이 9"
+                          },
+                          "askp2": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도2차선호가 / 길이 9"
+                          },
+                          "askp3": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도3차선호가 / 길이 9"
+                          },
+                          "askp4": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도4차선호가 / 길이 9"
+                          },
+                          "askp5": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도5차선호가 / 길이 9"
+                          },
+                          "askp6": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도6차선호가 / 길이 9"
+                          },
+                          "askp7": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도7차선호가 / 길이 9"
+                          },
+                          "askp8": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도8차선호가 / 길이 9"
+                          },
+                          "askp9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도9차선호가 / 길이 9"
+                          },
+                          "askp10": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도10차선호가 / 길이 9"
+                          },
+                          "bidp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수1차선호가 / 길이 9"
+                          },
+                          "bidp2": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수2차선호가 / 길이 9"
+                          },
+                          "bidp3": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수3차선호가 / 길이 9"
+                          },
+                          "bidp4": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수4차선호가 / 길이 9"
+                          },
+                          "bidp5": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수5차선호가 / 길이 9"
+                          },
+                          "bidp6": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수6차선호가 / 길이 9"
+                          },
+                          "bidp7": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수7차선호가 / 길이 9"
+                          },
+                          "bidp8": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수8차선호가 / 길이 9"
+                          },
+                          "bidp9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수9차선호가 / 길이 9"
+                          },
+                          "bidp10": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수10차선호가 / 길이 9"
+                          },
+                          "askp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도1차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도2차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도3차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도4차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도5차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn6": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도6차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn7": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도7차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn8": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도8차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도9차선잔량 / 길이 12"
+                          },
+                          "askp_rsqn10": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도10차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수1차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수2차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수3차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수4차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수5차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn6": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수6차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn7": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수7차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn8": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수8차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수9차선잔량 / 길이 12"
+                          },
+                          "bidp_rsqn10": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수10차선잔량 / 길이 12"
+                          },
+                          "total_askp_rsqn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도잔량합 / 길이 12"
+                          },
+                          "total_bidp_rsqn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수잔량합 / 길이 12"
+                          },
+                          "marcket1z16": {
+                            "type": "string",
+                            "description": "시장조치1 / 길이 16"
+                          },
+                          "marcket2z16": {
+                            "type": "string",
+                            "description": "시장조치2 / 길이 16"
+                          },
+                          "marcket3z16": {
+                            "type": "string",
+                            "description": "시장조치3 / 길이 16"
+                          },
+                          "aspr_cls_code": {
+                            "type": "string",
+                            "description": "동시구분 / 길이 1 / 1.동시호가 이외 정규시장"
+                          },
+                          "antc_cnpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "예상체결가 / 길이 9"
+                          },
+                          "antc_vrss_sign": {
+                            "type": "string",
+                            "description": "예상체결부호 / 길이 1"
+                          },
+                          "antc_cntg_vrss": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "예상체결등락폭 / 길이 9"
+                          },
+                          "antc_prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "예상체결등락률 / 길이 5.2"
+                          },
+                          "antc_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "예상체결수량 / 길이 12"
+                          },
+                          "lbmaprice": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LBMA가격 / 길이 9.3"
+                          },
+                          "prdy_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일거래량 / 길이 12"
+                          },
+                          "tenforeprice": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "TENFORE가격 / 길이 9.3"
+                          },
+                          "dscs_bltr_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "협의거래량 / 길이 12"
+                          },
+                          "massvalue": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "협의거래대금 / 길이 10"
+                          },
+                          "lp_askp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도1차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도2차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도3차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도4차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도5차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn6": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도6차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn7": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도7차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn8": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도8차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도9차선잔량 / 길이 12"
+                          },
+                          "lp_askp_rsqn10": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매도10차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수1차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수2차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수3차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수4차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수5차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn6": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수6차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn7": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수7차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn8": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수8차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수9차선잔량 / 길이 12"
+                          },
+                          "lp_bidp_rsqn10": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "LP매수10차선잔량 / 길이 12"
+                          },
+                          "cntg_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "변동거래량 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/quote/v1/goldDailyInvestorTrade": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krgoldQuoteGoldDailyInvestorTrade",
+        "summary": "금현물 일별투자매매현황",
+        "description": "\n\n원본 시트: API_국내_금현물_시세_일별투자매매현황",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      },
+                      "cnt": {
+                        "type": "string",
+                        "description": "읽을갯수 / 길이 3 / 030"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "cnt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "일자 / 길이 8"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "종가 / 길이 9"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                          },
+                          "prdy_vrss": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "등락폭 / 길이 9"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래량 / 길이 12"
+                          },
+                          "t0001z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "금융투자 / 길이 9"
+                          },
+                          "t0002z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "보험 / 길이 9"
+                          },
+                          "t0003z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "투신 / 길이 9"
+                          },
+                          "t0004z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "은행 / 길이 9"
+                          },
+                          "t0005z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "기타금융 / 길이 9"
+                          },
+                          "t0006z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "연기금 / 길이 9"
+                          },
+                          "t0007z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "국가지자체 / 길이 9"
+                          },
+                          "t0008z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "개인 / 길이 9"
+                          },
+                          "t0009z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "외국인 / 길이 9"
+                          },
+                          "t0015z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "기타법인2 / 길이 9"
+                          },
+                          "t0010z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "기관계 / 길이 9"
+                          },
+                          "t0011z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "합계 / 길이 9"
+                          },
+                          "t0013z9": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "사모 / 길이 9"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/TODO/op": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krgoldTODOOp",
+        "summary": "금현물 괴리율",
+        "description": "\n\n원본 시트: API_국내_금현물_시세_괴리율",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "nff_ert_plf_tup_cd": {
+                        "type": "string",
+                        "description": "비대면일임플랫폼제휴코드_IO / 길이 3"
+                      },
+                      "datez8": {
+                        "type": "string",
+                        "description": "거래일자(한국일자)YYYYMMDD / 길이 8"
+                      }
+                    },
+                    "required": [
+                      "nff_ert_plf_tup_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "spot_prpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "체결가격 / 길이 9.3"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "전일대비부호 / 길이 1"
+                          },
+                          "spot_prdy_vrss": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일대비 / 길이 9.3"
+                          },
+                          "spot_prdy_ctrt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "등락률 / 길이 9.2"
+                          },
+                          "spot_oprc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "시가 / 길이 9.3"
+                          },
+                          "spot_hgpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "고가 / 길이 9.3"
+                          },
+                          "spot_lwpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "저가 / 길이 9.3"
+                          },
+                          "spot_askp": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도우선호가 / 길이 9.3"
+                          },
+                          "spot_bidp": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수우선호가 / 길이 9.3"
+                          },
+                          "unch_stnd_exrt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "환산기준환율 / 길이 9.2"
+                          },
+                          "prdy_prpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일종가 / 길이 9.3"
+                          },
+                          "filler": {
+                            "type": "string",
+                            "description": "Filler / 길이 30"
+                          },
+                          "datez8": {
+                            "type": "string",
+                            "description": "거래일자(한국일자)YYYYMMDD / 길이 8"
+                          },
+                          "am_pricez9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Am_price / 길이 9.3"
+                          },
+                          "pm_pricez9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "Pm_price / 길이 9.3"
+                          },
+                          "signz1": {
+                            "type": "string",
+                            "description": "전일대비부호 / 길이 1"
+                          },
+                          "changez9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일대비 / 길이 9.3"
+                          },
+                          "chratez9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일대비등락률 / 길이 9.2"
+                          },
+                          "exchange_ratez9": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "환산기준환율 / 길이 9.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/quote/v1/goldDailyTrend": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krgoldQuoteGoldDailyTrend",
+        "summary": "금현물 일별추이",
+        "description": "\n\n원본 시트: API_국내_금현물_시세_일별추이",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      },
+                      "sdate": {
+                        "type": "string",
+                        "description": "시작일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "edate": {
+                        "type": "string",
+                        "description": "종료일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "gubun": {
+                        "type": "string",
+                        "description": "금액구분 / 길이 1 / 0.백만원 1.원"
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "일자 / 길이 8"
+                          },
+                          "stck_oprc": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시가 / 길이 9"
+                          },
+                          "stck_hgpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "고가 / 길이 9"
+                          },
+                          "stck_lwpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "저가 / 길이 9"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "종가 / 길이 9"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                          },
+                          "prdy_vrss": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "등락폭 / 길이 9"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래량 / 길이 12"
+                          },
+                          "acml_tr_pbmn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래대금 / 길이 18"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krgold/quote/v1/goldVolatilityTrade": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krgoldQuoteGoldVolatilityTrade",
+        "summary": "금현물 변동거래",
+        "description": "\n\n원본 시트: API_국내_금현물_시세_변동거래",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      },
+                      "cnt": {
+                        "type": "string",
+                        "description": "읽을갯수 / 길이 3"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "cnt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bsop_hour": {
+                            "type": "string",
+                            "description": "시간 / 길이 6"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "현재가 / 길이 9"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                          },
+                          "prdy_vrss": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "등락폭 / 길이 9"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "askp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매도호가 / 길이 9"
+                          },
+                          "bidp1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매수호가 / 길이 9"
+                          },
+                          "cntg_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "변동거래량 / 길이 10"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래량 / 길이 12"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-realtime-channels": {
+    "endpoint": "wss://api.nhplug.com:7070",
+    "endpoints": {
+      "운영_나무": "wss://api.nhplug.com:7070",
+      "운영모의_나무": "wss://moapi.nhplug.com:17070",
+      "개발_나무": "wss://devapi.nhplug.com:7070",
+      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+    },
+    "protocol": {
+      "transport": "WebSocket",
+      "auth": "메시지 header 의 token 필드에 access token(POST /oauth2/token 으로 발급)을 전달합니다. REST 와 달리 Authorization: Bearer · x-client-id · x-client-secret 헤더는 사용하지 않습니다.",
+      "subscribe_message": {
+        "header": {
+          "token": "{access_token}",
+          "tr_type": "1"
+        },
+        "body": {
+          "tr_cd": "<채널코드>",
+          "tr_key": "<구독키>"
+        }
+      },
+      "tr_type": {
+        "1": "등록(구독)",
+        "2": "해제"
+      },
+      "response_routing": "서버 푸시 메시지는 header 에 tr_cd(채널) 와 tr_key(구독키) 를 포함하여 채널·종목을 식별합니다.",
+      "open_items_TODO": [
+        "heartbeat 주기/포맷 미정",
+        "푸시 payload 인코딩(JSON vs 구분자) 미확정",
+        "통보 채널 암호화 여부 미정",
+        "연결/구독 한도 미정",
+        "재연결 규약 미정"
+      ]
+    },
+    "note": "실시간 시세·통보는 WebSocket. 구독 포맷·인증은 protocol, 환경별 주소는 endpoints, 채널코드는 channels[].tr_cd 참조.",
+    "channels": [
+      {
+        "name": "금현물 실시간 호가",
+        "sheet": "API_국내_금현물_실시간_호가",
+        "tr_cd": "g5",
+        "tr_key": {
+          "name": "shcode",
+          "kor": "종목코드",
+          "length": "9"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "g5",
+            "tr_key": "005930"
+          }
+        },
+        "fields": [
+          "shcode",
+          "time",
+          "p_offer",
+          "p_bid",
+          "p_offerjan",
+          "p_bidjan",
+          "p1_offer",
+          "p1_bid",
+          "p1_offerjan",
+          "p1_bidjan",
+          "p2_offer",
+          "p2_bid",
+          "p2_offerjan",
+          "p2_bidjan",
+          "p3_offer",
+          "p3_bid",
+          "p3_offerjan",
+          "p3_bidjan",
+          "p4_offer",
+          "p4_bid",
+          "p4_offerjan",
+          "p4_bidjan",
+          "p5_offer",
+          "p5_bid",
+          "p5_offerjan",
+          "p5_bidjan",
+          "p6_offer",
+          "p6_bid",
+          "p6_offerjan",
+          "p6_bidjan",
+          "p7_offer",
+          "p7_bid",
+          "p7_offerjan",
+          "p7_bidjan",
+          "p8_offer",
+          "p8_bid",
+          "p8_offerjan",
+          "p8_bidjan",
+          "p9_offer",
+          "p9_bid",
+          "p9_offerjan",
+          "p9_bidjan",
+          "tofferjan",
+          "tobidjan",
+          "stop",
+          "lp_p_offerjan",
+          "lp_p_bidjan",
+          "lp_p1_offerjan",
+          "lp_p1_bidjan",
+          "lp_p2_offerjan",
+          "lp_p2_bidjan",
+          "lp_p3_offerjan",
+          "lp_p3_bidjan",
+          "lp_p4_offerjan",
+          "lp_p4_bidjan",
+          "lp_p5_offerjan",
+          "lp_p5_bidjan",
+          "lp_p6_offerjan",
+          "lp_p6_bidjan",
+          "lp_p7_offerjan",
+          "lp_p7_bidjan",
+          "lp_p8_offerjan",
+          "lp_p8_bidjan",
+          "lp_p9_offerjan",
+          "lp_p9_bidjan"
+        ]
+      },
+      {
+        "name": "금현물 실시간 체결가",
+        "sheet": "API_국내_금현물_실시간_체결가",
+        "tr_cd": "g4",
+        "tr_key": {
+          "name": "shcode",
+          "kor": "종목코드",
+          "length": "9"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "g4",
+            "tr_key": "005930"
+          }
+        },
+        "fields": [
+          "shcode",
+          "time",
+          "sign",
+          "change",
+          "cheprice",
+          "chrate",
+          "chevolume",
+          "janggubun",
+          "openprice",
+          "highprice",
+          "lowprice",
+          "totvolume",
+          "totvalue"
+        ]
+      },
+      {
+        "name": "금현물 실시간 예상체결가",
+        "sheet": "API_국내_금현물_실시간_예상체결",
+        "tr_cd": "gE",
+        "tr_key": {
+          "name": "shcode",
+          "kor": "종목코드",
+          "length": "9"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "gE",
+            "tr_key": "005930"
+          }
+        },
+        "fields": [
+          "shcode",
+          "time",
+          "dongsi",
+          "eqsign",
+          "eqprice",
+          "eqchange",
+          "eqvolume",
+          "eqchrate"
+        ]
+      },
+      {
+        "name": "금현물 실시간 체결내역 통보",
+        "sheet": "API_국내_금현물_실시간_체결통보",
+        "tr_cd": "de",
+        "tr_key": {
+          "name": "userid",
+          "kor": "사용자ID",
+          "length": "8"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "de",
+            "tr_key": "<userid>"
+          }
+        },
+        "fields": [
+          "userid",
+          "itemgb",
+          "accountno",
+          "orderno",
+          "issuecd",
+          "issuename",
+          "slbygb",
+          "concgty",
+          "concprc",
+          "conctime",
+          "ucgb",
+          "rejgb"
+        ]
+      },
+      {
+        "name": "금현물 실시간 주문내역 통보",
+        "sheet": "API_국내_금현물_실시간_주문내역통보",
+        "tr_cd": "d3",
+        "tr_key": {
+          "name": "userid",
+          "kor": "사용자ID",
+          "length": "8"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "d3",
+            "tr_key": "<userid>"
+          }
+        },
+        "fields": [
+          "userid",
+          "itemgb",
+          "accountno",
+          "orderno",
+          "orgordno",
+          "ordercd",
+          "issuecd",
+          "issuename",
+          "slbygb",
+          "order_type",
+          "ordergty",
+          "orderprc",
+          "procnm",
+          "commcd",
+          "order_cond",
+          "fundcode",
+          "sin_gb",
+          "order_time",
+          "loan_date",
+          "rmt_mkt_cd",
+          "snd_mkt_cd",
+          "ord_cond_prc",
+          "sor_orrgb",
+          "mkt_order_qty"
+        ]
+      }
+    ]
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "POST /oauth2/token 으로 발급받은 access token"
+      },
+      "ClientId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-id"
+      },
+      "ClientSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-secret"
+      }
+    },
+    "parameters": {
+      "CtsHeader": {
+        "name": "cts",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "연속조회 키. 목록 조회 응답의 연속키를 다음 요청 헤더에 세팅"
+      }
+    },
+    "schemas": {
+      "Message": {
+        "type": "object",
+        "description": "공통 응답 메시지 봉투",
+        "properties": {
+          "msg_code": {
+            "type": "string"
+          },
+          "usr_msg": {
+            "type": "string"
+          },
+          "msg_lv_code": {
+            "type": "string"
+          },
+          "dvlp_msg_yn": {
+            "type": "string"
+          },
+          "svc_nm": {
+            "type": "string"
+          },
+          "func_nm": {
+            "type": "string"
+          },
+          "line_no": {
+            "type": "string"
+          },
+          "dvlp_msg": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

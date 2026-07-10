@@ -15,6 +15,7 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 docs/              # API 명세(llms.txt/openapi) 배치 + 에러코드/레이트리밋
+AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주문형식) — 자동 로드
 ```
 
 ## 빠른 시작

@@ -1,0 +1,4053 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "NH투자증권 Open API — 국내채권 (KR Bond)",
+    "version": "v1",
+    "description": "NH투자증권 Open API 중 **국내채권 (KR Bond)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+  },
+  "servers": [
+    {
+      "url": "https://api.nhplug.com:8443",
+      "description": "운영 · 나무 (실거래)"
+    },
+    {
+      "url": "https://moapi.nhplug.com:8443",
+      "description": "운영 모의투자 · 나무"
+    },
+    {
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "개발 · 나무 (실거래)"
+    },
+    {
+      "url": "https://devmoapi.nhplug.com:8443",
+      "description": "개발 모의투자 · 나무"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": [],
+      "ClientId": [],
+      "ClientSecret": []
+    }
+  ],
+  "x-environments": {
+    "portal": {
+      "나무": "https://www.nhplug.com"
+    },
+    "rest": {
+      "운영_나무": "https://api.nhplug.com:8443",
+      "운영모의_나무": "https://moapi.nhplug.com:8443",
+      "개발_나무": "https://devapi.nhplug.com:8443",
+      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    },
+    "websocket": {
+      "운영_나무": "wss://api.nhplug.com:7070",
+      "운영모의_나무": "wss://moapi.nhplug.com:17070",
+      "개발_나무": "wss://devapi.nhplug.com:7070",
+      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+    },
+    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+  },
+  "tags": [
+    {
+      "name": "주문 (Order)"
+    },
+    {
+      "name": "조회 (Inquiry)"
+    },
+    {
+      "name": "시세 (Market Data)"
+    },
+    {
+      "name": "실시간 (Realtime)"
+    }
+  ],
+  "paths": {
+    "/krbond/order/v1/bondBuy": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krbondOrderBondBuy",
+        "summary": "장내채권 매수주문",
+        "description": "\n\n원본 시트: API_국내_채권_주문_매수",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문수량 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "sam_mkt_end_smo_sby_yn": {
+                        "type": "string",
+                        "description": "소액시장종료동시매매여부 / 길이 1 / Y.동시매매 N.일반"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/order/v1/bondSell": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krbondOrderBondSell",
+        "summary": "장내채권 매도주문",
+        "description": "\n\n원본 시트: API_국내_채권_주문_매도",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문수량 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "sam_mkt_end_smo_sby_yn": {
+                        "type": "string",
+                        "description": "소액시장종료동시매매여부 / 길이 1 / Y.동시매매 N.일반"
+                      },
+                      "byn_dt": {
+                        "type": "string",
+                        "description": "매수일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "syn_ttn_dit_cd": {
+                        "type": "string",
+                        "description": "종합과세구분코드 / 길이 1 / 1.종합과세 2.분리과세"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr",
+                      "byn_dt",
+                      "syn_ttn_dit_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/order/v1/bondModify": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krbondOrderBondModify",
+        "summary": "장내채권 정정주문",
+        "description": "\n\n원본 시트: API_국내_채권_주문_정정",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "org_mkt_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "원시장주문번호 / 길이 10"
+                      },
+                      "all_pat_dit_cd": {
+                        "type": "string",
+                        "description": "전체일부구분코드 / 길이 1 / 1.잔량(전체) 2.일부"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "cor_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "정정수량 / 길이 18"
+                      },
+                      "cor_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "정정가격 / 길이 15.3"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "org_mkt_orr_no",
+                      "all_pat_dit_cd",
+                      "iem_cd",
+                      "cor_pr"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/order/v1/bondCancel": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krbondOrderBondCancel",
+        "summary": "장내채권 취소주문",
+        "description": "\n\n원본 시트: API_국내_채권_주문_취소",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "org_mkt_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "원시장주문번호 / 길이 10"
+                      },
+                      "all_pat_dit_cd": {
+                        "type": "string",
+                        "description": "전체일부구분코드 / 길이 1 / 1.잔량(전체) 2.일부"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "cor_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "정정수량 / 길이 18"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "org_mkt_orr_no",
+                      "all_pat_dit_cd",
+                      "iem_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/order/v1/bondSubstituteSell": {
+      "post": {
+        "tags": [
+          "주문 (Order)"
+        ],
+        "operationId": "krbondOrderBondSubstituteSell",
+        "summary": "장내채권 대용매도주문",
+        "description": "\n\n원본 시트: API_국내_채권_주문_대용매도",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문수량 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      },
+                      "sam_mkt_end_smo_sby_yn": {
+                        "type": "string",
+                        "description": "소액시장종료동시매매여부 / 길이 1 / Y.동시매매 N.일반"
+                      },
+                      "byn_dt": {
+                        "type": "string",
+                        "description": "매수일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "syn_ttn_dit_cd": {
+                        "type": "string",
+                        "description": "종합과세구분코드 / 길이 1 / 1.종합과세 2.분리과세"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr",
+                      "byn_dt",
+                      "syn_ttn_dit_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orr_gno_tab_cd": {
+                            "type": "string",
+                            "description": "주문채번팀점코드 / 길이 4"
+                          },
+                          "mkt_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "시장주문번호 / 길이 10"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/inquiry/v1/bondOrderableQuantity": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krbondInquiryBondOrderableQuantity",
+        "summary": "장내채권 주문가능수량 조회",
+        "description": "\n\n원본 시트: API_국내_채권_조회_주문가능수량",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "pwd": {
+                        "type": "string",
+                        "description": "주문시장코드 / 길이 8 / 11.일반채권 12.소액채권"
+                      },
+                      "bnd_mkt_dit_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 1"
+                      },
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "매매구분코드 / 길이 12 / 1.매도 2.매수"
+                      },
+                      "orr_qty": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문금액 / 길이 18"
+                      },
+                      "orr_pr": {
+                        "type": "number",
+                        "format": "double",
+                        "description": "주문가격 / 길이 15.3"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "pwd",
+                      "bnd_mkt_dit_cd",
+                      "iem_cd",
+                      "orr_qty",
+                      "orr_pr"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sby_fee": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "매매수수료 / 길이 18"
+                          },
+                          "fee_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "수수료율 / 길이 15.9"
+                          },
+                          "orr_pbl_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능금액 / 길이 18"
+                          },
+                          "orr_pbl_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능수량_IO / 길이 18"
+                          },
+                          "orr_pbl_qty1": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문가능수량1_IO / 길이 18"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krbond/TODO/op": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krbondTODOOp",
+        "summary": "장내채권 정정취소가능주문 조회",
+        "description": "\n\n원본 시트: API_국내_채권_조회_정정취소가능주문",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "orr_dt": {
+                        "type": "string",
+                        "description": "주문일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "itg_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "주문번호 / 길이 10"
+                      },
+                      "ost_cns_dit": {
+                        "type": "string",
+                        "description": "체결구분 / 길이 1 / 0.전체 1.미체결 2.체결"
+                      },
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      }
+                    },
+                    "required": [
+                      "orr_dt",
+                      "act_no",
+                      "ost_cns_dit",
+                      "CTS"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "통합주문번호 / 길이 11"
+                          },
+                          "orr_mkt_cd_nm": {
+                            "type": "string",
+                            "description": "주문시장코드명 / 길이 50"
+                          },
+                          "org_itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "원통합주문번호 / 길이 11"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 50"
+                          },
+                          "sby_dit_cd_nm": {
+                            "type": "string",
+                            "description": "매매구분코드명 / 길이 50"
+                          },
+                          "lon_dt": {
+                            "type": "string",
+                            "description": "대출일자 / 길이 8"
+                          },
+                          "cfd_lon_cd": {
+                            "type": "string",
+                            "description": "신용대출코드 / 길이 20 / 00.일반거래 01.유통융자 02.자기융자 03.유통대주 04.자기대주 10.매입자금대출"
+                          },
+                          "nmn_pr_tp_cd_nm": {
+                            "type": "string",
+                            "description": "호가유형코드명_IO / 길이 30"
+                          },
+                          "orr_cnd_dit_cd_nm": {
+                            "type": "string",
+                            "description": "주문조건구분코드명_IO / 길이 60"
+                          },
+                          "orr_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문수량 / 길이 19"
+                          },
+                          "orr_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "주문가격 / 길이 15.3"
+                          },
+                          "tot_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총체결수량_IO / 길이 23"
+                          },
+                          "cns_avg_uit_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "체결평균단가 / 길이 15.3"
+                          },
+                          "cns_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결금액 / 길이 16"
+                          },
+                          "cns_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결건수 / 길이 19"
+                          },
+                          "ny_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "미체결수량_IO / 길이 23"
+                          },
+                          "can_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "취소수량 / 길이 19"
+                          },
+                          "orr_mdi": {
+                            "type": "string",
+                            "description": "주문매체_IO / 길이 20"
+                          },
+                          "orr_rjt_rsn_cd_nm": {
+                            "type": "string",
+                            "description": "주문거부사유코드명_IO / 길이 4"
+                          },
+                          "rmt_mkt_cd": {
+                            "type": "string",
+                            "description": "요청시장코드 / 길이 3"
+                          },
+                          "sor_mkt_sli_yn": {
+                            "type": "string",
+                            "description": "SOR시장분할여부 / 길이 1"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krbond/inquiry/v1/bondModifiableOrder": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krbondInquiryBondModifiableOrder",
+        "summary": "장내채권 주문체결내역 조회",
+        "description": "\n\n원본 시트: API_국내_채권_조회_체결내역",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "orr_dt": {
+                        "type": "string",
+                        "description": "주문일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "itg_orr_no": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "통합주문번호 / 길이 10"
+                      },
+                      "orr_mkt_cd": {
+                        "type": "string",
+                        "description": "주문시장코드 / 길이 2 / 00.전체 11.장내채권 12.소액채권"
+                      },
+                      "ost_cns_dit": {
+                        "type": "string",
+                        "description": "체결구분 / 길이 1 / 0.전체 1.미체결 2.체결"
+                      },
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 길이 17 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      }
+                    },
+                    "required": [
+                      "orr_dt",
+                      "act_no",
+                      "ost_cns_dit"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cus_fnm": {
+                            "type": "string",
+                            "description": "고객성명 / 길이 40"
+                          },
+                          "itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "통합주문번호 / 길이 11"
+                          },
+                          "orr_mkt_cd_nm": {
+                            "type": "string",
+                            "description": "주문시장코드명 / 길이 50"
+                          },
+                          "org_itg_orr_no": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "원통합주문번호 / 길이 11"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 50"
+                          },
+                          "sby_dit_cd_nm": {
+                            "type": "string",
+                            "description": "매매구분코드명 / 길이 50"
+                          },
+                          "lon_dt": {
+                            "type": "string",
+                            "description": "대출일자 / 길이 8"
+                          },
+                          "cfd_lon_cd": {
+                            "type": "string",
+                            "description": "신용대출코드 / 길이 20 / 00.일반거래 01.유통융자 02.자기융자 03.유통대주 04.자기대주 10.매입자금대출"
+                          },
+                          "nmn_pr_tp_cd_nm": {
+                            "type": "string",
+                            "description": "호가유형코드명_IO / 길이 30"
+                          },
+                          "orr_cnd_dit_cd_nm": {
+                            "type": "string",
+                            "description": "주문조건구분코드명_IO / 길이 60"
+                          },
+                          "orr_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "주문수량 / 길이 19"
+                          },
+                          "orr_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "주문가격 / 길이 15.3"
+                          },
+                          "tot_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총체결수량_IO / 길이 23"
+                          },
+                          "cns_avg_uit_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "체결평균단가 / 길이 15.3"
+                          },
+                          "cns_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결금액 / 길이 16"
+                          },
+                          "cns_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "체결건수 / 길이 19"
+                          },
+                          "ny_cns_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "미체결수량_IO / 길이 23"
+                          },
+                          "can_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "취소수량 / 길이 19"
+                          },
+                          "orr_mdi": {
+                            "type": "string",
+                            "description": "주문매체_IO / 길이 20"
+                          },
+                          "orr_rjt_rsn_cd_nm": {
+                            "type": "string",
+                            "description": "주문거부사유코드명_IO / 길이 4"
+                          },
+                          "rmt_mkt_cd": {
+                            "type": "string",
+                            "description": "요청시장코드 / 길이 3 / SOR/KRX/NXT"
+                          },
+                          "sor_mkt_sli_yn": {
+                            "type": "string",
+                            "description": "SOR시장분할여부 / 길이 1 / Y.분할 N.미분할"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krbond/inquiry/v1/bondBalance": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krbondInquiryBondBalance",
+        "summary": "장내채권 잔고조회",
+        "description": "\n\n원본 시트: API_국내_채권_조회_잔고",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 길이 81 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      },
+                      "act_no": {
+                        "type": "string",
+                        "description": "계좌번호 / 길이 11"
+                      },
+                      "iqr_dt": {
+                        "type": "string",
+                        "description": "조회일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "iqr_dit": {
+                        "type": "string",
+                        "description": "조회구분_IO / 길이 1 / 0.매수일별 조회 1.종목별조회"
+                      }
+                    },
+                    "required": [
+                      "act_no",
+                      "iqr_dt",
+                      "iqr_dit"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tot_aet_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총자산금액 / 길이 18"
+                          },
+                          "tot_byn_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총매수금액 / 길이 18"
+                          },
+                          "tot_eal_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총평가금액 / 길이 18"
+                          },
+                          "tot_eal_pls": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총평가손익_IO / 길이 18"
+                          },
+                          "dca": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "예수금 / 길이 18"
+                          },
+                          "tot_lon_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "총대출금액_IO / 길이 18"
+                          },
+                          "pdt_tp_nm": {
+                            "type": "string",
+                            "description": "상품유형명 / 길이 50"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 60"
+                          },
+                          "byn_dt": {
+                            "type": "string",
+                            "description": "매수일자 / 길이 8"
+                          },
+                          "cur_cd": {
+                            "type": "string",
+                            "description": "통화코드 / 길이 3"
+                          },
+                          "itg_bnc_qty": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "통합잔고수량 / 길이 18.3"
+                          },
+                          "itg_ny_stl_qty": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "통합미결제수량 / 길이 18.3"
+                          },
+                          "itg_bnc_qty_sum": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "통합잔고수량합계_IO / 길이 18.3"
+                          },
+                          "nsv_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "비저축수량 / 길이 18"
+                          },
+                          "avg_phs_uit_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "평균매입단가 / 길이 18.5"
+                          },
+                          "phs_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매입가격 / 길이 18.2"
+                          },
+                          "eal_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "평가금액 / 길이 18"
+                          },
+                          "eal_pls_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "평가손익금액 / 길이 18.2"
+                          },
+                          "xrn_dt": {
+                            "type": "string",
+                            "description": "만기일자 / 길이 8"
+                          },
+                          "byn_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수수익율 / 길이 15.9"
+                          },
+                          "svl_dd_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "잔존일수 / 길이 10"
+                          },
+                          "xrn_rdp_amt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "만기상환금액 / 길이 18"
+                          },
+                          "syn_ttn_dit_cd": {
+                            "type": "string",
+                            "description": "종합과세구분코드 / 길이 1"
+                          },
+                          "syn_ttn_dit_cd_nm": {
+                            "type": "string",
+                            "description": "종합과세구분코드명 / 길이 20"
+                          },
+                          "tax_sum": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "세금합계_IO / 길이 18"
+                          },
+                          "cfd_eal_ogt_cfd_grd_cd1": {
+                            "type": "string",
+                            "description": "신용평가기관신용등급코드1 / 길이 4"
+                          },
+                          "tp_cd_nm": {
+                            "type": "string",
+                            "description": "유형코드명_IO / 길이 30"
+                          },
+                          "fc_sec_trd_nat_cd": {
+                            "type": "string",
+                            "description": "외화증권거래국가코드 / 길이 3"
+                          },
+                          "nat_cd_nm": {
+                            "type": "string",
+                            "description": "국가코드명_IO / 길이 40"
+                          },
+                          "pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "수익율 / 길이 15.9"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krbond/inquiry/v1/bondSubstituteBalance": {
+      "post": {
+        "tags": [
+          "조회 (Inquiry)"
+        ],
+        "operationId": "krbondInquiryBondSubstituteBalance",
+        "summary": "장내채권 대용잔고조회",
+        "description": "\n\n원본 시트: API_국내_채권_조회_대용잔고",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "frs_act_no": {
+                        "type": "string",
+                        "description": "선물계좌번호 / 길이 11"
+                      },
+                      "ahi_act_no": {
+                        "type": "string",
+                        "description": "현물계좌번호 / 길이 11"
+                      },
+                      "CTS": {
+                        "type": "string",
+                        "description": "CTS / 길이 34 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                      }
+                    },
+                    "required": [
+                      "frs_act_no"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "act_no": {
+                            "type": "string",
+                            "description": "계좌번호 / 길이 11"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 50"
+                          },
+                          "bnc_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "잔고수량 / 길이 18"
+                          },
+                          "sba_pbl_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "대용가능수량_IO / 길이 18"
+                          },
+                          "frs_sba_apm_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "선물대용지정수량 / 길이 18"
+                          },
+                          "syn_ttn_dit_cd": {
+                            "type": "string",
+                            "description": "종합과세구분코드 / 길이 1"
+                          },
+                          "syn_ttn_dit_cd_nm": {
+                            "type": "string",
+                            "description": "종합과세구분코드명 / 길이 50"
+                          },
+                          "byn_dt": {
+                            "type": "string",
+                            "description": "매수일자 / 길이 8"
+                          },
+                          "xrn_dt": {
+                            "type": "string",
+                            "description": "만기일자 / 길이 8"
+                          },
+                          "sba_pr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "대용가격 / 길이 18"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CtsHeader"
+          }
+        ]
+      }
+    },
+    "/krbond/quote/v1/bondCurrent": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondCurrent",
+        "summary": "장내채권 현재가",
+        "description": "\n\n원본 시트: API_국내_채권_시세_현재가",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      },
+                      "market": {
+                        "type": "string",
+                        "description": "시장구분 / 길이 1 / 소액채권일때만 0.일반채권 1.소액채권"
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "market"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bond_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 45"
+                          },
+                          "bond_stnd_iscd": {
+                            "type": "string",
+                            "description": "코드 / 길이 12"
+                          },
+                          "bond_shrn_iscd": {
+                            "type": "string",
+                            "description": "단축코드 / 길이 9"
+                          },
+                          "pblc_date": {
+                            "type": "string",
+                            "description": "발행일 / 길이 8"
+                          },
+                          "rdmp_date": {
+                            "type": "string",
+                            "description": "상환일 / 길이 8"
+                          },
+                          "lstn_date": {
+                            "type": "string",
+                            "description": "상장일 / 길이 8"
+                          },
+                          "cnvr_stck_iscd": {
+                            "type": "string",
+                            "description": "전환주식명 / 길이 12"
+                          },
+                          "cnvsdatez8": {
+                            "type": "string",
+                            "description": "전환청구시작일 / 길이 8"
+                          },
+                          "cnvedatez8": {
+                            "type": "string",
+                            "description": "전환청구종료일 / 길이 8"
+                          },
+                          "dvdn_rckn_date": {
+                            "type": "string",
+                            "description": "배당기산일 / 길이 8"
+                          },
+                          "gurn_istu_name": {
+                            "type": "string",
+                            "description": "보증기관 / 길이 20"
+                          },
+                          "pblc_amt": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "발행액(백만원) / 길이 8"
+                          },
+                          "lstn_amt": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "상장액(백만원) / 길이 8"
+                          },
+                          "srfc_mnrt": {
+                            "type": "string",
+                            "description": "표면금리 / 길이 7"
+                          },
+                          "sspr": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "대용가 / 길이 8"
+                          },
+                          "evnt_rate": {
+                            "type": "string",
+                            "description": "전환비율 / 길이 7"
+                          },
+                          "mtrt_guar_ert": {
+                            "type": "string",
+                            "description": "보장수익율 / 길이 7"
+                          },
+                          "cnvr_amt": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "전환가격 / 길이 9"
+                          },
+                          "bond_prpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "현재가 / 길이 11.2"
+                          },
+                          "bond_oprc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "시가 / 길이 11.2"
+                          },
+                          "bond_hgpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "고가 / 길이 11.2"
+                          },
+                          "bond_lwpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "저가 / 길이 11.2"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "누적거래량 / 길이 15"
+                          },
+                          "acml_tr_pbmn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "누적거래대금 / 길이 11"
+                          },
+                          "bond_askp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도1호가 / 길이 11.2"
+                          },
+                          "askp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도1호가잔량 / 길이 15"
+                          },
+                          "askp_ert1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도1호가수익률 / 길이 6.3"
+                          },
+                          "bond_bidp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수1호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수1호가잔량 / 길이 15"
+                          },
+                          "bidp_ert1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수1호가수익률 / 길이 6.3"
+                          },
+                          "bond_askp2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도2호가 / 길이 11.2"
+                          },
+                          "askp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도2호가잔량 / 길이 15"
+                          },
+                          "askp_ert2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도2호가수익률 / 길이 6.3"
+                          },
+                          "bond_bidp2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수2호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수2호가잔량 / 길이 15"
+                          },
+                          "bidp_ert2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수2호가수익률 / 길이 6.3"
+                          },
+                          "bond_askp3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도3호가 / 길이 11.2"
+                          },
+                          "askp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도3호가잔량 / 길이 15"
+                          },
+                          "askp_ert3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도3호가수익률 / 길이 6.3"
+                          },
+                          "bond_bidp3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수3호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수3호가잔량 / 길이 15"
+                          },
+                          "bidp_ert3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수3호가수익률 / 길이 6.3"
+                          },
+                          "bond_askp4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도4호가 / 길이 11.2"
+                          },
+                          "askp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도4호가잔량 / 길이 15"
+                          },
+                          "askp_ert4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도4호가수익률 / 길이 6.3"
+                          },
+                          "bond_bidp4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수4호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수4호가잔량 / 길이 15"
+                          },
+                          "bidp_ert4": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수4호가수익률 / 길이 6.3"
+                          },
+                          "bond_askp5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도5호가 / 길이 11.2"
+                          },
+                          "askp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도5호가잔량 / 길이 15"
+                          },
+                          "askp_ert5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도5호가수익률 / 길이 6.3"
+                          },
+                          "bond_bidp5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수5호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수5호가잔량 / 길이 15"
+                          },
+                          "bidp_ert5": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수5호가수익률 / 길이 6.3"
+                          },
+                          "total_askp_rsqn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "총매도호가잔량 / 길이 15"
+                          },
+                          "total_bidp_rsqn": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "총매수호가잔량 / 길이 15"
+                          },
+                          "shrn_iscd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 6"
+                          },
+                          "bond_prdy_clpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일종가 / 길이 11.2"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1"
+                          },
+                          "prdy_vrss": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일비 / 길이 11.2"
+                          },
+                          "bond_dryy_hgpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "연중최고 / 길이 11.2"
+                          },
+                          "bond_dryy_lwpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "연중최저 / 길이 11.2"
+                          },
+                          "bond_cls_code": {
+                            "type": "string",
+                            "description": "주식사채구분 / 길이 30"
+                          },
+                          "spcl_cond": {
+                            "type": "string",
+                            "description": "특이조건 / 길이 60"
+                          },
+                          "bsop_hour": {
+                            "type": "string",
+                            "description": "호가시간 / 길이 6"
+                          },
+                          "bondgbz1": {
+                            "type": "string",
+                            "description": "채권구분 / 길이 1 / 1.소액채권 2.일반채권 3.소액인데일반채권"
+                          },
+                          "stopgbz1": {
+                            "type": "string",
+                            "description": "거래정지구분 / 길이 1 / 0.정상 1.거래정지"
+                          },
+                          "bond_cnpr_unit": {
+                            "type": "string",
+                            "description": "가격단위규칙ID / 길이 4"
+                          },
+                          "bond_cnpr_unit2": {
+                            "type": "string",
+                            "description": "가격단위규칙ID명 / 길이 5"
+                          },
+                          "warngbz1": {
+                            "type": "string",
+                            "description": "투자유의구분 / 길이 1 / 0.정상 1.투자유의지정예고 2.투자유의지정"
+                          },
+                          "avrg_prtx_unpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "평균세전단가 / 길이 16.6 / 민평단가"
+                          },
+                          "hts_kor_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 13"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "현재가 / 길이 7"
+                          },
+                          "parityz7": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "패러티 / 길이 7.2"
+                          },
+                          "new_volumez12": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "신규거래량 / 길이 15"
+                          },
+                          "cntg_hour": {
+                            "type": "string",
+                            "description": "시간 / 길이 8"
+                          },
+                          "cntg_qty": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "변동거래량 / 길이 15"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/bondDetail": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondDetail",
+        "summary": "장내채권 상세정보 조회",
+        "description": "\n\n원본 시트: API_국내_채권_시세_상세정보",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      }
+                    },
+                    "required": [
+                      "iem_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "bnd_iem_krl_nm": {
+                            "type": "string",
+                            "description": "채권종목한글명 / 길이 60"
+                          },
+                          "bnd_iem_eng_nm": {
+                            "type": "string",
+                            "description": "채권종목영문명 / 길이 60"
+                          },
+                          "grt_ogt_cd_nm": {
+                            "type": "string",
+                            "description": "보증기관코드명_IO / 길이 40"
+                          },
+                          "cco_ogt_cd_nm": {
+                            "type": "string",
+                            "description": "주간사기관코드명_IO / 길이 40"
+                          },
+                          "pym_agy_ogt_cd_nm": {
+                            "type": "string",
+                            "description": "지급대행기관코드명_IO / 길이 40"
+                          },
+                          "pbs_ogt_cd_nm": {
+                            "type": "string",
+                            "description": "발행기관코드명_IO / 길이 40"
+                          },
+                          "tct_ogt_cd_nm": {
+                            "type": "string",
+                            "description": "수탁기관코드명_IO / 길이 40"
+                          },
+                          "std_iem_cd": {
+                            "type": "string",
+                            "description": "표준종목코드 / 길이 12"
+                          },
+                          "iem_cd1": {
+                            "type": "string",
+                            "description": "종목코드1_IO / 길이 12"
+                          },
+                          "pbs_dt": {
+                            "type": "string",
+                            "description": "발행일자 / 길이 8"
+                          },
+                          "rnu_dt": {
+                            "type": "string",
+                            "description": "매출일자 / 길이 8"
+                          },
+                          "ltg_dt": {
+                            "type": "string",
+                            "description": "상장일자 / 길이 8"
+                          },
+                          "xrn_dt": {
+                            "type": "string",
+                            "description": "만기일자 / 길이 8"
+                          },
+                          "int_pym_mtd_tp_cd_nm": {
+                            "type": "string",
+                            "description": "이자지급방법유형코드명_IO / 길이 30"
+                          },
+                          "srf_int_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "표면이자율 / 길이 11.8"
+                          },
+                          "crp_bnd_dc_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "회사채할인율 / 길이 8.5"
+                          },
+                          "int_pym_uit_te_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "이자지급단위기간수 / 길이 11"
+                          },
+                          "int_dd_bse_tp_cd": {
+                            "type": "string",
+                            "description": "이자일기준유형코드 / 길이 1"
+                          },
+                          "fst_int_pym_dt": {
+                            "type": "string",
+                            "description": "최초이자지급일자 / 길이 8"
+                          },
+                          "rlr_rbf_int_pym_dt": {
+                            "type": "string",
+                            "description": "보통직전이자지급일자 / 길이 8"
+                          },
+                          "rlr_ntm_int_pym_dt": {
+                            "type": "string",
+                            "description": "보통차기이자지급일자 / 길이 8"
+                          },
+                          "bnk_hdy_pia_pym_mtd_cd": {
+                            "type": "string",
+                            "description": "은행휴일원리금지급방법코드 / 길이 1"
+                          },
+                          "obj_iem_cd": {
+                            "type": "string",
+                            "description": "대상종목코드 / 길이 12"
+                          },
+                          "obj_stk_iem_nm": {
+                            "type": "string",
+                            "description": "대상주식종목명 / 길이 60"
+                          },
+                          "stk_crp_bnd_dit_cd": {
+                            "type": "string",
+                            "description": "주식회사채구분코드 / 길이 1"
+                          },
+                          "rit_dit_cd": {
+                            "type": "string",
+                            "description": "권리구분코드 / 길이 2"
+                          },
+                          "xrn_rdp_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "만기상환율 / 길이 18.8"
+                          },
+                          "erc_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "행사가격 / 길이 15.6"
+                          },
+                          "asr_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "보장수익율 / 길이 15.9"
+                          },
+                          "erc_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "행사비율 / 길이 11.8"
+                          },
+                          "bnd_tp_cd_nm": {
+                            "type": "string",
+                            "description": "채권유형코드명_IO / 길이 50"
+                          },
+                          "abs_dit_cd": {
+                            "type": "string",
+                            "description": "자산유동화증권구분코드 / 길이 2"
+                          },
+                          "ltg_nst_tp_cd_nm": {
+                            "type": "string",
+                            "description": "상장비상장유형코드명_IO / 길이 20"
+                          },
+                          "rdp_mtd_nm": {
+                            "type": "string",
+                            "description": "상환방법명_IO / 길이 20"
+                          },
+                          "dfm_te_cnt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "거치기간수 / 길이 11"
+                          },
+                          "sli_rdp_nbt": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "분할상환횟수 / 길이 10"
+                          },
+                          "rnu_tp_cd": {
+                            "type": "string",
+                            "description": "매출유형코드 / 길이 1"
+                          },
+                          "pre_rnu_ptm_int_pym_mtd_cd": {
+                            "type": "string",
+                            "description": "선매출시점이자지급방법코드 / 길이 1"
+                          },
+                          "aay_tp_cd": {
+                            "type": "string",
+                            "description": "선후급유형코드 / 길이 1"
+                          },
+                          "int_won_uit_udr_pcs_dit_cd": {
+                            "type": "string",
+                            "description": "이자원단위미만처리구분코드 / 길이 1"
+                          },
+                          "sri_erc_af_iem_cd": {
+                            "type": "string",
+                            "description": "신주인수권행사후종목코드 / 길이 12"
+                          },
+                          "erc_oum_dt": {
+                            "type": "string",
+                            "description": "행사개시일자 / 길이 8"
+                          },
+                          "erc_end_dt": {
+                            "type": "string",
+                            "description": "행사종료일자 / 길이 8"
+                          },
+                          "krw_sba_pr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "원화대용가격 / 길이 18"
+                          },
+                          "pot_sba_pr": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "포인트대용가격 / 길이 18"
+                          },
+                          "bnd_pbs_tal": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "채권발행총액 / 길이 18"
+                          },
+                          "cfd_grd_cd1": {
+                            "type": "string",
+                            "description": "신용등급코드1 / 길이 4"
+                          },
+                          "add_irt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "가산금리 / 길이 11.8"
+                          },
+                          "trd_sop_ssp_rop_tp_cd": {
+                            "type": "string",
+                            "description": "거래정지중단재개유형코드 / 길이 1"
+                          },
+                          "bnd_trd_sop_rsn_cd": {
+                            "type": "string",
+                            "description": "채권거래정지사유코드 / 길이 1"
+                          },
+                          "ltg_aot_rsn_cd": {
+                            "type": "string",
+                            "description": "상장폐지사유코드 / 길이 2"
+                          },
+                          "opt_knd_cd_nm": {
+                            "type": "string",
+                            "description": "옵션종류코드명_IO / 길이 20"
+                          },
+                          "xrn_dfn_int_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "만기확정이자율 / 길이 11.8"
+                          },
+                          "osf_fds_amn_tp_cd_nm": {
+                            "type": "string",
+                            "description": "자기자본관리유형코드명_IO / 길이 20"
+                          },
+                          "sby_fbd_dit_cd_nm": {
+                            "type": "string",
+                            "description": "매매금지구분코드명_IO / 길이 20"
+                          },
+                          "lon_pbl_yn_nm": {
+                            "type": "string",
+                            "description": "대출가능여부명_IO / 길이 20"
+                          },
+                          "nat_bnd_sby_obj_yn_nm": {
+                            "type": "string",
+                            "description": "국채매매대상여부명_IO / 길이 20"
+                          },
+                          "plt_cnd_nm": {
+                            "type": "string",
+                            "description": "특이조건명 / 길이 60"
+                          },
+                          "int_rt_dsn_bse_irt_knd_cts": {
+                            "type": "string",
+                            "description": "이자율결정기준금리종류내용 / 길이 100"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/bondTradingStatus": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondTradingStatus",
+        "summary": "장내채권 매매현황",
+        "description": "\n\n원본 시트: API_국내_채권_시세_매매현황",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "indata": {
+                        "type": "string",
+                        "description": "조회구분 / 길이 1 / 1,종목코드 2.거래량 3.패리티 5.호가종목전체"
+                      }
+                    },
+                    "required": [
+                      "indata"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bond_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 80"
+                          },
+                          "bond_prpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "현재가 / 길이 11.2"
+                          },
+                          "bond_askp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도호가 / 길이 11.2"
+                          },
+                          "askp_rsqn1": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "매도잔량 / 길이 18"
+                          },
+                          "bond_bidp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수호가 / 길이 11.2"
+                          },
+                          "bidp_rsqn1": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "매수잔량 / 길이 18"
+                          },
+                          "acml_vol": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "거래량 / 길이 15"
+                          },
+                          "parityz7": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "패러티 / 길이 7.2"
+                          },
+                          "cnvr_amt": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "전환가 / 길이 9"
+                          },
+                          "shrn_iscd": {
+                            "type": "string",
+                            "description": "주식코드 / 길이 6"
+                          },
+                          "stck_prpr": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "주식현재가 / 길이 10"
+                          },
+                          "bond_stnd_iscd": {
+                            "type": "string",
+                            "description": "채권표준코드 / 길이 12"
+                          },
+                          "bond_shrn_iscd": {
+                            "type": "string",
+                            "description": "CB코드 / 길이 9"
+                          },
+                          "ratez7": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "현재가수익율 / 길이 7.3"
+                          },
+                          "askp_ert1": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "매도수익율 / 길이 7.3"
+                          },
+                          "bidp_ert1": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "매수수익율 / 길이 7.3"
+                          },
+                          "rdmp_date": {
+                            "type": "string",
+                            "description": "상환일 / 길이 8"
+                          },
+                          "srfc_mnrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "표면금리 / 길이 7.3"
+                          },
+                          "bond_prdy_clpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일종가 / 길이 11.2"
+                          },
+                          "bondgbz1": {
+                            "type": "string",
+                            "description": "채권구분 / 길이 1 / 1.소액채권 2.전환사채(소액채권이외)"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/bondDaily": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondDaily",
+        "summary": "장내채권 일자별시세",
+        "description": "\n\n원본 시트: API_국내_채권_시세_일자별",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bond_shrn_iscd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 9"
+                      },
+                      "input_date": {
+                        "type": "string",
+                        "description": "조회일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "array_cnt": {
+                        "type": "string",
+                        "description": "읽을갯수 / 길이 3"
+                      },
+                      "market_gb": {
+                        "type": "string",
+                        "description": "시장구분 / 길이 1 / 소액채권일때만 0.일반채권 1.소액채권"
+                      }
+                    },
+                    "required": [
+                      "bond_shrn_iscd",
+                      "input_date"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bond_shrn_iscd": {
+                            "type": "string",
+                            "description": "단축종목코드 / 길이 9"
+                          },
+                          "bond_isnm": {
+                            "type": "string",
+                            "description": "채권종목명 / 길이 40"
+                          },
+                          "bond_stnd_iscd": {
+                            "type": "string",
+                            "description": "표준코드 / 길이 12"
+                          },
+                          "base_date": {
+                            "type": "string",
+                            "description": "기준일자 / 길이 6"
+                          },
+                          "bond_gb": {
+                            "type": "string",
+                            "description": "채권구분 / 길이 1 / 1.소액채권 2.일반채권 3.소액인데일반채권클릭"
+                          },
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "일자 / 길이 8"
+                          },
+                          "bond_oprc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "시가 / 길이 11.2"
+                          },
+                          "bond_hgpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "고가 / 길이 11.2"
+                          },
+                          "bond_lwpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "저가 / 길이 11.2"
+                          },
+                          "bond_clpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "종가 / 길이 11.2"
+                          },
+                          "prdy_vrss_sign": {
+                            "type": "string",
+                            "description": "등락부호 / 길이 1"
+                          },
+                          "prdy_vrss": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "등락폭 / 길이 11.2"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "acml_vol": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "거래량 / 길이 15"
+                          },
+                          "acml_tr_pbmn": {
+                            "type": "integer",
+                            "format": "int64",
+                            "description": "거래대금 / 길이 15"
+                          },
+                          "vol_prdy_rt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "거래량전일비 / 길이 6.2"
+                          },
+                          "oprc_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "시가수익률 / 길이 6.3"
+                          },
+                          "hgpr_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "고가수익률 / 길이 6.3"
+                          },
+                          "lwpr_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "저가수익률 / 길이 6.3"
+                          },
+                          "clpr_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "종가수익률 / 길이 6.3"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/bondIssuance": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondIssuance",
+        "summary": "장내채권 발행현황",
+        "description": "\n\n원본 시트: API_국내_채권_시세_발행현황",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "gubunz1": {
+                        "type": "string",
+                        "description": "입력구분 / 길이 1 / A.전체 1.전환사체 2.신주인수권부사채 3.교환사채 4.국채 5.통안채 6.금융채 7.비금융특수채 8.회사채 9.지방채 0.기타"
+                      }
+                    },
+                    "required": [
+                      "gubunz1"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bond_shrn_iscd": {
+                            "type": "string",
+                            "description": "단축종목코드 / 길이 9"
+                          },
+                          "bond_stnd_iscd": {
+                            "type": "string",
+                            "description": "표준종목코드 / 길이 12"
+                          },
+                          "bond_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 80"
+                          },
+                          "srfc_mnrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "표면금리 / 길이 6.3"
+                          },
+                          "pblc_date": {
+                            "type": "string",
+                            "description": "발행일 / 길이 8"
+                          },
+                          "rdmp_date": {
+                            "type": "string",
+                            "description": "만기일 / 길이 8"
+                          },
+                          "bond_prdy_clpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일종가 / 길이 11.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/bondFairValue": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteBondFairValue",
+        "summary": "장내채권 민간평간단가조회",
+        "description": "\n\n원본 시트: API_국내_채권_시세_민평단가",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "iqr_sta_dt": {
+                        "type": "string",
+                        "description": "조회시작일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "iqr_end_dt": {
+                        "type": "string",
+                        "description": "조회종료일자 / 길이 8 / YYYYMMDD"
+                      }
+                    },
+                    "required": [
+                      "iem_cd",
+                      "iqr_sta_dt",
+                      "iqr_end_dt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bse_dt": {
+                            "type": "string",
+                            "description": "기준일자 / 길이 8"
+                          },
+                          "avg_bnd_uit_pr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "평균채권단가 / 길이 15.6 / 3개사"
+                          },
+                          "avg_eal_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "평균평가수익율 / 길이 15.9 / 3개사"
+                          },
+                          "vty_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "변동성비율 / 길이 15.9 / 3개사"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/inflationBond": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteInflationBond",
+        "summary": "물가연동채권물가계수일괄조회",
+        "description": "\n\n원본 시트: API_국내_채권_시세_물가연동채권",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "iem_cd": {
+                        "type": "string",
+                        "description": "종목코드 / 길이 12"
+                      },
+                      "iqr_dt": {
+                        "type": "string",
+                        "description": "조회일자 / 길이 8 / YYYYMMDD"
+                      }
+                    },
+                    "required": [
+                      "iem_cd",
+                      "iqr_dt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "aly_dt": {
+                            "type": "string",
+                            "description": "적용일자 / 길이 8"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "iem_nm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 60"
+                          },
+                          "cpr_lkg_cef1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "물가연동계수1 / 길이 8.5 / T"
+                          },
+                          "cpr_lkg_cef2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "물가연동계수2 / 길이 8.5 / T+1"
+                          },
+                          "cpr_lkg_cef3": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "물가연동계수3 / 길이 8.5 / T+2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/yieldTrend": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteYieldTrend",
+        "summary": "채권 수익률 추이",
+        "description": "\n\n원본 시트: API_국내_채권_시세_수익률추이",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bsop_date": {
+                        "type": "string",
+                        "description": "조회일자 / 길이 8"
+                      }
+                    },
+                    "required": [
+                      "bsop_date"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symb": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "hts_kor_isnm": {
+                            "type": "string",
+                            "description": "종류명 / 길이 40"
+                          },
+                          "zandatez20": {
+                            "type": "string",
+                            "description": "잔존기간 / 길이 20"
+                          },
+                          "price1": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "당일수익률1 / 길이 7.2"
+                          },
+                          "price2": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "당일수익률2 / 길이 7.2"
+                          },
+                          "ovrs_prpr": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "당일종가 / 길이 7.2"
+                          },
+                          "prdy_vrss": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "전일대비 / 길이 7.2"
+                          },
+                          "prdy_clpr": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "전일종가 / 길이 7.2"
+                          },
+                          "spread": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "국고채권대비SP / 길이 7.2"
+                          },
+                          "ovrs_dryy_hgpr": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "연중최고 / 길이 7.2"
+                          },
+                          "ovrs_dryy_lwpr": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "연중최저 / 길이 7.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/rateSpreadDailyYield": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteRateSpreadDailyYield",
+        "summary": "채권 금리 스프레드 일별 수익률",
+        "description": "\n\n원본 시트: API_국내_채권_시세_금리스프레드일별수익률",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "symbol": {
+                        "type": "string",
+                        "description": "기준종목코드 / 길이 12"
+                      },
+                      "symbol2": {
+                        "type": "string",
+                        "description": "비교종목코드 / 길이 12"
+                      },
+                      "input": {
+                        "type": "string",
+                        "description": "기간구분 / 길이 1 / 0.기간 1.1개월 2.3개월 3.6개월 4.1년"
+                      },
+                      "sdate": {
+                        "type": "string",
+                        "description": "시작일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "edate": {
+                        "type": "string",
+                        "description": "종료일자 / 길이 8 / YYYYMMDD"
+                      }
+                    },
+                    "required": [
+                      "symbol",
+                      "symbol2",
+                      "input"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "symb": {
+                            "type": "string",
+                            "description": "기준종목코드 / 길이 12"
+                          },
+                          "hts_kor_isnm": {
+                            "type": "string",
+                            "description": "기준종목명 / 길이 40"
+                          },
+                          "bsop_date1": {
+                            "type": "string",
+                            "description": "일자1 / 길이 8 / 그리드용(YYYYMMDD)"
+                          },
+                          "bsop_date2": {
+                            "type": "string",
+                            "description": "일자2 / 길이 6 / 차트용(YYMMDD)"
+                          },
+                          "ovrs_prpr": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "종가 / 길이 7.2"
+                          },
+                          "prdy_vrss": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락폭 / 길이 7.2"
+                          },
+                          "prdy_ctrt": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락률 / 길이 5.2"
+                          },
+                          "symb2": {
+                            "type": "string",
+                            "description": "비교종목코드 / 길이 12"
+                          },
+                          "hts_kor_isnm2": {
+                            "type": "string",
+                            "description": "비교종목명 / 길이 40"
+                          },
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "일자 / 길이 6 / 차트용(YYMMDD)"
+                          },
+                          "ovrs_prpr2": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "비교종목종가 / 길이 7.2"
+                          },
+                          "spread": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "스프레드 / 길이 5.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/yieldComparisonByType": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteYieldComparisonByType",
+        "summary": "채권 유형별 수익률 비교",
+        "description": "\n\n원본 시트: API_국내_채권_시세_유형별수익률비교",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "symbol1": {
+                        "type": "string",
+                        "description": "종목코드1 / 길이 12"
+                      },
+                      "symbol2": {
+                        "type": "string",
+                        "description": "종목코드2 / 길이 12"
+                      },
+                      "symbol3": {
+                        "type": "string",
+                        "description": "종목코드3 / 길이 12"
+                      },
+                      "sdate": {
+                        "type": "string",
+                        "description": "시작일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "edate": {
+                        "type": "string",
+                        "description": "종료일자 / 길이 8 / YYYYMMDD"
+                      }
+                    },
+                    "required": [
+                      "symbol1",
+                      "symbol2",
+                      "symbol3",
+                      "sdate",
+                      "edate"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bsop_date1": {
+                            "type": "string",
+                            "description": "일자1 / 길이 8 / 그리드용(YYYYMMDD)"
+                          },
+                          "bsop_date2": {
+                            "type": "string",
+                            "description": "일자2 / 길이 6 / 차트용(YYMMDD)"
+                          },
+                          "symb1": {
+                            "type": "string",
+                            "description": "종목코드1 / 길이 12"
+                          },
+                          "hts_kor_isnm1": {
+                            "type": "string",
+                            "description": "종목명1 / 길이 40"
+                          },
+                          "ovrs_prpr1": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "종가1 / 길이 7.2"
+                          },
+                          "prdy_vrss1": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락폭1 / 길이 5.2"
+                          },
+                          "symb2": {
+                            "type": "string",
+                            "description": "종목코드2 / 길이 12"
+                          },
+                          "hts_kor_isnm2": {
+                            "type": "string",
+                            "description": "종목명2 / 길이 40"
+                          },
+                          "ovrs_prpr2": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "종가2 / 길이 7.2"
+                          },
+                          "prdy_vrss2": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락폭2 / 길이 5.2"
+                          },
+                          "symb3": {
+                            "type": "string",
+                            "description": "종목코드3 / 길이 12"
+                          },
+                          "hts_kor_isnm3": {
+                            "type": "string",
+                            "description": "종목명3 / 길이 40"
+                          },
+                          "ovrs_prpr3": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "종가3 / 길이 7.2"
+                          },
+                          "prdy_vrss3": {
+                            "type": "number",
+                            "format": "float",
+                            "description": "등락폭3 / 길이 5.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/fairValueYield": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteFairValueYield",
+        "summary": "채권 시가평가 수익률(민평)",
+        "description": "\n\n원본 시트: API_국내_채권_시세_시가평가수익률민평",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bse_dt": {
+                        "type": "string",
+                        "description": "기준일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "pve_eal_ogt_cd": {
+                        "type": "string",
+                        "description": "민간평가기관코드 / 길이 2 / 01.KIS 02.KBP(한채평) 03.NICE(한신평) 04.KNP(에프엔자산평가) 99.민간평가평균단가 98.민간평가평균단가(4사평균)"
+                      }
+                    },
+                    "required": [
+                      "bse_dt",
+                      "pve_eal_ogt_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "coi_yn": {
+                            "type": "string",
+                            "description": "선택여부_IO / 길이 1"
+                          },
+                          "bnd_lknd_cd": {
+                            "type": "string",
+                            "description": "채권대종류코드 / 길이 2"
+                          },
+                          "bnd_lknd_nm": {
+                            "type": "string",
+                            "description": "채권대종류명 / 길이 60"
+                          },
+                          "bnd_mknd_cd": {
+                            "type": "string",
+                            "description": "채권중종류코드 / 길이 2"
+                          },
+                          "bnd_mknd_nm": {
+                            "type": "string",
+                            "description": "채권중종류명 / 길이 60"
+                          },
+                          "bnd_sknd_cd": {
+                            "type": "string",
+                            "description": "채권소종류코드 / 길이 3"
+                          },
+                          "bnd_sknd_nm": {
+                            "type": "string",
+                            "description": "채권소종류명 / 길이 60"
+                          },
+                          "pve_eal_ogt_cd": {
+                            "type": "string",
+                            "description": "민간평가기관코드 / 길이 2"
+                          },
+                          "bse_mar_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준3월수익율 / 길이 15.9"
+                          },
+                          "bse_jne_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준6월수익율 / 길이 15.9"
+                          },
+                          "bse_sep_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준9월수익율 / 길이 15.9"
+                          },
+                          "bse_yr1_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준1년수익율 / 길이 15.9"
+                          },
+                          "bse_yr1_jne_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준1년6월수익율 / 길이 15.9"
+                          },
+                          "bse_yr2_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준2년수익율 / 길이 15.9"
+                          },
+                          "bse_yr2_jne_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준2년6월수익율 / 길이 15.9"
+                          },
+                          "bse_yr3_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준3년수익율 / 길이 15.9"
+                          },
+                          "yr4_bnd_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "4년채권수익율 / 길이 15.9"
+                          },
+                          "bse_yr5_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준5년수익율 / 길이 15.9"
+                          },
+                          "yr7_bnd_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "7년채권수익율 / 길이 15.9"
+                          },
+                          "yr10_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "10년수익율 / 길이 15.9"
+                          },
+                          "yr15_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "15년수익율 / 길이 15.9"
+                          },
+                          "bse_yr20_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "기준20년수익율 / 길이 15.9"
+                          },
+                          "yr30_pft_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "30년수익율 / 길이 15.9"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/smallBondIssuance": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteSmallBondIssuance",
+        "summary": "소액채권발행현황",
+        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권발행현황",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bnd_sby_knd_dit_cd": {
+                        "type": "string",
+                        "description": "채권매매종류구분코드 / 길이 1 / 1.국민주택 2.서울철도 3.지역개발 4.지방철도"
+                      }
+                    },
+                    "required": [
+                      "bnd_sby_knd_dit_cd"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bnd_iem_krl_nm": {
+                            "type": "string",
+                            "description": "채권종목한글명 / 길이 60"
+                          },
+                          "iem_std_cd": {
+                            "type": "string",
+                            "description": "종목표준코드 / 길이 12"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "종목코드 / 길이 12"
+                          },
+                          "pbs_dt": {
+                            "type": "string",
+                            "description": "발행일자 / 길이 8"
+                          },
+                          "xrn_dt": {
+                            "type": "string",
+                            "description": "만기일자 / 길이 8"
+                          },
+                          "srf_int_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "표면이자율 / 길이 11.8"
+                          },
+                          "int_pym_mtd_tp_cd_nm": {
+                            "type": "string",
+                            "description": "이자지급방법유형코드명_IO / 길이 30"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/smallBondQuoteTrading": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteSmallBondQuoteTrading",
+        "summary": "소액채권호가매매현황",
+        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권호가매매현황",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bond_cls_code": {
+                        "type": "string",
+                        "description": "매매종류구분 / 길이 1 / 1.국민주택 2.서울철도 3.지역개발 4.지방철도 5.지역개발1"
+                      }
+                    },
+                    "required": [
+                      "bond_cls_code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bond_isnm": {
+                            "type": "string",
+                            "description": "종목명 / 길이 81"
+                          },
+                          "bond_cntg_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "현재가수익율 / 길이 6.3"
+                          },
+                          "bond_prpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "현재가 / 길이 11.2"
+                          },
+                          "askp_ert1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도수익율 / 길이 6.3"
+                          },
+                          "bond_askp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매도가격 / 길이 11.2"
+                          },
+                          "bidp_ert1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수수익율 / 길이 6.3"
+                          },
+                          "bond_bidp1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "매수가격 / 길이 11.2"
+                          },
+                          "bond_oprc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "시가 / 길이 11.2"
+                          },
+                          "bond_hgpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "고가 / 길이 11.2"
+                          },
+                          "bond_lwpr": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "저가 / 길이 11.2"
+                          },
+                          "acml_vol": {
+                            "type": "string",
+                            "description": "거래량 / 길이 15"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/smallBondTimeCurrent": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteSmallBondTimeCurrent",
+        "summary": "소액채권시간대별현재가",
+        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권시간대별현재가",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "data_cls_code": {
+                        "type": "string",
+                        "description": "조회구분 / 길이 1 / 1.국민주택 2.서울철도 3.지역개발 4.지방철도 5.지역개발1"
+                      }
+                    },
+                    "required": [
+                      "data_cls_code"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cntg_hour": {
+                            "type": "string",
+                            "description": "시간 / 길이 6"
+                          },
+                          "bond_cntg_ert1": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "수익율1 / 길이 6.3"
+                          },
+                          "acml_vol1": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "거래량1 / 길이 15"
+                          },
+                          "bond_cntg_ert2": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "수익율2 / 길이 6.3"
+                          },
+                          "acml_vol2": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "거래량2 / 길이 15"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/krbond/quote/v1/smallBondReportedYield": {
+      "post": {
+        "tags": [
+          "시세 (Market Data)"
+        ],
+        "operationId": "krbondQuoteSmallBondReportedYield",
+        "summary": "소액채권신고수익률",
+        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권신고수익률",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Input_0": {
+                    "type": "object",
+                    "properties": {
+                      "bsop_date": {
+                        "type": "string",
+                        "description": "일자 / 길이 8"
+                      }
+                    },
+                    "required": [
+                      "bsop_date"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Output_0": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "자료일자 / 길이 6"
+                          },
+                          "pre_date": {
+                            "type": "string",
+                            "description": "전일일자 / 길이 6"
+                          },
+                          "next_date": {
+                            "type": "string",
+                            "description": "익일일자 / 길이 6"
+                          },
+                          "gubun_nm": {
+                            "type": "string",
+                            "description": "구분명 / 길이 14"
+                          },
+                          "pre_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일시장수익률 / 길이 6.3"
+                          },
+                          "pre_prc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "전일시장가격 / 길이 11.2"
+                          },
+                          "today_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "당일시장수익률 / 길이 6.3"
+                          },
+                          "today_prc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "당일시장가격 / 길이 11.2"
+                          },
+                          "next_ert": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "익일시장수익률 / 길이 6.3"
+                          },
+                          "next_prc": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "익일시장가격 / 길이 11.2"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "$ref": "#/components/schemas/Message"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-realtime-channels": {
+    "endpoint": "wss://api.nhplug.com:7070",
+    "endpoints": {
+      "운영_나무": "wss://api.nhplug.com:7070",
+      "운영모의_나무": "wss://moapi.nhplug.com:17070",
+      "개발_나무": "wss://devapi.nhplug.com:7070",
+      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+    },
+    "protocol": {
+      "transport": "WebSocket",
+      "auth": "메시지 header 의 token 필드에 access token(POST /oauth2/token 으로 발급)을 전달합니다. REST 와 달리 Authorization: Bearer · x-client-id · x-client-secret 헤더는 사용하지 않습니다.",
+      "subscribe_message": {
+        "header": {
+          "token": "{access_token}",
+          "tr_type": "1"
+        },
+        "body": {
+          "tr_cd": "<채널코드>",
+          "tr_key": "<구독키>"
+        }
+      },
+      "tr_type": {
+        "1": "등록(구독)",
+        "2": "해제"
+      },
+      "response_routing": "서버 푸시 메시지는 header 에 tr_cd(채널) 와 tr_key(구독키) 를 포함하여 채널·종목을 식별합니다.",
+      "open_items_TODO": [
+        "heartbeat 주기/포맷 미정",
+        "푸시 payload 인코딩(JSON vs 구분자) 미확정",
+        "통보 채널 암호화 여부 미정",
+        "연결/구독 한도 미정",
+        "재연결 규약 미정"
+      ]
+    },
+    "note": "실시간 시세·통보는 WebSocket. 구독 포맷·인증은 protocol, 환경별 주소는 endpoints, 채널코드는 channels[].tr_cd 참조.",
+    "channels": [
+      {
+        "name": "장내채권 실시간 호가소액",
+        "sheet": "API_국내_채권_실시간_호가(소액채권)",
+        "tr_cd": "c1",
+        "tr_key": {
+          "name": "expcode",
+          "kor": "표준채권코드",
+          "length": "12"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "c1",
+            "tr_key": "<expcode>"
+          }
+        },
+        "fields": [
+          "b_gubun",
+          "time",
+          "tot_bid_rem",
+          "p_bid_price",
+          "p_bid_rem",
+          "p_bid_rate",
+          "p1_bid_price",
+          "p1_bid_rem",
+          "p1_bid_rate",
+          "p2_bid_price",
+          "p2_bid_rem",
+          "p2_bid_rate",
+          "p3_bid_price",
+          "p3_bid_rem",
+          "p3_bid_rate",
+          "p4_bid_price",
+          "p4_bid_rem",
+          "p4_bid_rate",
+          "tot_off_rem",
+          "p_off_price",
+          "p_off_rem",
+          "p_off_rate",
+          "p1_off_price",
+          "p1_off_rem",
+          "p1_off_rate",
+          "p2_off_price",
+          "p2_off_rem",
+          "p2_off_rate",
+          "p3_off_price",
+          "p3_off_rem",
+          "p3_off_rate",
+          "p4_off_price",
+          "p4_off_rem",
+          "p4_off_rate",
+          "vbid5"
+        ]
+      },
+      {
+        "name": "장내채권 실시간 호가전환",
+        "sheet": "API_국내_채권_실시간_호가(전환사채)",
+        "tr_cd": "c3",
+        "tr_key": {
+          "name": "expcode",
+          "kor": "표준채권코드",
+          "length": "12"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "c3",
+            "tr_key": "<expcode>"
+          }
+        },
+        "fields": [
+          "expcode",
+          "time",
+          "tot_bid_rem",
+          "p_bid_price",
+          "p_bid_rem",
+          "p_bid_rate",
+          "p1_bid_price",
+          "p1_bid_rem",
+          "p1_bid_rate",
+          "p2_bid_price",
+          "p2_bid_rem",
+          "p2_bid_rate",
+          "p3_bid_price",
+          "p3_bid_rem",
+          "p3_bid_rate",
+          "p4_bid_price",
+          "p4_bid_rem",
+          "p4_bid_rate",
+          "tot_off_rem",
+          "p_off_price",
+          "p_off_rem",
+          "p_off_rate",
+          "p1_off_price",
+          "p1_off_rem",
+          "p1_off_rate",
+          "p2_off_price",
+          "p2_off_rem",
+          "p2_off_rate",
+          "p3_off_price",
+          "p3_off_rem",
+          "p3_off_rate",
+          "p4_off_price",
+          "p4_off_rem",
+          "p4_off_rate"
+        ]
+      },
+      {
+        "name": "장내채권 실시간 체결가소액",
+        "sheet": "API_국내_채권_실시간_체결가(소액채권)",
+        "tr_cd": "c2",
+        "tr_key": {
+          "name": "expcode",
+          "kor": "표준채권코드",
+          "length": "12"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "c2",
+            "tr_key": "<expcode>"
+          }
+        },
+        "fields": [
+          "expcode",
+          "b_gubun",
+          "time",
+          "cheprice",
+          "chevolume",
+          "chevalue",
+          "cherate",
+          "openprice",
+          "highprice",
+          "lowprice",
+          "openrate",
+          "highrate",
+          "lowrate",
+          "totvolume",
+          "totvalue"
+        ]
+      },
+      {
+        "name": "장내채권 실시간 체결가전환",
+        "sheet": "API_국내_채권_실시간_체결가(전환사채)",
+        "tr_cd": "c4",
+        "tr_key": {
+          "name": "expcode",
+          "kor": "표준채권코드",
+          "length": "12"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "c4",
+            "tr_key": "<expcode>"
+          }
+        },
+        "fields": [
+          "expcode",
+          "time",
+          "cheprice",
+          "chevolume",
+          "chevalue",
+          "cherate",
+          "openprice",
+          "highprice",
+          "lowprice",
+          "openrate",
+          "highrate",
+          "lowrate",
+          "totvolume",
+          "totvalue"
+        ]
+      },
+      {
+        "name": "장내채권 실시간 체결내역 통보",
+        "sheet": "API_국내_채권_실시간_체결통보",
+        "tr_cd": "de",
+        "tr_key": {
+          "name": "userid",
+          "kor": "사용자ID",
+          "length": "8"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "de",
+            "tr_key": "<userid>"
+          }
+        },
+        "fields": [
+          "userid",
+          "itemgb",
+          "accountno",
+          "orderno",
+          "issuecd",
+          "issuename",
+          "slbygb",
+          "concgty",
+          "concprc",
+          "conctime",
+          "ucgb",
+          "rejgb"
+        ]
+      },
+      {
+        "name": "장내채권 실시간 주문내역 통보",
+        "sheet": "API_국내_채권_실시간_주문내역통보",
+        "tr_cd": "d3",
+        "tr_key": {
+          "name": "userid",
+          "kor": "사용자ID",
+          "length": "8"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "d3",
+            "tr_key": "<userid>"
+          }
+        },
+        "fields": [
+          "userid",
+          "itemgb",
+          "accountno",
+          "orderno",
+          "orgordno",
+          "ordercd",
+          "issuecd",
+          "issuename",
+          "slbygb",
+          "order_type",
+          "ordergty",
+          "orderprc",
+          "procnm",
+          "commcd",
+          "order_cond",
+          "fundcode",
+          "sin_gb",
+          "order_time",
+          "loan_date",
+          "rmt_mkt_cd",
+          "snd_mkt_cd",
+          "ord_cond_prc",
+          "sor_orrgb",
+          "mkt_order_qty"
+        ]
+      },
+      {
+        "name": "채권지수 실시간 체결가",
+        "sheet": "API_국내_채권_실시간_채권지수체결가",
+        "tr_cd": "uB",
+        "tr_key": {
+          "name": "jisuid",
+          "kor": "지수ID",
+          "length": "6"
+        },
+        "subscribe_example": {
+          "header": {
+            "token": "{access_token}",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "uB",
+            "tr_key": "<jisuid>"
+          }
+        },
+        "fields": [
+          "jisuid",
+          "time",
+          "grossprofit",
+          "gross_sign",
+          "gross_change",
+          "gross_open",
+          "gross_high",
+          "gross_hightime",
+          "gross_low",
+          "gross_lowtime",
+          "gross_chrate",
+          "cleanprice",
+          "clean_sign",
+          "clean_change",
+          "clean_open",
+          "clean_high",
+          "clean_hightime",
+          "clean_low",
+          "clean_lowtime",
+          "clean_chrate",
+          "marketprice",
+          "market_sign",
+          "market_change",
+          "market_open",
+          "market_high",
+          "market_hightime",
+          "market_low",
+          "market_lowtime",
+          "market_chrate",
+          "callreinvest",
+          "zeroreinvest",
+          "theoryprice",
+          "avgduration",
+          "avgconvexity",
+          "avgytm",
+          "avgguidanceytm"
+        ]
+      }
+    ]
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "POST /oauth2/token 으로 발급받은 access token"
+      },
+      "ClientId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-id"
+      },
+      "ClientSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-client-secret"
+      }
+    },
+    "parameters": {
+      "CtsHeader": {
+        "name": "cts",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "description": "연속조회 키. 목록 조회 응답의 연속키를 다음 요청 헤더에 세팅"
+      }
+    },
+    "schemas": {
+      "Message": {
+        "type": "object",
+        "description": "공통 응답 메시지 봉투",
+        "properties": {
+          "msg_code": {
+            "type": "string"
+          },
+          "usr_msg": {
+            "type": "string"
+          },
+          "msg_lv_code": {
+            "type": "string"
+          },
+          "dvlp_msg_yn": {
+            "type": "string"
+          },
+          "svc_nm": {
+            "type": "string"
+          },
+          "func_nm": {
+            "type": "string"
+          },
+          "line_no": {
+            "type": "string"
+          },
+          "dvlp_msg": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
