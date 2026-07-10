@@ -1,0 +1,9 @@
+[project]
+name = "nhplug-sdk"
+version = "0.1.0"
+description = "NH투자증권 Open API 파이썬 샘플·파이프라인·문서"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
