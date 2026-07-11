@@ -10,7 +10,7 @@ def balance(act_no: str) -> dict:
         "bnc_bse_cd": "5",
         "ltg_aot_dit_cd": "9",
         "aet_bse": "2",
-        "qut_dit_cd": " ",
+        "qut_dit_cd": "UNT",
     })
 
 

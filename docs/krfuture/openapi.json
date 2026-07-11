@@ -3,24 +3,20 @@
   "info": {
     "title": "NH투자증권 Open API — 국내파생 (KR Derivatives)",
     "version": "v1",
-    "description": "NH투자증권 Open API 중 **국내파생 (KR Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+    "description": "NH투자증권 Open API 중 **국내파생 (KR Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 최신 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token.\n- 각 필드 description 에 한글명·길이·원본 설명(코드값 포함)을 담았습니다."
   },
   "servers": [
     {
-      "url": "https://api.nhplug.com:8443",
-      "description": "운영 · 나무 (실거래)"
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "🟢 테스트 (Test) — 실매매 전 검증 [기본]"
     },
     {
       "url": "https://moapi.nhplug.com:8443",
-      "description": "운영 모의투자 · 나무"
+      "description": "🟢 모의투자 (Mock) — 교육이수"
     },
     {
-      "url": "https://devapi.nhplug.com:8443",
-      "description": "개발 · 나무 (실거래)"
-    },
-    {
-      "url": "https://devmoapi.nhplug.com:8443",
-      "description": "개발 모의투자 · 나무"
+      "url": "https://api.nhplug.com:8443",
+      "description": "🔴 실거래 (Live) — 실제 주문 체결 (검증 후에만)"
     }
   ],
   "security": [
@@ -31,22 +27,23 @@
     }
   ],
   "x-environments": {
-    "portal": {
-      "나무": "https://www.nhplug.com"
+    "portal": "https://www.nhplug.com",
+    "note": "⚠️ 실주문은 실거래(live) 에서만 체결됩니다. 개발·검증은 반드시 test 또는 mock 에서 먼저 하세요. 권장 순서: 테스트/모의 → 검증 → 실거래. 현재 나무(Namuh) 기준(N2 추후).",
+    "test": {
+      "desc": "테스트 — 실매매 전 검증",
+      "rest": "https://devapi.nhplug.com:8443",
+      "websocket": "wss://devapi.nhplug.com:7070"
     },
-    "rest": {
-      "운영_나무": "https://api.nhplug.com:8443",
-      "운영모의_나무": "https://moapi.nhplug.com:8443",
-      "개발_나무": "https://devapi.nhplug.com:8443",
-      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    "mock": {
+      "desc": "모의투자 — 교육이수",
+      "rest": "https://moapi.nhplug.com:8443",
+      "websocket": "wss://moapi.nhplug.com:17070"
     },
-    "websocket": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
-    },
-    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+    "live": {
+      "desc": "실거래 — 실제 주문 체결",
+      "rest": "https://api.nhplug.com:8443",
+      "websocket": "wss://api.nhplug.com:7070"
+    }
   },
   "tags": [
     {
@@ -70,7 +67,7 @@
         ],
         "operationId": "krfutureOrderDay",
         "summary": "선물옵션 주문주간",
-        "description": "\n\n원본 시트: API_국내_파생_주문_주간",
+        "description": "원본 시트: API_국내_파생_주문_주간",
         "requestBody": {
           "required": true,
           "content": {
@@ -89,9 +86,9 @@
                         "type": "string",
                         "description": "매매구분코드 / 길이 1 / 1.매도 2.매수"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -115,7 +112,7 @@
                     "required": [
                       "act_no",
                       "sby_dit_cd",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "orr_qty"
                     ]
                   }
@@ -154,12 +151,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -192,7 +189,7 @@
         ],
         "operationId": "krfutureOrderNightNight",
         "summary": "선물옵션 주문야간",
-        "description": "\n\n원본 시트: API_국내_파생_주문_야간",
+        "description": "원본 시트: API_국내_파생_주문_야간",
         "requestBody": {
           "required": true,
           "content": {
@@ -211,9 +208,9 @@
                         "type": "string",
                         "description": "매매구분코드 / 길이 1 / 1.매도 2.매수"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -237,7 +234,7 @@
                     "required": [
                       "act_no",
                       "sby_dit_cd",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "orr_qty"
                     ]
                   }
@@ -276,12 +273,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -314,7 +311,7 @@
         ],
         "operationId": "krfutureOrderDayModify",
         "summary": "선물옵션 정정취소주문주간정정",
-        "description": "\n\n원본 시트: API_국내_파생_주문_주간정정",
+        "description": "원본 시트: API_국내_파생_주문_주간정정",
         "requestBody": {
           "required": true,
           "content": {
@@ -329,9 +326,9 @@
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -359,7 +356,7 @@
                     },
                     "required": [
                       "act_no",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "orr_qty",
                       "orr_pr",
                       "fno_nmn_pr_tp_cd",
@@ -397,12 +394,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -435,7 +432,7 @@
         ],
         "operationId": "krfutureOrderNightModify",
         "summary": "선물옵션 정정취소주문야간정정",
-        "description": "\n\n원본 시트: API_국내_파생_주문_야간정정",
+        "description": "원본 시트: API_국내_파생_주문_야간정정",
         "requestBody": {
           "required": true,
           "content": {
@@ -450,9 +447,9 @@
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -480,7 +477,7 @@
                     },
                     "required": [
                       "act_no",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "orr_qty",
                       "orr_pr",
                       "fno_nmn_pr_tp_cd",
@@ -518,12 +515,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -556,7 +553,7 @@
         ],
         "operationId": "krfutureOrderDayCancel",
         "summary": "선물옵션 정정취소주문주간취소",
-        "description": "\n\n원본 시트: API_국내_파생_주문_주간취소",
+        "description": "원본 시트: API_국내_파생_주문_주간취소",
         "requestBody": {
           "required": true,
           "content": {
@@ -571,9 +568,9 @@
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -588,7 +585,7 @@
                     },
                     "required": [
                       "act_no",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "org_orr_no"
                     ]
                   }
@@ -622,12 +619,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -660,7 +657,7 @@
         ],
         "operationId": "krfutureOrderNightCancel",
         "summary": "선물옵션 정정취소주문야간취소",
-        "description": "\n\n원본 시트: API_국내_파생_주문_야간취소",
+        "description": "원본 시트: API_국내_파생_주문_야간취소",
         "requestBody": {
           "required": true,
           "content": {
@@ -675,9 +672,9 @@
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
                       },
-                      "fno_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
-                        "description": "선물옵션종목코드 / 길이 12 / 예시> KA0166000"
+                        "description": "종목코드 / 길이 12 / 예시> KA0166000"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -692,7 +689,7 @@
                     },
                     "required": [
                       "act_no",
-                      "fno_iem_cd",
+                      "iem_cd",
                       "org_orr_no"
                     ]
                   }
@@ -726,12 +723,12 @@
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "dsg_csh_isf_amt": {
                             "type": "integer",
@@ -764,7 +761,7 @@
         ],
         "operationId": "krfutureInquiryOrderExecutionHistory",
         "summary": "선물옵션 주문체결내역조회",
-        "description": "\n\n원본 시트: API_국내_파생_조회_체결",
+        "description": "원본 시트: API_국내_파생_조회_체결",
         "requestBody": {
           "required": true,
           "content": {
@@ -781,15 +778,15 @@
                       },
                       "orr_dt": {
                         "type": "string",
-                        "description": "주문일자 / 길이 8 / YYYYMMDD"
+                        "description": "시작주문일자 / 길이 8 / YYYYMMDD"
                       },
                       "cns_dit_cd": {
                         "type": "string",
-                        "description": "체결구분코드_IO / 길이 1 / 0.전체 1.체결 2.미체결"
+                        "description": "체결구분코드 / 길이 1 / 0.전체 1.체결 2.미체결"
                       },
                       "sot_dit": {
                         "type": "string",
-                        "description": "정렬구분_IO / 길이 1 / 1.주문번호역순 2.주문번호순"
+                        "description": "정렬구분 / 길이 1 / 1.주문번호역순 2.주문번호순"
                       },
                       "sby_dit_cd": {
                         "type": "string",
@@ -797,11 +794,7 @@
                       },
                       "iem_dit": {
                         "type": "string",
-                        "description": "종목구분_IO / 길이 1 / 9.전체 1.코스피200선물 2.코스피200옵션 7.주식선물 8.주식옵션 A.변동지수선물 B.섹터지수선물 D.미니코스피200선물 E.미니코스피200옵션 F.코스닥150선물 G.유로스톡스50선물 K.KRX300선물 L.코스닥150옵션 N.위클리옵션 P.코스닥글로벌 Q.코리아밸류업 R.코스닥150위클리옵션"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 76 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
+                        "description": "종목구분 / 길이 1 / 9.전체 1.코스피200선물 2.코스피200옵션 7.주식선물 8.주식옵션 A.변동지수선물 B.섹터지수선물 D.미니코스피200선물 E.미니코스피200옵션 F.코스닥150선물 G.유로스톡스50선물 K.KRX300선물 L.코스닥150옵션 N.위클리옵션 P.코스닥글로벌 Q.코리아밸류업 R.코스닥150위클리옵션"
                       }
                     },
                     "required": [
@@ -847,11 +840,11 @@
                           },
                           "orr_cnd_dit_cd_nm": {
                             "type": "string",
-                            "description": "주문조건구분코드명_IO / 길이 60"
+                            "description": "주문조건구분코드명 / 길이 60"
                           },
                           "nmn_pr_tp_cd_nm": {
                             "type": "string",
-                            "description": "호가유형코드명_IO / 길이 30"
+                            "description": "호가유형코드명 / 길이 30"
                           },
                           "fno_nmn_pr_tp_cd": {
                             "type": "string",
@@ -892,7 +885,7 @@
                           "ny_cns_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "미체결수량_IO / 길이 18"
+                            "description": "미체결수량 / 길이 18"
                           },
                           "pcs_rlt_msg_cd": {
                             "type": "string",
@@ -908,7 +901,7 @@
                           },
                           "orr_rjt_rsn_cd_nm": {
                             "type": "string",
-                            "description": "주문거부사유코드명_IO / 길이 50"
+                            "description": "주문거부사유코드명 / 길이 50"
                           }
                         }
                       }
@@ -936,7 +929,7 @@
         ],
         "operationId": "krfutureInquiryBalance",
         "summary": "선물옵션 잔고현황",
-        "description": "\n\n원본 시트: API_국내_파생_조회_잔고",
+        "description": "원본 시트: API_국내_파생_조회_잔고",
         "requestBody": {
           "required": true,
           "content": {
@@ -989,7 +982,7 @@
                           },
                           "sby_dit_nm": {
                             "type": "string",
-                            "description": "매매구분명_IO / 길이 4"
+                            "description": "매매구분명 / 길이 4"
                           },
                           "byn_cns_qty": {
                             "type": "integer",
@@ -1004,12 +997,12 @@
                           "avg_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "평균가격_IO / 길이 15.3"
+                            "description": "평균가격 / 길이 15.3"
                           },
                           "pti_uit_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "진입단가_IO / 길이 15.3"
+                            "description": "진입단가 / 길이 15.3"
                           },
                           "now_pr": {
                             "type": "number",
@@ -1024,7 +1017,7 @@
                           "frs_pti_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물진입평가손익_IO / 길이 15"
+                            "description": "선물진입평가손익 / 길이 15"
                           },
                           "sby_pls_amt": {
                             "type": "integer",
@@ -1034,17 +1027,17 @@
                           "frs_pti_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물진입매매손익_IO / 길이 15"
+                            "description": "선물진입매매손익 / 길이 15"
                           },
                           "tot_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총손익합계_IO / 길이 15"
+                            "description": "총손익합계 / 길이 15"
                           },
                           "lqd_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산가능수량_IO / 길이 15"
+                            "description": "청산가능수량 / 길이 15"
                           },
                           "opt_eal_amt": {
                             "type": "integer",
@@ -1074,22 +1067,22 @@
                           "pti_abk_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입장부금액_IO / 길이 15"
+                            "description": "진입장부금액 / 길이 15"
                           },
                           "sby_pls_rt": {
                             "type": "number",
                             "format": "double",
-                            "description": "매매손익율_IO / 길이 10.3"
+                            "description": "매매손익율 / 길이 10.3"
                           },
                           "pti_eal_pft_rt": {
                             "type": "number",
                             "format": "double",
-                            "description": "진입평가수익율_IO / 길이 5.2"
+                            "description": "진입평가수익율 / 길이 5.2"
                           },
                           "pti_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입평가손익_IO / 길이 15"
+                            "description": "진입평가손익 / 길이 15"
                           },
                           "frs_fee": {
                             "type": "integer",
@@ -1099,16 +1092,16 @@
                           "pti_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입수수료_IO / 길이 18"
+                            "description": "진입수수료 / 길이 18"
                           },
                           "lqd_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산수수료_IO / 길이 18"
+                            "description": "청산수수료 / 길이 18"
                           },
                           "sby_dit_nm2": {
                             "type": "string",
-                            "description": "매매구분명2_IO / 길이 4"
+                            "description": "매매구분명2 / 길이 4"
                           },
                           "bf_dd_ny_stl_qty": {
                             "type": "integer",
@@ -1118,92 +1111,92 @@
                           "bnc_ind_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "잔고증감수량_IO / 길이 15"
+                            "description": "잔고증감수량 / 길이 15"
                           },
                           "ral_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실손익합계_IO / 길이 15"
+                            "description": "실손익합계 / 길이 15"
                           },
                           "sby_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매매손익합계_IO / 길이 18"
+                            "description": "매매손익합계 / 길이 18"
                           },
                           "tot_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총평가손익_IO / 길이 15"
+                            "description": "총평가손익 / 길이 15"
                           },
                           "pti_tot_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입총손익합계_IO / 길이 15"
+                            "description": "진입총손익합계 / 길이 15"
                           },
                           "pti_sby_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입매매손익합계_IO / 길이 15"
+                            "description": "진입매매손익합계 / 길이 15"
                           },
                           "pti_eal_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입평가손익합계_IO / 길이 15"
+                            "description": "진입평가손익합계 / 길이 15"
                           },
                           "ral_frs_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실선물손익_IO / 길이 15"
+                            "description": "실선물손익 / 길이 15"
                           },
                           "frs_tot_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물총손익_IO / 길이 15"
+                            "description": "선물총손익 / 길이 15"
                           },
                           "frs_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매매손익_IO / 길이 15"
+                            "description": "선물매매손익 / 길이 15"
                           },
                           "frs_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물평가손익_IO / 길이 15"
+                            "description": "선물평가손익 / 길이 15"
                           },
                           "pti_frs_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입선물평가손익_IO / 길이 15"
+                            "description": "진입선물평가손익 / 길이 15"
                           },
                           "ral_opt_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실옵션손익_IO / 길이 15"
+                            "description": "실옵션손익 / 길이 15"
                           },
                           "opt_tot_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션총손익_IO / 길이 15"
+                            "description": "옵션총손익 / 길이 15"
                           },
                           "opt_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매매손익_IO / 길이 15"
+                            "description": "옵션매매손익 / 길이 15"
                           },
                           "opt_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션평가손익_IO / 길이 15"
+                            "description": "옵션평가손익 / 길이 15"
                           },
                           "idx_opt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션손익금액_IO / 길이 18"
+                            "description": "지수옵션손익금액 / 길이 18"
                           },
                           "pti_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입매매손익_IO / 길이 15"
+                            "description": "진입매매손익 / 길이 15"
                           },
                           "fno_eal_amt": {
                             "type": "integer",
@@ -1213,27 +1206,27 @@
                           "byn_cst_sum1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매수대금합계1_IO / 길이 18"
+                            "description": "매수대금합계1 / 길이 18"
                           },
                           "sum_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "합계수량1_IO / 길이 18"
+                            "description": "합계수량1 / 길이 18"
                           },
                           "sll_cst_sum1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매도대금합계1_IO / 길이 18"
+                            "description": "매도대금합계1 / 길이 18"
                           },
                           "sum_qty2": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "합계수량2_IO / 길이 18"
+                            "description": "합계수량2 / 길이 18"
                           },
                           "fee_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수수료합계_IO / 길이 18"
+                            "description": "수수료합계 / 길이 18"
                           },
                           "fee_sum_amt": {
                             "type": "integer",
@@ -1253,7 +1246,7 @@
                           "qty_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수량합계_IO / 길이 18"
+                            "description": "수량합계 / 길이 18"
                           },
                           "opt_byn_amt": {
                             "type": "integer",
@@ -1318,7 +1311,7 @@
                           "eal_amt_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "평가금액합계_IO / 길이 18"
+                            "description": "평가금액합계 / 길이 18"
                           },
                           "dsg_sba_amt": {
                             "type": "integer",
@@ -1343,22 +1336,22 @@
                           "eal_pls1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "평가손익1_IO / 길이 18"
+                            "description": "평가손익1 / 길이 18"
                           },
                           "xcl_dpa_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "정산차금합계_IO / 길이 15"
+                            "description": "정산차금합계 / 길이 15"
                           },
                           "lst_dfa_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "최종차액금액_IO / 길이 18"
+                            "description": "최종차액금액 / 길이 18"
                           },
                           "opt_eal_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션평가손익금액_IO / 길이 18"
+                            "description": "옵션평가손익금액 / 길이 18"
                           },
                           "opt_aloc_amt": {
                             "type": "integer",
@@ -1387,7 +1380,7 @@
                           },
                           "trd_act_nm": {
                             "type": "string",
-                            "description": "거래계좌명_IO / 길이 20"
+                            "description": "거래계좌명 / 길이 20"
                           }
                         }
                       }
@@ -1415,7 +1408,7 @@
         ],
         "operationId": "krfutureInquiryOrderable",
         "summary": "선물옵션 주문가능",
-        "description": "\n\n원본 시트: API_국내_파생_조회_주문가능수량",
+        "description": "원본 시트: API_국내_파생_조회_주문가능수량",
         "requestBody": {
           "required": true,
           "content": {
@@ -1485,12 +1478,12 @@
                           "lqd_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산가능수량_IO / 길이 18"
+                            "description": "청산가능수량 / 길이 18"
                           },
                           "all_orr_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전체주문수량_IO / 길이 18"
+                            "description": "전체주문수량 / 길이 18"
                           },
                           "copt_sll_ny_stl_qty": {
                             "type": "integer",
@@ -1515,12 +1508,12 @@
                           "orr_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량_IO / 길이 10"
+                            "description": "주문가능수량 / 길이 10"
                           },
                           "orr_pbl_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량1_IO / 길이 18"
+                            "description": "주문가능수량1 / 길이 18"
                           },
                           "orr_qty": {
                             "type": "integer",
@@ -1558,7 +1551,7 @@
         ],
         "operationId": "krfutureInquiryMargin",
         "summary": "선물옵션 증거금 상세",
-        "description": "\n\n원본 시트: API_국내_파생_조회_증거금",
+        "description": "원본 시트: API_국내_파생_조회_증거금",
         "requestBody": {
           "required": true,
           "content": {
@@ -1684,7 +1677,7 @@
                           "rrv_wtm": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "예비증거금_IO / 길이 18"
+                            "description": "예비증거금 / 길이 18"
                           },
                           "sby_pls_amt": {
                             "type": "integer",
@@ -1694,12 +1687,12 @@
                           "opt_byn_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수대금_IO / 길이 18"
+                            "description": "옵션매수대금 / 길이 18"
                           },
                           "opt_sll_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도대금_IO / 길이 18"
+                            "description": "옵션매도대금 / 길이 18"
                           },
                           "frs_xcl_dpa": {
                             "type": "integer",
@@ -1719,7 +1712,7 @@
                           "rvb_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "미수수수료_IO / 길이 18"
+                            "description": "미수수수료 / 길이 18"
                           },
                           "rvb_odu_fee": {
                             "type": "integer",
@@ -1729,22 +1722,22 @@
                           "bf_dd_jin_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전일가입금액_IO / 길이 18"
+                            "description": "전일가입금액 / 길이 18"
                           },
                           "tdy_jin_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "금일가입금액_IO / 길이 18"
+                            "description": "금일가입금액 / 길이 18"
                           },
                           "bf_dd_rrs_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전일반대대용_IO / 길이 18"
+                            "description": "전일반대대용 / 길이 18"
                           },
                           "tdy_rrs_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "금일반대대용_IO / 길이 18"
+                            "description": "금일반대대용 / 길이 18"
                           },
                           "opt_stl_amt": {
                             "type": "integer",
@@ -1754,7 +1747,7 @@
                           "rls_pbl_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "해제가능대용_IO / 길이 18"
+                            "description": "해제가능대용 / 길이 18"
                           },
                           "opt_ant_amt": {
                             "type": "integer",
@@ -1769,17 +1762,17 @@
                           "men_af_csh_rpm_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후현금입금금액_IO / 길이 18"
+                            "description": "장종료후현금입금금액 / 길이 18"
                           },
                           "men_af_sba_rpm_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후대용입금금액_IO / 길이 18"
+                            "description": "장종료후대용입금금액 / 길이 18"
                           },
                           "men_af_rpm_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후입금총액_IO / 길이 18"
+                            "description": "장종료후입금총액 / 길이 18"
                           },
                           "frs_nsk_wtm_tal": {
                             "type": "integer",
@@ -1849,12 +1842,12 @@
                           "sba_sec_sll_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "대용증권매도금액_IO / 길이 18"
+                            "description": "대용증권매도금액 / 길이 18"
                           },
                           "sba_sec_sll_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "대용증권매도총액_IO / 길이 18"
+                            "description": "대용증권매도총액 / 길이 18"
                           },
                           "wrw_pbl_amt_tal": {
                             "type": "integer",
@@ -1864,12 +1857,12 @@
                           "cvc_apm_sba_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "커버드콜지정대용금액_IO / 길이 18"
+                            "description": "커버드콜지정대용금액 / 길이 18"
                           },
                           "ahi_stk_byn_gte_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "현물주식매수확보금액_IO / 길이 18"
+                            "description": "현물주식매수확보금액 / 길이 18"
                           },
                           "rvb_sct_gte_amt": {
                             "type": "integer",
@@ -1879,7 +1872,7 @@
                           "lst_stl_dpa": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "최종결제차금_IO / 길이 18"
+                            "description": "최종결제차금 / 길이 18"
                           },
                           "sll_amt": {
                             "type": "integer",
@@ -1894,17 +1887,17 @@
                           "cal_erc_popt_aloc_rit_erc_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "콜행사풋옵션배정권리행사대금_IO / 길이 18"
+                            "description": "콜행사풋옵션배정권리행사대금 / 길이 18"
                           },
                           "cal_aloc_popt_erc_rit_erc_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "콜배정풋옵션행사권리행사대금_IO / 길이 18"
+                            "description": "콜배정풋옵션행사권리행사대금 / 길이 18"
                           },
                           "frs_orr_wtm": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물주문증거금_IO / 길이 18"
+                            "description": "선물주문증거금 / 길이 18"
                           },
                           "srd_orr_wtm": {
                             "type": "integer",
@@ -1914,22 +1907,22 @@
                           "opt_byn_orr_wtm_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수주문증거금현금_IO / 길이 18"
+                            "description": "옵션매수주문증거금현금 / 길이 18"
                           },
                           "opt_sll_orr_wtm_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도주문증거금현금_IO / 길이 18"
+                            "description": "옵션매도주문증거금현금 / 길이 18"
                           },
                           "nby_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "순매수대금_IO / 길이 18"
+                            "description": "순매수대금 / 길이 18"
                           },
                           "nby_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "순매수현금_IO / 길이 18"
+                            "description": "순매수현금 / 길이 18"
                           },
                           "frs_fee": {
                             "type": "integer",
@@ -1949,7 +1942,7 @@
                           "tdt_frs_nlo_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "당일선물순손실금액_IO / 길이 18"
+                            "description": "당일선물순손실금액 / 길이 18"
                           },
                           "gar_dd_bf_nlo_stl_amt": {
                             "type": "integer",
@@ -1959,7 +1952,7 @@
                           "iopt_hld_lmt_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션보유한도수량_IO / 길이 18"
+                            "description": "주식옵션보유한도수량 / 길이 18"
                           },
                           "opt_hld_lmt_qty": {
                             "type": "integer",
@@ -2006,7 +1999,7 @@
         ],
         "operationId": "krfutureInquiryNightOrderExecutionHistory",
         "summary": "(야간)선물옵션 주문체결 내역조회",
-        "description": "\n\n원본 시트: API_국내_파생_조회_야간체결",
+        "description": "원본 시트: API_국내_파생_조회_야간체결",
         "requestBody": {
           "required": true,
           "content": {
@@ -2035,7 +2028,7 @@
                       },
                       "cns_dit_cd": {
                         "type": "string",
-                        "description": "체결구분코드_IO / 길이 1 / 0.전체 1.체결 2.미체결"
+                        "description": "체결구분코드 / 길이 1 / 0.전체 1.체결 2.미체결"
                       },
                       "ost_dit": {
                         "type": "string",
@@ -2227,19 +2220,19 @@
                           },
                           "orr_cnd_dit_cd_nm": {
                             "type": "string",
-                            "description": "주문조건구분코드명_IO / 길이 60"
+                            "description": "주문조건구분코드명 / 길이 60"
                           },
                           "sby_dit_nm": {
                             "type": "string",
-                            "description": "매매구분명_IO / 길이 4"
+                            "description": "매매구분명 / 길이 4"
                           },
                           "cor_can_dit_nm": {
                             "type": "string",
-                            "description": "정정취소구분명_IO / 길이 4"
+                            "description": "정정취소구분명 / 길이 4"
                           },
                           "nmn_pr_tp_cd_nm": {
                             "type": "string",
-                            "description": "호가유형코드명_IO / 길이 60"
+                            "description": "호가유형코드명 / 길이 60"
                           },
                           "trd_tp_nm": {
                             "type": "string",
@@ -2247,7 +2240,7 @@
                           },
                           "orr_mdi_nm": {
                             "type": "string",
-                            "description": "주문매체명_IO / 길이 20"
+                            "description": "주문매체명 / 길이 20"
                           },
                           "frs_sll_amt": {
                             "type": "integer",
@@ -2277,12 +2270,12 @@
                           "opt_byn_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수수량_IO / 길이 18"
+                            "description": "옵션매수수량 / 길이 18"
                           },
                           "opt_sll_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도수량_IO / 길이 18"
+                            "description": "옵션매도수량 / 길이 18"
                           },
                           "opt_sll_amt": {
                             "type": "integer",
@@ -2315,7 +2308,7 @@
         ],
         "operationId": "krfutureInquiryNightBalance",
         "summary": "(야간)선물옵션 잔고현황",
-        "description": "\n\n원본 시트: API_국내_파생_조회_야간잔고",
+        "description": "원본 시트: API_국내_파생_조회_야간잔고",
         "requestBody": {
           "required": true,
           "content": {
@@ -2377,7 +2370,7 @@
                           },
                           "sby_dit_nm": {
                             "type": "string",
-                            "description": "매매구분명_IO / 길이 4"
+                            "description": "매매구분명 / 길이 4"
                           },
                           "tdy_ny_stl_qty": {
                             "type": "integer",
@@ -2407,12 +2400,12 @@
                           "avg_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "평균가격_IO / 길이 15.3"
+                            "description": "평균가격 / 길이 15.3"
                           },
                           "pti_uit_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "진입단가_IO / 길이 15.3"
+                            "description": "진입단가 / 길이 15.3"
                           },
                           "now_pr": {
                             "type": "number",
@@ -2422,12 +2415,12 @@
                           "tdt_cns_byn_avg_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "당일체결매수평균가격_IO / 길이 15.3"
+                            "description": "당일체결매수평균가격 / 길이 15.3"
                           },
                           "tdt_cns_sll_avg_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "당일체결매도평균가격_IO / 길이 15.3"
+                            "description": "당일체결매도평균가격 / 길이 15.3"
                           },
                           "eal_pls_amt": {
                             "type": "integer",
@@ -2437,7 +2430,7 @@
                           "frs_pti_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물진입평가손익_IO / 길이 15"
+                            "description": "선물진입평가손익 / 길이 15"
                           },
                           "sby_pls_amt": {
                             "type": "integer",
@@ -2447,22 +2440,22 @@
                           "frs_pti_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물진입매매손익_IO / 길이 15"
+                            "description": "선물진입매매손익 / 길이 15"
                           },
                           "tot_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총손익합계_IO / 길이 15"
+                            "description": "총손익합계 / 길이 15"
                           },
                           "lqd_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산수량_IO / 길이 15"
+                            "description": "청산수량 / 길이 15"
                           },
                           "lqd_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산가능수량_IO / 길이 15"
+                            "description": "청산가능수량 / 길이 15"
                           },
                           "opt_eal_amt": {
                             "type": "integer",
@@ -2492,22 +2485,22 @@
                           "pti_abk_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입장부금액_IO / 길이 15"
+                            "description": "진입장부금액 / 길이 15"
                           },
                           "sby_pls_rt": {
                             "type": "number",
                             "format": "double",
-                            "description": "매매손익율_IO / 길이 10.3"
+                            "description": "매매손익율 / 길이 10.3"
                           },
                           "pti_eal_pft_rt": {
                             "type": "number",
                             "format": "double",
-                            "description": "진입평가수익율_IO / 길이 5.2"
+                            "description": "진입평가수익율 / 길이 5.2"
                           },
                           "pti_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입평가손익_IO / 길이 15"
+                            "description": "진입평가손익 / 길이 15"
                           },
                           "frs_fee": {
                             "type": "integer",
@@ -2517,16 +2510,16 @@
                           "pti_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입수수료_IO / 길이 18"
+                            "description": "진입수수료 / 길이 18"
                           },
                           "lqd_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산수수료_IO / 길이 18"
+                            "description": "청산수수료 / 길이 18"
                           },
                           "sby_dit_nm2": {
                             "type": "string",
-                            "description": "매매구분명2_IO / 길이 4"
+                            "description": "매매구분명2 / 길이 4"
                           },
                           "bf_dd_ny_stl_qty": {
                             "type": "integer",
@@ -2536,92 +2529,92 @@
                           "bnc_ind_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "잔고증감수량_IO / 길이 15"
+                            "description": "잔고증감수량 / 길이 15"
                           },
                           "ral_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실손익합계_IO / 길이 15"
+                            "description": "실손익합계 / 길이 15"
                           },
                           "sby_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매매손익합계_IO / 길이 18"
+                            "description": "매매손익합계 / 길이 18"
                           },
                           "tot_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총평가손익_IO / 길이 15"
+                            "description": "총평가손익 / 길이 15"
                           },
                           "pti_tot_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입총손익합계_IO / 길이 15"
+                            "description": "진입총손익합계 / 길이 15"
                           },
                           "pti_sby_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입매매손익합계_IO / 길이 15"
+                            "description": "진입매매손익합계 / 길이 15"
                           },
                           "pti_eal_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입평가손익합계_IO / 길이 15"
+                            "description": "진입평가손익합계 / 길이 15"
                           },
                           "ral_frs_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실선물손익_IO / 길이 15"
+                            "description": "실선물손익 / 길이 15"
                           },
                           "frs_tot_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물총손익_IO / 길이 15"
+                            "description": "선물총손익 / 길이 15"
                           },
                           "frs_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매매손익_IO / 길이 15"
+                            "description": "선물매매손익 / 길이 15"
                           },
                           "frs_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물평가손익_IO / 길이 15"
+                            "description": "선물평가손익 / 길이 15"
                           },
                           "pti_frs_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입선물평가손익_IO / 길이 15"
+                            "description": "진입선물평가손익 / 길이 15"
                           },
                           "ral_opt_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "실옵션손익_IO / 길이 15"
+                            "description": "실옵션손익 / 길이 15"
                           },
                           "opt_tot_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션총손익_IO / 길이 15"
+                            "description": "옵션총손익 / 길이 15"
                           },
                           "opt_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매매손익_IO / 길이 15"
+                            "description": "옵션매매손익 / 길이 15"
                           },
                           "opt_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션평가손익_IO / 길이 15"
+                            "description": "옵션평가손익 / 길이 15"
                           },
                           "idx_opt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션손익금액_IO / 길이 18"
+                            "description": "지수옵션손익금액 / 길이 18"
                           },
                           "pti_sby_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "진입매매손익_IO / 길이 15"
+                            "description": "진입매매손익 / 길이 15"
                           },
                           "fno_eal_amt": {
                             "type": "integer",
@@ -2631,27 +2624,27 @@
                           "byn_cst_sum1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매수대금합계1_IO / 길이 18"
+                            "description": "매수대금합계1 / 길이 18"
                           },
                           "sum_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "합계수량1_IO / 길이 18"
+                            "description": "합계수량1 / 길이 18"
                           },
                           "sll_cst_sum1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매도대금합계1_IO / 길이 18"
+                            "description": "매도대금합계1 / 길이 18"
                           },
                           "sum_qty2": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "합계수량2_IO / 길이 18"
+                            "description": "합계수량2 / 길이 18"
                           },
                           "fee_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수수료합계_IO / 길이 18"
+                            "description": "수수료합계 / 길이 18"
                           },
                           "fee_sum_amt": {
                             "type": "integer",
@@ -2676,7 +2669,7 @@
                           "qty_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수량합계_IO / 길이 18"
+                            "description": "수량합계 / 길이 18"
                           },
                           "opt_byn_amt": {
                             "type": "integer",
@@ -2696,7 +2689,7 @@
                           "sby_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매매수량1_IO / 길이 18"
+                            "description": "매매수량1 / 길이 18"
                           },
                           "dsg_tal": {
                             "type": "integer",
@@ -2751,7 +2744,7 @@
                           "eal_amt_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "평가금액합계_IO / 길이 18"
+                            "description": "평가금액합계 / 길이 18"
                           },
                           "dsg_sba_amt": {
                             "type": "integer",
@@ -2776,22 +2769,22 @@
                           "eal_pls1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "평가손익1_IO / 길이 18"
+                            "description": "평가손익1 / 길이 18"
                           },
                           "xcl_dpa_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "정산차금합계_IO / 길이 15"
+                            "description": "정산차금합계 / 길이 15"
                           },
                           "lst_dfa_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "최종차액금액_IO / 길이 18"
+                            "description": "최종차액금액 / 길이 18"
                           },
                           "opt_eal_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션평가손익금액_IO / 길이 18"
+                            "description": "옵션평가손익금액 / 길이 18"
                           },
                           "opt_aloc_amt": {
                             "type": "integer",
@@ -2844,7 +2837,7 @@
         ],
         "operationId": "krfutureInquiryNightOrderable",
         "summary": "(야간)선물옵션 주문가능 조회",
-        "description": "\n\n원본 시트: API_국내_파생_조회_야간주문가능수량",
+        "description": "원본 시트: API_국내_파생_조회_야간주문가능수량",
         "requestBody": {
           "required": true,
           "content": {
@@ -2949,12 +2942,12 @@
                           "orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능총액_IO / 길이 18"
+                            "description": "주문가능총액 / 길이 18"
                           },
                           "orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능현금_IO / 길이 18"
+                            "description": "주문가능현금 / 길이 18"
                           },
                           "frs_xcl_dpa": {
                             "type": "integer",
@@ -2989,17 +2982,17 @@
                           "ned_dsg_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "필요예탁총액_IO / 길이 18"
+                            "description": "필요예탁총액 / 길이 18"
                           },
                           "ned_dsg_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "필요예탁현금_IO / 길이 18"
+                            "description": "필요예탁현금 / 길이 18"
                           },
                           "wtm_lvy_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "증거금징수수량_IO / 길이 18"
+                            "description": "증거금징수수량 / 길이 18"
                           },
                           "wtm_iny_qty": {
                             "type": "integer",
@@ -3009,7 +3002,7 @@
                           "wtm_lvy_uit_pr": {
                             "type": "number",
                             "format": "double",
-                            "description": "증거금징수단가_IO / 길이 18.3"
+                            "description": "증거금징수단가 / 길이 18.3"
                           },
                           "anw_qty": {
                             "type": "integer",
@@ -3019,12 +3012,12 @@
                           "lqd_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산가능수량_IO / 길이 18"
+                            "description": "청산가능수량 / 길이 18"
                           },
                           "all_orr_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전체주문수량_IO / 길이 18"
+                            "description": "전체주문수량 / 길이 18"
                           },
                           "ftn_aet_iem_end_pr": {
                             "type": "number",
@@ -3039,12 +3032,12 @@
                           "sum_stl_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "합계결제금액_IO / 길이 18"
+                            "description": "합계결제금액 / 길이 18"
                           },
                           "max_pbl_bse_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "최대가능기준수량_IO / 길이 18"
+                            "description": "최대가능기준수량 / 길이 18"
                           },
                           "copt_sll_ny_stl_qty": {
                             "type": "integer",
@@ -3069,12 +3062,12 @@
                           "orr_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량_IO / 길이 10"
+                            "description": "주문가능수량 / 길이 10"
                           },
                           "orr_pbl_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량1_IO / 길이 18"
+                            "description": "주문가능수량1 / 길이 18"
                           },
                           "orr_qty": {
                             "type": "integer",
@@ -3094,32 +3087,32 @@
                           "orr_af_dsg_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후예탁총액_IO / 길이 17"
+                            "description": "주문후예탁총액 / 길이 17"
                           },
                           "orr_af_dsg_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후예탁현금_IO / 길이 17"
+                            "description": "주문후예탁현금 / 길이 17"
                           },
                           "orr_af_brg_wtm_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후위탁증거금총액_IO / 길이 17"
+                            "description": "주문후위탁증거금총액 / 길이 17"
                           },
                           "orr_af_brg_wtm_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후위탁증거금현금_IO / 길이 17"
+                            "description": "주문후위탁증거금현금 / 길이 17"
                           },
                           "orr_af_orr_pbl_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후주문가능총액_IO / 길이 17"
+                            "description": "주문후주문가능총액 / 길이 17"
                           },
                           "orr_af_orr_pbl_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문후주문가능현금_IO / 길이 17"
+                            "description": "주문후주문가능현금 / 길이 17"
                           }
                         }
                       }
@@ -3147,7 +3140,7 @@
         ],
         "operationId": "krfutureInquiryNightMargin",
         "summary": "(야간)선물옵션 증거금 상세",
-        "description": "\n\n원본 시트: API_국내_파생_조회_야간증거금",
+        "description": "원본 시트: API_국내_파생_조회_야간증거금",
         "requestBody": {
           "required": true,
           "content": {
@@ -3273,7 +3266,7 @@
                           "rrv_wtm": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "예비증거금_IO / 길이 18"
+                            "description": "예비증거금 / 길이 18"
                           },
                           "sby_pls_amt": {
                             "type": "integer",
@@ -3283,12 +3276,12 @@
                           "opt_byn_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수대금_IO / 길이 18"
+                            "description": "옵션매수대금 / 길이 18"
                           },
                           "opt_sll_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도대금_IO / 길이 18"
+                            "description": "옵션매도대금 / 길이 18"
                           },
                           "frs_xcl_dpa": {
                             "type": "integer",
@@ -3308,7 +3301,7 @@
                           "rvb_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "미수수수료_IO / 길이 18"
+                            "description": "미수수수료 / 길이 18"
                           },
                           "rvb_odu_fee": {
                             "type": "integer",
@@ -3318,22 +3311,22 @@
                           "bf_dd_jin_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전일가입금액_IO / 길이 18"
+                            "description": "전일가입금액 / 길이 18"
                           },
                           "tdy_jin_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "금일가입금액_IO / 길이 18"
+                            "description": "금일가입금액 / 길이 18"
                           },
                           "bf_dd_rrs_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "전일반대대용_IO / 길이 18"
+                            "description": "전일반대대용 / 길이 18"
                           },
                           "tdy_rrs_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "금일반대대용_IO / 길이 18"
+                            "description": "금일반대대용 / 길이 18"
                           },
                           "opt_stl_amt": {
                             "type": "integer",
@@ -3343,7 +3336,7 @@
                           "rls_pbl_sba": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "해제가능대용_IO / 길이 18"
+                            "description": "해제가능대용 / 길이 18"
                           },
                           "opt_ant_amt": {
                             "type": "integer",
@@ -3358,17 +3351,17 @@
                           "men_af_csh_rpm_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후현금입금금액_IO / 길이 18"
+                            "description": "장종료후현금입금금액 / 길이 18"
                           },
                           "men_af_sba_rpm_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후대용입금금액_IO / 길이 18"
+                            "description": "장종료후대용입금금액 / 길이 18"
                           },
                           "men_af_rpm_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "장종료후입금총액_IO / 길이 18"
+                            "description": "장종료후입금총액 / 길이 18"
                           },
                           "frs_nsk_wtm_tal": {
                             "type": "integer",
@@ -3438,12 +3431,12 @@
                           "sba_sec_sll_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "대용증권매도금액_IO / 길이 18"
+                            "description": "대용증권매도금액 / 길이 18"
                           },
                           "sba_sec_sll_tal": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "대용증권매도총액_IO / 길이 18"
+                            "description": "대용증권매도총액 / 길이 18"
                           },
                           "wrw_pbl_amt_tal": {
                             "type": "integer",
@@ -3453,12 +3446,12 @@
                           "cvc_apm_sba_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "커버드콜지정대용금액_IO / 길이 18"
+                            "description": "커버드콜지정대용금액 / 길이 18"
                           },
                           "ahi_stk_byn_gte_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "현물주식매수확보금액_IO / 길이 18"
+                            "description": "현물주식매수확보금액 / 길이 18"
                           },
                           "rvb_sct_gte_amt": {
                             "type": "integer",
@@ -3468,7 +3461,7 @@
                           "lst_stl_dpa": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "최종결제차금_IO / 길이 18"
+                            "description": "최종결제차금 / 길이 18"
                           },
                           "sll_amt": {
                             "type": "integer",
@@ -3483,17 +3476,17 @@
                           "cal_erc_popt_aloc_rit_erc_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "콜행사풋옵션배정권리행사대금_IO / 길이 18"
+                            "description": "콜행사풋옵션배정권리행사대금 / 길이 18"
                           },
                           "cal_aloc_popt_erc_rit_erc_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "콜배정풋옵션행사권리행사대금_IO / 길이 18"
+                            "description": "콜배정풋옵션행사권리행사대금 / 길이 18"
                           },
                           "frs_orr_wtm": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물주문증거금_IO / 길이 18"
+                            "description": "선물주문증거금 / 길이 18"
                           },
                           "srd_orr_wtm": {
                             "type": "integer",
@@ -3503,22 +3496,22 @@
                           "opt_byn_orr_wtm_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수주문증거금현금_IO / 길이 18"
+                            "description": "옵션매수주문증거금현금 / 길이 18"
                           },
                           "opt_sll_orr_wtm_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도주문증거금현금_IO / 길이 18"
+                            "description": "옵션매도주문증거금현금 / 길이 18"
                           },
                           "nby_cst": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "순매수대금_IO / 길이 18"
+                            "description": "순매수대금 / 길이 18"
                           },
                           "nby_csh": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "순매수현금_IO / 길이 18"
+                            "description": "순매수현금 / 길이 18"
                           },
                           "frs_fee": {
                             "type": "integer",
@@ -3538,7 +3531,7 @@
                           "tdt_frs_nlo_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "당일선물순손실금액_IO / 길이 18"
+                            "description": "당일선물순손실금액 / 길이 18"
                           },
                           "gar_dd_bf_nlo_stl_amt": {
                             "type": "integer",
@@ -3548,7 +3541,7 @@
                           "iopt_hld_lmt_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션보유한도수량_IO / 길이 18"
+                            "description": "주식옵션보유한도수량 / 길이 18"
                           },
                           "opt_hld_lmt_qty": {
                             "type": "integer",
@@ -3595,7 +3588,7 @@
         ],
         "operationId": "krfutureInquiryEvalPnl",
         "summary": "선물옵션 잔고평가손익내역",
-        "description": "\n\n원본 시트: API_국내_파생_조회_평가손익",
+        "description": "원본 시트: API_국내_파생_조회_평가손익",
         "requestBody": {
           "required": true,
           "content": {
@@ -3640,72 +3633,72 @@
                           "ksp_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피선물매수약정수량_IO / 길이 18"
+                            "description": "코스피선물매수약정수량 / 길이 18"
                           },
                           "ksp_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피선물매도약정수량_IO / 길이 18"
+                            "description": "코스피선물매도약정수량 / 길이 18"
                           },
                           "ksp_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피선물매수약정금액_IO / 길이 18"
+                            "description": "코스피선물매수약정금액 / 길이 18"
                           },
                           "ksp_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피선물매도약정금액_IO / 길이 18"
+                            "description": "코스피선물매도약정금액 / 길이 18"
                           },
                           "ksp_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피당일손익금액_IO / 길이 18"
+                            "description": "코스피당일손익금액 / 길이 18"
                           },
                           "ksp_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피선물수수료_IO / 길이 18"
+                            "description": "코스피선물수수료 / 길이 18"
                           },
                           "ksp_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피옵션매수약정수량_IO / 길이 18"
+                            "description": "코스피옵션매수약정수량 / 길이 18"
                           },
                           "ksp_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피옵션매도약정수량_IO / 길이 18"
+                            "description": "코스피옵션매도약정수량 / 길이 18"
                           },
                           "ksp_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피옵션매수약정금액_IO / 길이 18"
+                            "description": "코스피옵션매수약정금액 / 길이 18"
                           },
                           "ksp_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피옵션매도약정금액_IO / 길이 18"
+                            "description": "코스피옵션매도약정금액 / 길이 18"
                           },
                           "iopt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매수약정수량_IO / 길이 18"
+                            "description": "주식옵션매수약정수량 / 길이 18"
                           },
                           "iopt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매도약정수량_IO / 길이 18"
+                            "description": "주식옵션매도약정수량 / 길이 18"
                           },
                           "iopt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매수약정금액_IO / 길이 18"
+                            "description": "주식옵션매수약정금액 / 길이 18"
                           },
                           "iopt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매도약정금액_IO / 길이 18"
+                            "description": "주식옵션매도약정금액 / 길이 18"
                           },
                           "pls_amt": {
                             "type": "integer",
@@ -3715,7 +3708,7 @@
                           "iopt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션손익금액_IO / 길이 18"
+                            "description": "주식옵션손익금액 / 길이 18"
                           },
                           "opt_byn_amt": {
                             "type": "integer",
@@ -3735,7 +3728,7 @@
                           "opt_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션수수료_IO / 길이 18"
+                            "description": "옵션수수료 / 길이 18"
                           },
                           "bf_dd_sba_sll_amt": {
                             "type": "integer",
@@ -3750,42 +3743,42 @@
                           "ctc_qty_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "약정수량합계_IO / 길이 18"
+                            "description": "약정수량합계 / 길이 18"
                           },
                           "ctc_amt_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "약정금액합계_IO / 길이 18"
+                            "description": "약정금액합계 / 길이 18"
                           },
                           "idx_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션약정수량_IO / 길이 18"
+                            "description": "지수옵션약정수량 / 길이 18"
                           },
                           "idx_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션약정금액_IO / 길이 18"
+                            "description": "지수옵션약정금액 / 길이 18"
                           },
                           "iopt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션약정수량_IO / 길이 18"
+                            "description": "주식옵션약정수량 / 길이 18"
                           },
                           "iopt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션약정금액_IO / 길이 18"
+                            "description": "주식옵션약정금액 / 길이 18"
                           },
                           "tdt_pls_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "당일손익합계_IO / 길이 18"
+                            "description": "당일손익합계 / 길이 18"
                           },
                           "fee_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수수료합계_IO / 길이 18"
+                            "description": "수수료합계 / 길이 18"
                           },
                           "dca": {
                             "type": "integer",
@@ -3795,127 +3788,127 @@
                           "nxt_dd_prv_xcl_dca": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "익일가정산예수금_IO / 길이 18"
+                            "description": "익일가정산예수금 / 길이 18"
                           },
                           "kar_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매수약정수량_IO / 길이 18"
+                            "description": "스타지수선물매수약정수량 / 길이 18"
                           },
                           "kar_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매도약정수량_IO / 길이 18"
+                            "description": "스타지수선물매도약정수량 / 길이 18"
                           },
                           "kar_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매수약정금액_IO / 길이 18"
+                            "description": "스타지수선물매수약정금액 / 길이 18"
                           },
                           "kar_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매도약정금액_IO / 길이 18"
+                            "description": "스타지수선물매도약정금액 / 길이 18"
                           },
                           "kar_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물당일손익금액_IO / 길이 18"
+                            "description": "스타지수선물당일손익금액 / 길이 18"
                           },
                           "kar_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물수수료_IO / 길이 18"
+                            "description": "스타지수선물수수료 / 길이 18"
                           },
                           "stk_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매수약정수량_IO / 길이 18"
+                            "description": "주식선물매수약정수량 / 길이 18"
                           },
                           "stk_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매도약정수량_IO / 길이 18"
+                            "description": "주식선물매도약정수량 / 길이 18"
                           },
                           "stk_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매수약정금액_IO / 길이 18"
+                            "description": "주식선물매수약정금액 / 길이 18"
                           },
                           "stk_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매도약정금액_IO / 길이 18"
+                            "description": "주식선물매도약정금액 / 길이 18"
                           },
                           "stk_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물당일손익금액_IO / 길이 18"
+                            "description": "주식선물당일손익금액 / 길이 18"
                           },
                           "stk_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물수수료_IO / 길이 18"
+                            "description": "주식선물수수료 / 길이 18"
                           },
                           "vty_idx_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매수약정수량_IO / 길이 18"
+                            "description": "변동성지수선물매수약정수량 / 길이 18"
                           },
                           "vty_idx_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매도약정수량_IO / 길이 18"
+                            "description": "변동성지수선물매도약정수량 / 길이 18"
                           },
                           "vty_idx_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매수약정금액_IO / 길이 18"
+                            "description": "변동성지수선물매수약정금액 / 길이 18"
                           },
                           "vty_idx_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매도약정금액_IO / 길이 18"
+                            "description": "변동성지수선물매도약정금액 / 길이 18"
                           },
                           "vty_idx_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물당일손익금액_IO / 길이 18"
+                            "description": "변동성지수선물당일손익금액 / 길이 18"
                           },
                           "vty_idx_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물수수료_IO / 길이 18"
+                            "description": "변동성지수선물수수료 / 길이 18"
                           },
                           "ser_idx_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매수약정수량_IO / 길이 18"
+                            "description": "섹터지수선물매수약정수량 / 길이 18"
                           },
                           "ser_idx_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매도약정수량_IO / 길이 18"
+                            "description": "섹터지수선물매도약정수량 / 길이 18"
                           },
                           "ser_idx_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매수약정금액_IO / 길이 18"
+                            "description": "섹터지수선물매수약정금액 / 길이 18"
                           },
                           "ser_idx_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매도약정금액_IO / 길이 18"
+                            "description": "섹터지수선물매도약정금액 / 길이 18"
                           },
                           "ser_idx_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물당일손익금액_IO / 길이 18"
+                            "description": "섹터지수선물당일손익금액 / 길이 18"
                           },
                           "ser_idx_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물수수료_IO / 길이 18"
+                            "description": "섹터지수선물수수료 / 길이 18"
                           },
                           "mini_ksp_frs_byn_ctc_qty": {
                             "type": "integer",
@@ -3975,32 +3968,32 @@
                           "ksq150_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매수약정수량_IO / 길이 18"
+                            "description": "코스닥150선물매수약정수량 / 길이 18"
                           },
                           "ksq150_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물당일손익금액_IO / 길이 18"
+                            "description": "코스닥150선물당일손익금액 / 길이 18"
                           },
                           "ksq150_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물수수료_IO / 길이 18"
+                            "description": "코스닥150선물수수료 / 길이 18"
                           },
                           "ksq150_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매도약정금액_IO / 길이 18"
+                            "description": "코스닥150선물매도약정금액 / 길이 18"
                           },
                           "ksq150_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매도약정수량_IO / 길이 18"
+                            "description": "코스닥150선물매도약정수량 / 길이 18"
                           },
                           "ksq150_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매수약정금액_IO / 길이 18"
+                            "description": "코스닥150선물매수약정금액 / 길이 18"
                           },
                           "ero_50_idx_frs_byn_ctc_qty": {
                             "type": "integer",
@@ -4035,162 +4028,162 @@
                           "ksq150_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매수약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션매수약정수량 / 길이 18"
                           },
                           "ksq150_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매도약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션매도약정수량 / 길이 18"
                           },
                           "ksq150_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매수약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션매수약정금액 / 길이 18"
                           },
                           "ksq150_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매도약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션매도약정금액 / 길이 18"
                           },
                           "ksq150_opt_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션당일손익금액_IO / 길이 18"
+                            "description": "코스닥150옵션당일손익금액 / 길이 18"
                           },
                           "ksq150_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션약정금액 / 길이 18"
                           },
                           "ksq150_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션약정수량 / 길이 18"
                           },
                           "krx300_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매수약정수량_IO / 길이 18"
+                            "description": "거래소300선물매수약정수량 / 길이 18"
                           },
                           "krx300_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매도약정수량_IO / 길이 18"
+                            "description": "거래소300선물매도약정수량 / 길이 18"
                           },
                           "krx300_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매수약정금액_IO / 길이 18"
+                            "description": "거래소300선물매수약정금액 / 길이 18"
                           },
                           "krx300_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매도약정금액_IO / 길이 18"
+                            "description": "거래소300선물매도약정금액 / 길이 18"
                           },
                           "krx300_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물당일손익금액_IO / 길이 18"
+                            "description": "거래소300선물당일손익금액 / 길이 18"
                           },
                           "krx300_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물수수료_IO / 길이 18"
+                            "description": "거래소300선물수수료 / 길이 18"
                           },
                           "ksp200_wky_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매수약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션매수약정수량 / 길이 18"
                           },
                           "ksp200_wky_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매도약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션매도약정수량 / 길이 18"
                           },
                           "ksp200_wky_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매수약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션매수약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매도약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션매도약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션당일손익금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션당일손익금액 / 길이 18"
                           },
                           "ksp200_wky_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매수약정수량_IO / 길이 18"
+                            "description": "코스닥글로벌선물매수약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매도약정수량_IO / 길이 18"
+                            "description": "코스닥글로벌선물매도약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매수약정금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물매수약정금액 / 길이 18"
                           },
                           "ksq_gbl_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매도약정금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물매도약정금액 / 길이 18"
                           },
                           "ksq_gbl_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물당일손익금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물당일손익금액 / 길이 18"
                           },
                           "ksq_gbl_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물수수료_IO / 길이 18"
+                            "description": "코스닥글로벌선물수수료 / 길이 18"
                           },
                           "kor_vup_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매수약정수량_IO / 길이 18"
+                            "description": "코리아밸류업선물매수약정수량 / 길이 18"
                           },
                           "kor_vup_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매도약정수량_IO / 길이 18"
+                            "description": "코리아밸류업선물매도약정수량 / 길이 18"
                           },
                           "kor_vup_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매수약정금액_IO / 길이 18"
+                            "description": "코리아밸류업선물매수약정금액 / 길이 18"
                           },
                           "kor_vup_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매도약정금액_IO / 길이 18"
+                            "description": "코리아밸류업선물매도약정금액 / 길이 18"
                           },
                           "kor_vup_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물당일손익금액_IO / 길이 18"
+                            "description": "코리아밸류업선물당일손익금액 / 길이 18"
                           },
                           "kor_vup_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물수수료_IO / 길이 18"
+                            "description": "코리아밸류업선물수수료 / 길이 18"
                           },
                           "ksq150_wky_opt_byn_ctc_qty": {
                             "type": "integer",
@@ -4288,7 +4281,7 @@
         ],
         "operationId": "krfutureInquiryExecutionHistory",
         "summary": "선물옵션 기준일체결내역",
-        "description": "\n\n원본 시트: API_국내_파생_조회_체결내역",
+        "description": "원본 시트: API_국내_파생_조회_체결내역",
         "requestBody": {
           "required": true,
           "content": {
@@ -4299,10 +4292,6 @@
                   "Input_0": {
                     "type": "object",
                     "properties": {
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 62 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
-                      },
                       "act_no": {
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
@@ -4317,7 +4306,7 @@
                       },
                       "cns_dit_cd": {
                         "type": "string",
-                        "description": "체결구분코드_IO / 길이 1 / 0.전체 1.체결 2.미체결"
+                        "description": "체결구분코드 / 길이 1 / 0.전체 1.체결 2.미체결"
                       },
                       "fno_orr_no": {
                         "type": "integer",
@@ -4523,19 +4512,19 @@
                           },
                           "orr_cnd_dit_cd_nm": {
                             "type": "string",
-                            "description": "주문조건구분코드명_IO / 길이 60"
+                            "description": "주문조건구분코드명 / 길이 60"
                           },
                           "sby_dit_nm": {
                             "type": "string",
-                            "description": "매매구분명_IO / 길이 4"
+                            "description": "매매구분명 / 길이 4"
                           },
                           "cor_can_dit_nm": {
                             "type": "string",
-                            "description": "정정취소구분명_IO / 길이 4"
+                            "description": "정정취소구분명 / 길이 4"
                           },
                           "nmn_pr_tp_cd_nm": {
                             "type": "string",
-                            "description": "호가유형코드명_IO / 길이 60"
+                            "description": "호가유형코드명 / 길이 60"
                           },
                           "trd_tp_nm": {
                             "type": "string",
@@ -4569,12 +4558,12 @@
                           "opt_byn_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매수수량_IO / 길이 18"
+                            "description": "옵션매수수량 / 길이 18"
                           },
                           "opt_sll_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션매도수량_IO / 길이 18"
+                            "description": "옵션매도수량 / 길이 18"
                           },
                           "opt_sll_amt": {
                             "type": "integer",
@@ -4607,7 +4596,7 @@
         ],
         "operationId": "krfutureInquiryCommission",
         "summary": "선물옵션기간약정수수료일별",
-        "description": "\n\n원본 시트: API_국내_파생_조회_약정수수료",
+        "description": "원본 시트: API_국내_파생_조회_약정수수료",
         "requestBody": {
           "required": true,
           "content": {
@@ -4658,22 +4647,22 @@
                           "frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매수약정수량_IO / 길이 22"
+                            "description": "선물매수약정수량 / 길이 22"
                           },
                           "frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매도약정수량_IO / 길이 22"
+                            "description": "선물매도약정수량 / 길이 22"
                           },
                           "frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매수약정금액_IO / 길이 22"
+                            "description": "선물매수약정금액 / 길이 22"
                           },
                           "frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "선물매도약정금액_IO / 길이 22"
+                            "description": "선물매도약정금액 / 길이 22"
                           },
                           "frs_pls_amt": {
                             "type": "integer",
@@ -4688,157 +4677,157 @@
                           "kar_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매수약정수량_IO / 길이 22"
+                            "description": "스타지수선물매수약정수량 / 길이 22"
                           },
                           "kar_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매도약정수량_IO / 길이 22"
+                            "description": "스타지수선물매도약정수량 / 길이 22"
                           },
                           "kar_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매수약정금액_IO / 길이 22"
+                            "description": "스타지수선물매수약정금액 / 길이 22"
                           },
                           "kar_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물매도약정금액_IO / 길이 22"
+                            "description": "스타지수선물매도약정금액 / 길이 22"
                           },
                           "kar_frs_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물손익금액_IO / 길이 22"
+                            "description": "스타지수선물손익금액 / 길이 22"
                           },
                           "kar_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수선물수수료_IO / 길이 22"
+                            "description": "스타지수선물수수료 / 길이 22"
                           },
                           "stk_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매수약정수량_IO / 길이 22"
+                            "description": "주식선물매수약정수량 / 길이 22"
                           },
                           "stk_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매도약정수량_IO / 길이 22"
+                            "description": "주식선물매도약정수량 / 길이 22"
                           },
                           "stk_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매수약정금액_IO / 길이 22"
+                            "description": "주식선물매수약정금액 / 길이 22"
                           },
                           "stk_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물매도약정금액_IO / 길이 22"
+                            "description": "주식선물매도약정금액 / 길이 22"
                           },
                           "stk_frs_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물손익금액_IO / 길이 22"
+                            "description": "주식선물손익금액 / 길이 22"
                           },
                           "stk_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물수수료_IO / 길이 22"
+                            "description": "주식선물수수료 / 길이 22"
                           },
                           "idx_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션매수약정수량_IO / 길이 22"
+                            "description": "지수옵션매수약정수량 / 길이 22"
                           },
                           "idx_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션매도약정수량_IO / 길이 22"
+                            "description": "지수옵션매도약정수량 / 길이 22"
                           },
                           "idx_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션매수약정금액_IO / 길이 22"
+                            "description": "지수옵션매수약정금액 / 길이 22"
                           },
                           "idx_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션매도약정금액_IO / 길이 22"
+                            "description": "지수옵션매도약정금액 / 길이 22"
                           },
                           "iopt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매수약정수량_IO / 길이 22"
+                            "description": "주식옵션매수약정수량 / 길이 22"
                           },
                           "iopt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매도약정수량_IO / 길이 22"
+                            "description": "주식옵션매도약정수량 / 길이 22"
                           },
                           "iopt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매수약정금액_IO / 길이 22"
+                            "description": "주식옵션매수약정금액 / 길이 22"
                           },
                           "iopt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션매도약정금액_IO / 길이 22"
+                            "description": "주식옵션매도약정금액 / 길이 22"
                           },
                           "idx_opt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션손익금액_IO / 길이 22"
+                            "description": "지수옵션손익금액 / 길이 22"
                           },
                           "iopt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션손익금액_IO / 길이 22"
+                            "description": "주식옵션손익금액 / 길이 22"
                           },
                           "opt_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "옵션수수료_IO / 길이 22"
+                            "description": "옵션수수료 / 길이 22"
                           },
                           "ctc_qty_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "약정수량합계_IO / 길이 22"
+                            "description": "약정수량합계 / 길이 22"
                           },
                           "ctc_amt_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "약정금액합계_IO / 길이 22"
+                            "description": "약정금액합계 / 길이 22"
                           },
                           "idx_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션약정수량_IO / 길이 22"
+                            "description": "지수옵션약정수량 / 길이 22"
                           },
                           "idx_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "지수옵션약정금액_IO / 길이 22"
+                            "description": "지수옵션약정금액 / 길이 22"
                           },
                           "iopt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션약정수량_IO / 길이 22"
+                            "description": "주식옵션약정수량 / 길이 22"
                           },
                           "iopt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식옵션약정금액_IO / 길이 22"
+                            "description": "주식옵션약정금액 / 길이 22"
                           },
                           "pls_amt_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "손익금액합계_IO / 길이 22"
+                            "description": "손익금액합계 / 길이 22"
                           },
                           "fee_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "수수료합계_IO / 길이 22"
+                            "description": "수수료합계 / 길이 22"
                           },
                           "act_atc_fnm": {
                             "type": "string",
@@ -4847,12 +4836,12 @@
                           "byn_eal_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매수평가금액_IO / 길이 18"
+                            "description": "매수평가금액 / 길이 18"
                           },
                           "sll_eal_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매도평가금액_IO / 길이 18"
+                            "description": "매도평가금액 / 길이 18"
                           },
                           "frs_xcl_dpa": {
                             "type": "integer",
@@ -4862,12 +4851,12 @@
                           "kar_xcl_dpa": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "스타지수정산차금_IO / 길이 18"
+                            "description": "스타지수정산차금 / 길이 18"
                           },
                           "stk_frs_xcl_dpa": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주식선물정산차금_IO / 길이 18"
+                            "description": "주식선물정산차금 / 길이 18"
                           },
                           "opt_byn_amt": {
                             "type": "integer",
@@ -4887,62 +4876,62 @@
                           "vty_idx_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매수약정수량_IO / 길이 18"
+                            "description": "변동성지수선물매수약정수량 / 길이 18"
                           },
                           "vty_idx_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매도약정수량_IO / 길이 18"
+                            "description": "변동성지수선물매도약정수량 / 길이 18"
                           },
                           "vty_idx_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매수약정금액_IO / 길이 18"
+                            "description": "변동성지수선물매수약정금액 / 길이 18"
                           },
                           "vty_idx_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물매도약정금액_IO / 길이 18"
+                            "description": "변동성지수선물매도약정금액 / 길이 18"
                           },
                           "vty_idx_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물당일손익금액_IO / 길이 18"
+                            "description": "변동성지수선물당일손익금액 / 길이 18"
                           },
                           "vty_idx_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "변동성지수선물수수료_IO / 길이 18"
+                            "description": "변동성지수선물수수료 / 길이 18"
                           },
                           "ser_idx_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매수약정수량_IO / 길이 18"
+                            "description": "섹터지수선물매수약정수량 / 길이 18"
                           },
                           "ser_idx_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매도약정수량_IO / 길이 18"
+                            "description": "섹터지수선물매도약정수량 / 길이 18"
                           },
                           "ser_idx_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매수약정금액_IO / 길이 18"
+                            "description": "섹터지수선물매수약정금액 / 길이 18"
                           },
                           "ser_idx_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물매도약정금액_IO / 길이 18"
+                            "description": "섹터지수선물매도약정금액 / 길이 18"
                           },
                           "ser_idx_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물당일손익금액_IO / 길이 18"
+                            "description": "섹터지수선물당일손익금액 / 길이 18"
                           },
                           "ser_idx_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "섹터지수선물수수료_IO / 길이 18"
+                            "description": "섹터지수선물수수료 / 길이 18"
                           },
                           "mini_ksp_frs_byn_ctc_qty": {
                             "type": "integer",
@@ -4977,32 +4966,32 @@
                           "ksq150_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매수약정수량_IO / 길이 18"
+                            "description": "코스닥150선물매수약정수량 / 길이 18"
                           },
                           "ksq150_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매도약정수량_IO / 길이 18"
+                            "description": "코스닥150선물매도약정수량 / 길이 18"
                           },
                           "ksq150_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매수약정금액_IO / 길이 18"
+                            "description": "코스닥150선물매수약정금액 / 길이 18"
                           },
                           "ksq150_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물매도약정금액_IO / 길이 18"
+                            "description": "코스닥150선물매도약정금액 / 길이 18"
                           },
                           "ksq150_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물당일손익금액_IO / 길이 18"
+                            "description": "코스닥150선물당일손익금액 / 길이 18"
                           },
                           "ksq150_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150선물수수료_IO / 길이 18"
+                            "description": "코스닥150선물수수료 / 길이 18"
                           },
                           "ero_50_idx_frs_byn_ctc_qty": {
                             "type": "integer",
@@ -5037,162 +5026,162 @@
                           "ksq150_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매수약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션매수약정수량 / 길이 18"
                           },
                           "ksq150_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매도약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션매도약정수량 / 길이 18"
                           },
                           "ksq150_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매수약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션매수약정금액 / 길이 18"
                           },
                           "ksq150_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션매도약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션매도약정금액 / 길이 18"
                           },
                           "ksq150_opt_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션당일손익금액_IO / 길이 18"
+                            "description": "코스닥150옵션당일손익금액 / 길이 18"
                           },
                           "ksq150_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션약정금액_IO / 길이 18"
+                            "description": "코스닥150옵션약정금액 / 길이 18"
                           },
                           "ksq150_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥150옵션약정수량_IO / 길이 18"
+                            "description": "코스닥150옵션약정수량 / 길이 18"
                           },
                           "krx300_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매수약정수량_IO / 길이 18"
+                            "description": "거래소300선물매수약정수량 / 길이 18"
                           },
                           "krx300_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매도약정수량_IO / 길이 18"
+                            "description": "거래소300선물매도약정수량 / 길이 18"
                           },
                           "krx300_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매수약정금액_IO / 길이 18"
+                            "description": "거래소300선물매수약정금액 / 길이 18"
                           },
                           "krx300_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물매도약정금액_IO / 길이 18"
+                            "description": "거래소300선물매도약정금액 / 길이 18"
                           },
                           "krx300_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물당일손익금액_IO / 길이 18"
+                            "description": "거래소300선물당일손익금액 / 길이 18"
                           },
                           "krx300_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "거래소300선물수수료_IO / 길이 18"
+                            "description": "거래소300선물수수료 / 길이 18"
                           },
                           "ksp200_wky_opt_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매수약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션매수약정수량 / 길이 18"
                           },
                           "ksp200_wky_opt_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매도약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션매도약정수량 / 길이 18"
                           },
                           "ksp200_wky_opt_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매수약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션매수약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션매도약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션매도약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션당일손익금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션당일손익금액 / 길이 18"
                           },
                           "ksp200_wky_opt_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션약정금액_IO / 길이 18"
+                            "description": "코스피200위클리옵션약정금액 / 길이 18"
                           },
                           "ksp200_wky_opt_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스피200위클리옵션약정수량_IO / 길이 18"
+                            "description": "코스피200위클리옵션약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매수약정수량_IO / 길이 18"
+                            "description": "코스닥글로벌선물매수약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매도약정수량_IO / 길이 18"
+                            "description": "코스닥글로벌선물매도약정수량 / 길이 18"
                           },
                           "ksq_gbl_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매수약정금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물매수약정금액 / 길이 18"
                           },
                           "ksq_gbl_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물매도약정금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물매도약정금액 / 길이 18"
                           },
                           "ksq_gbl_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물당일손익금액_IO / 길이 18"
+                            "description": "코스닥글로벌선물당일손익금액 / 길이 18"
                           },
                           "ksq_gbl_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코스닥글로벌선물수수료_IO / 길이 18"
+                            "description": "코스닥글로벌선물수수료 / 길이 18"
                           },
                           "kor_vup_frs_byn_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매수약정수량_IO / 길이 18"
+                            "description": "코리아밸류업선물매수약정수량 / 길이 18"
                           },
                           "kor_vup_frs_sll_ctc_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매도약정수량_IO / 길이 18"
+                            "description": "코리아밸류업선물매도약정수량 / 길이 18"
                           },
                           "kor_vup_frs_byn_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매수약정금액_IO / 길이 18"
+                            "description": "코리아밸류업선물매수약정금액 / 길이 18"
                           },
                           "kor_vup_frs_sll_ctc_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물매도약정금액_IO / 길이 18"
+                            "description": "코리아밸류업선물매도약정금액 / 길이 18"
                           },
                           "kor_vup_frs_tdt_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물당일손익금액_IO / 길이 18"
+                            "description": "코리아밸류업선물당일손익금액 / 길이 18"
                           },
                           "kor_vup_frs_fee": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "코리아밸류업선물수수료_IO / 길이 18"
+                            "description": "코리아밸류업선물수수료 / 길이 18"
                           },
                           "ksq150_wky_opt_byn_ctc_qty": {
                             "type": "integer",
@@ -5290,7 +5279,7 @@
         ],
         "operationId": "krfutureQuoteDay",
         "summary": "선물옵션 시세주간",
-        "description": "\n\n원본 시트: API_국내_파생_시세_주간",
+        "description": "원본 시트: API_국내_파생_시세_주간",
         "requestBody": {
           "required": true,
           "content": {
@@ -5343,7 +5332,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보합+리버스(기세)"
                           },
                           "vrss": {
                             "type": "number",
@@ -5712,7 +5701,7 @@
                           },
                           "antc_sign": {
                             "type": "string",
-                            "description": "예상체결부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "예상체결부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보합+리버스(기세)"
                           },
                           "antc_vrss": {
                             "type": "number",
@@ -5791,7 +5780,7 @@
                           },
                           "oprc_vrss_sign": {
                             "type": "string",
-                            "description": "시가대비부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "시가대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "oprc_vrss": {
                             "type": "number",
@@ -5829,7 +5818,7 @@
                           },
                           "unas_sign": {
                             "type": "string",
-                            "description": "기초자산등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "기초자산등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보합+리버스(기세)"
                           },
                           "unas_vrss": {
                             "type": "number",
@@ -5879,7 +5868,7 @@
         ],
         "operationId": "krfutureQuoteNight",
         "summary": "선물옵션 시세야간",
-        "description": "\n\n원본 시트: API_국내_파생_시세_야간",
+        "description": "원본 시트: API_국내_파생_시세_야간",
         "requestBody": {
           "required": true,
           "content": {
@@ -5890,13 +5879,13 @@
                   "Input_0": {
                     "type": "object",
                     "properties": {
-                      "shrn_iscd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "종목코드 / 길이 9"
                       }
                     },
                     "required": [
-                      "shrn_iscd"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -5917,11 +5906,11 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "shrn_iscd": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "종목코드 / 길이 8"
                           },
-                          "ftop_kor_isnm": {
+                          "iem_nm": {
                             "type": "string",
                             "description": "종목명 / 길이 80"
                           },
@@ -5932,7 +5921,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "vrss": {
                             "type": "number",
@@ -6301,7 +6290,7 @@
                           },
                           "antc_sign": {
                             "type": "string",
-                            "description": "예상체결부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "예상체결부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "antc_vrss": {
                             "type": "number",
@@ -6380,7 +6369,7 @@
                           },
                           "oprc_vrss_sign": {
                             "type": "string",
-                            "description": "시가대비부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "시가대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "oprc_vrss": {
                             "type": "number",
@@ -6418,7 +6407,7 @@
                           },
                           "unas_sign": {
                             "type": "string",
-                            "description": "기초자산등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "기초자산등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "unas_vrss": {
                             "type": "number",
@@ -6468,7 +6457,7 @@
         ],
         "operationId": "krfutureQuoteDayPeriod",
         "summary": "선물옵션기간별시세(일/주/월/년)주간",
-        "description": "\n\n원본 시트: API_국내_파생_시세_기간별주간",
+        "description": "원본 시트: API_국내_파생_시세_기간별주간",
         "requestBody": {
           "required": true,
           "content": {
@@ -6511,14 +6500,6 @@
                         "type": "string",
                         "description": "당일조회 / 길이 1 / 1.당일만조회(분/초/틱에서 사용) 0.전체조회"
                       },
-                      "cts_flag": {
-                        "type": "string",
-                        "description": "연속조회여부 / 길이 1 / N.다음페이지 P.이전페이지 이외:지금페이지"
-                      },
-                      "ctsz30": {
-                        "type": "string",
-                        "description": "연속조회키 / 길이 30"
-                      },
                       "out1_scale_change": {
                         "type": "string",
                         "description": "Out1단위변경 / 길이 1 / Out1기준단위 0.변경안함 1.거래량천단위,거래대금백만단위 2.거래량단주,거래대금만백만단위"
@@ -6531,11 +6512,7 @@
                     "required": [
                       "shrn_iscd",
                       "mrkt_div_cls_code",
-                      "edate",
-                      "array_cnt",
-                      "maxavg",
                       "gubun",
-                      "xtick",
                       "today_cls_code",
                       "out1_scale_change",
                       "out2_scale_change"
@@ -6581,7 +6558,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "string",
@@ -6669,7 +6646,7 @@
                           },
                           "unas_prdy_sign": {
                             "type": "string",
-                            "description": "기초자산대비부호 / 길이 1"
+                            "description": "기초자산대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_oprc": {
                             "type": "string",
@@ -6727,10 +6704,6 @@
                             "type": "string",
                             "description": "기준가 / 길이 11 / float 11.2"
                           },
-                          "ctsz30": {
-                            "type": "string",
-                            "description": "이전키 / 길이 30"
-                          },
                           "lasttickcount": {
                             "type": "string",
                             "description": "마지막N틱봉의틱묶음갯수 / 길이 5"
@@ -6772,7 +6745,7 @@
         ],
         "operationId": "krfutureQuoteNightPeriod",
         "summary": "선물옵션기간별시세(일/주/월/년)야간",
-        "description": "\n\n원본 시트: API_국내_파생_시세_기간별야간",
+        "description": "원본 시트: API_국내_파생_시세_기간별야간",
         "requestBody": {
           "required": true,
           "content": {
@@ -6783,7 +6756,7 @@
                   "Input_0": {
                     "type": "object",
                     "properties": {
-                      "shrn_iscd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "종목코드 / 길이 9"
                       },
@@ -6815,14 +6788,6 @@
                         "type": "string",
                         "description": "당일조회 / 길이 1 / 1.당일만조회(분/초/틱에서 사용) 0.전체조회"
                       },
-                      "cts_flag": {
-                        "type": "string",
-                        "description": "연속조회여부 / 길이 1 / N.다음페이지 P.이전페이지 이외:지금페이지"
-                      },
-                      "ctsz40": {
-                        "type": "string",
-                        "description": "연속조회키 / 길이 40"
-                      },
                       "out1_scale_change": {
                         "type": "string",
                         "description": "Out1단위변경 / 길이 1 / Out1기준단위 0.변경안함 1.거래량천단위,거래대금백만단위 2.거래량단주,거래대금만백만단위"
@@ -6834,11 +6799,7 @@
                     },
                     "required": [
                       "mrkt_div_cls_code",
-                      "edate",
-                      "array_cnt",
-                      "maxavg",
                       "gubun",
-                      "xtick",
                       "today_cls_code",
                       "out1_scale_change",
                       "out2_scale_change"
@@ -6870,13 +6831,13 @@
                             "type": "string",
                             "description": "조회시간 / 길이 6 / HHmmSS"
                           },
-                          "shrn_iscd": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "종목코드 / 길이 9"
                           },
-                          "hts_kor_isnm": {
+                          "iem_nm": {
                             "type": "string",
-                            "description": "한글종목명 / 길이 41"
+                            "description": "종목명 / 길이 41"
                           },
                           "prpr": {
                             "type": "string",
@@ -6884,7 +6845,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "string",
@@ -6972,7 +6933,7 @@
                           },
                           "unas_prdy_sign": {
                             "type": "string",
-                            "description": "기초자산대비부호 / 길이 1"
+                            "description": "기초자산대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_oprc": {
                             "type": "string",
@@ -7087,7 +7048,7 @@
         ],
         "operationId": "krfutureQuoteIntradayExpectedTrend",
         "summary": "선물옵션 변동거래량",
-        "description": "\n\n원본 시트: API_국내_파생_시세_체결추이",
+        "description": "원본 시트: API_국내_파생_시세_체결추이",
         "requestBody": {
           "required": true,
           "content": {
@@ -7102,17 +7063,9 @@
                         "type": "string",
                         "description": "종목코드 / 길이 9"
                       },
-                      "IsPageUp": {
-                        "type": "string",
-                        "description": "다음데이터구분 / 길이 1 / N.다음페이지 P.이전페이지 .지금페이지"
-                      },
                       "array_cnt": {
                         "type": "string",
                         "description": "읽을갯수 / 길이 3"
-                      },
-                      "next_key13": {
-                        "type": "string",
-                        "description": "NEXT_KEY13 / 길이 13"
                       }
                     },
                     "required": [
@@ -7152,7 +7105,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "전일대비부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "전일대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "number",
@@ -7207,10 +7160,6 @@
                             "type": "integer",
                             "format": "int64",
                             "description": "미결제약정수 / 길이 12"
-                          },
-                          "next_button": {
-                            "type": "string",
-                            "description": "NEXT_BUTTION / 길이 1"
                           }
                         }
                       }
@@ -7233,7 +7182,7 @@
         ],
         "operationId": "krfutureQuoteDaily",
         "summary": "선물옵션 일자별",
-        "description": "\n\n원본 시트: API_국내_파생_시세_일자별거래",
+        "description": "원본 시트: API_국내_파생_시세_일자별거래",
         "requestBody": {
           "required": true,
           "content": {
@@ -7271,22 +7220,13 @@
                       "array_cnt": {
                         "type": "string",
                         "description": "읽을갯수 / 길이 4"
-                      },
-                      "IsPageUp": {
-                        "type": "string",
-                        "description": "다음데이터구분 / 길이 1 / N.다음페이지 P.이전페이지 .지금페이지"
-                      },
-                      "next_key50": {
-                        "type": "string",
-                        "description": "NEXT_KEY50 / 길이 50"
                       }
                     },
                     "required": [
                       "shrn_iscd",
                       "bsop_date",
                       "gubun",
-                      "xtick",
-                      "array_cnt"
+                      "xtick"
                     ]
                   }
                 }
@@ -7307,6 +7247,14 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "bsop_date": {
+                            "type": "string",
+                            "description": "일자 / 길이 8"
+                          },
+                          "bsop_hour": {
+                            "type": "string",
+                            "description": "시간 / 길이 6"
+                          },
                           "prod_oprc": {
                             "type": "string",
                             "description": "시가 / 길이 15"
@@ -7319,25 +7267,13 @@
                             "type": "string",
                             "description": "저가 / 길이 15"
                           },
-                          "prod_sdpr": {
-                            "type": "string",
-                            "description": "기준가 / 길이 15"
-                          },
-                          "bsop_date": {
-                            "type": "string",
-                            "description": "일자 / 길이 8"
-                          },
-                          "bsop_hour": {
-                            "type": "string",
-                            "description": "시간 / 길이 6"
-                          },
                           "prod_prpr": {
                             "type": "string",
                             "description": "현재가 / 길이 15"
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "전일대비부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "전일대비부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "string",
@@ -7409,7 +7345,7 @@
         ],
         "operationId": "krfutureQuoteTradingStatus",
         "summary": "선물옵션 시간대별 투자자 매매현황",
-        "description": "\n\n원본 시트: API_국내_파생_시세_시간대별투자자",
+        "description": "원본 시트: API_국내_파생_시세_시간대별투자자",
         "requestBody": {
           "required": true,
           "content": {
@@ -7432,17 +7368,9 @@
                         "type": "string",
                         "description": "옵션구분 / 길이 1 / 1.금액 2.수량"
                       },
-                      "cntz3": {
+                      "cnt": {
                         "type": "string",
                         "description": "읽을갯수 / 길이 3"
-                      },
-                      "IsPageUp": {
-                        "type": "string",
-                        "description": "ISPAGEUP / 길이 1 / N.다음페이지 P.이전페이지 .지금페이지"
-                      },
-                      "ctsz8": {
-                        "type": "string",
-                        "description": "CTSz8 / 길이 8"
                       }
                     },
                     "required": [
@@ -7541,14 +7469,6 @@
                             "type": "integer",
                             "format": "int64",
                             "description": "사모펀드 / 길이 12"
-                          },
-                          "ctsz8": {
-                            "type": "string",
-                            "description": "CTSz8 / 길이 8"
-                          },
-                          "nextbutton": {
-                            "type": "string",
-                            "description": "NEXTBUTTON / 길이 1"
                           }
                         }
                       }
@@ -7571,7 +7491,7 @@
         ],
         "operationId": "krfutureQuoteTimeProgramTrading",
         "summary": "선물옵션 프로그램매매",
-        "description": "\n\n원본 시트: API_국내_파생_시세_시간대별프로그램매매",
+        "description": "원본 시트: API_국내_파생_시세_시간대별프로그램매매",
         "requestBody": {
           "required": true,
           "content": {
@@ -7597,14 +7517,6 @@
                       "mrkt_cls_code": {
                         "type": "string",
                         "description": "시장구분 / 길이 1 / 1.코스피 0.코스닥"
-                      },
-                      "IsPageUp": {
-                        "type": "string",
-                        "description": "ISPAGEUP / 길이 1 / N.다음페이지 P.이전페이지 .지금페이지"
-                      },
-                      "next_key": {
-                        "type": "string",
-                        "description": "NEXT_KEY / 길이 14"
                       },
                       "array_cnt": {
                         "type": "string",
@@ -7684,22 +7596,6 @@
                             "type": "number",
                             "format": "double",
                             "description": "순매수 / 길이 16"
-                          },
-                          "next_key": {
-                            "type": "string",
-                            "description": "NEXT_KEY / 길이 14"
-                          },
-                          "out1_cnt": {
-                            "type": "string",
-                            "description": "Out1Cnt / 길이 6"
-                          },
-                          "out2_cnt": {
-                            "type": "string",
-                            "description": "Out2Cnt / 길이 6"
-                          },
-                          "outCts_cnt": {
-                            "type": "string",
-                            "description": "OutCtsCnt / 길이 6"
                           }
                         }
                       }
@@ -7717,12 +7613,11 @@
     }
   },
   "x-realtime-channels": {
-    "endpoint": "wss://api.nhplug.com:7070",
+    "endpoint": "wss://devapi.nhplug.com:7070",
     "endpoints": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+      "test": "wss://devapi.nhplug.com:7070",
+      "mock": "wss://moapi.nhplug.com:17070",
+      "live": "wss://api.nhplug.com:7070"
     },
     "protocol": {
       "transport": "WebSocket",
@@ -7980,7 +7875,7 @@
       {
         "name": "지수선물 실시간체결가KQ150",
         "sheet": "API_국내_파생_실시간_지수선물체결가(KQ150)",
-        "tr_cd": "fc",
+        "tr_cd": "fC",
         "tr_key": {
           "name": "fuitem",
           "kor": "종목코드",
@@ -7992,7 +7887,7 @@
             "tr_type": "1"
           },
           "body": {
-            "tr_cd": "fc",
+            "tr_cd": "fC",
             "tr_key": "<fuitem>"
           }
         },
@@ -8031,7 +7926,7 @@
       {
         "name": "지수선물 실시간체결가미니",
         "sheet": "API_국내_파생_실시간_지수선물체결가(미니)",
-        "tr_cd": "hc",
+        "tr_cd": "hC",
         "tr_key": {
           "name": "fuitem",
           "kor": "종목코드",
@@ -8043,7 +7938,7 @@
             "tr_type": "1"
           },
           "body": {
-            "tr_cd": "hc",
+            "tr_cd": "hC",
             "tr_key": "<fuitem>"
           }
         },

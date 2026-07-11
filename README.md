@@ -52,13 +52,13 @@ python krstock_examples.py
 | 변수 | 설명 |
 |---|---|
 | `NHPLUG_APP_KEY` / `NHPLUG_APP_SECRET` | 발급받은 앱키/시크릿 (`APP_KEY`/`APP_SECRET` 도 허용) |
-| `NHPLUG_BASE_URL` | 접속 환경. 기본 `https://devmoapi.nhplug.com:8443`(개발 모의투자) |
+| `NHPLUG_BASE_URL` | 접속 환경. 기본 `https://devapi.nhplug.com:8443`(테스트) |
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
 
 ## ⚠️ 안전
 
-- 기본 환경은 **모의투자**. 운영 실거래(`api.nhplug.com`)는 명시적으로 전환할 때만.
-- 주문 샘플은 기본 **드라이런**입니다. 실주문은 `dry_run=False`로, 반드시 모의투자에서 검증 후.
+- 기본 환경은 **테스트(devapi)**. 운영 실거래(`api.nhplug.com`)는 명시적으로 전환할 때만.
+- 주문 샘플은 기본 **드라이런**입니다. 실주문은 `dry_run=False`로, 반드시 테스트/모의투자에서 검증 후.
 - 앱키/시크릿은 코드에 넣지 말고 `.env`로 관리(`.gitignore` 처리됨).
 
 ## 라이선스 · 문의

@@ -3,24 +3,20 @@
   "info": {
     "title": "NH투자증권 Open API — 해외파생 (Global Derivatives)",
     "version": "v1",
-    "description": "NH투자증권 Open API 중 **해외파생 (Global Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+    "description": "NH투자증권 Open API 중 **해외파생 (Global Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 최신 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token.\n- 각 필드 description 에 한글명·길이·원본 설명(코드값 포함)을 담았습니다."
   },
   "servers": [
     {
-      "url": "https://api.nhplug.com:8443",
-      "description": "운영 · 나무 (실거래)"
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "🟢 테스트 (Test) — 실매매 전 검증 [기본]"
     },
     {
       "url": "https://moapi.nhplug.com:8443",
-      "description": "운영 모의투자 · 나무"
+      "description": "🟢 모의투자 (Mock) — 교육이수"
     },
     {
-      "url": "https://devapi.nhplug.com:8443",
-      "description": "개발 · 나무 (실거래)"
-    },
-    {
-      "url": "https://devmoapi.nhplug.com:8443",
-      "description": "개발 모의투자 · 나무"
+      "url": "https://api.nhplug.com:8443",
+      "description": "🔴 실거래 (Live) — 실제 주문 체결 (검증 후에만)"
     }
   ],
   "security": [
@@ -31,22 +27,23 @@
     }
   ],
   "x-environments": {
-    "portal": {
-      "나무": "https://www.nhplug.com"
+    "portal": "https://www.nhplug.com",
+    "note": "⚠️ 실주문은 실거래(live) 에서만 체결됩니다. 개발·검증은 반드시 test 또는 mock 에서 먼저 하세요. 권장 순서: 테스트/모의 → 검증 → 실거래. 현재 나무(Namuh) 기준(N2 추후).",
+    "test": {
+      "desc": "테스트 — 실매매 전 검증",
+      "rest": "https://devapi.nhplug.com:8443",
+      "websocket": "wss://devapi.nhplug.com:7080"
     },
-    "rest": {
-      "운영_나무": "https://api.nhplug.com:8443",
-      "운영모의_나무": "https://moapi.nhplug.com:8443",
-      "개발_나무": "https://devapi.nhplug.com:8443",
-      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    "mock": {
+      "desc": "모의투자 — 교육이수",
+      "rest": "https://moapi.nhplug.com:8443",
+      "websocket": "wss://moapi.nhplug.com:17070"
     },
-    "websocket": {
-      "운영_나무": "wss://api.nhplug.com:7080",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7080",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
-    },
-    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+    "live": {
+      "desc": "실거래 — 실제 주문 체결",
+      "rest": "https://api.nhplug.com:8443",
+      "websocket": "wss://api.nhplug.com:7080"
+    }
   },
   "tags": [
     {
@@ -70,7 +67,7 @@
         ],
         "operationId": "gbfutureOrderBuy",
         "summary": "해외선물옵션 주문",
-        "description": "\n\n원본 시트: API_해외_파생_주문_매수매도",
+        "description": "원본 시트: API_해외_파생_주문_매수매도",
         "requestBody": {
           "required": true,
           "content": {
@@ -91,7 +88,7 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -183,7 +180,7 @@
         ],
         "operationId": "gbfutureOrderModify",
         "summary": "해외선물옵션 정정취소주문정정",
-        "description": "\n\n원본 시트: API_해외_파생_주문_정정",
+        "description": "원본 시트: API_해외_파생_주문_정정",
         "requestBody": {
           "required": true,
           "content": {
@@ -200,7 +197,7 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "fdv_fr_orr_no": {
                         "type": "integer",
@@ -282,7 +279,7 @@
         ],
         "operationId": "gbfutureOrderCancel",
         "summary": "해외선물옵션 정정취소주문취소",
-        "description": "\n\n원본 시트: API_해외_파생_주문_취소",
+        "description": "원본 시트: API_해외_파생_주문_취소",
         "requestBody": {
           "required": true,
           "content": {
@@ -304,7 +301,7 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "fdv_orr_tp_cd": {
                         "type": "string",
@@ -365,7 +362,7 @@
         ],
         "operationId": "gbfutureInquiryTodayOrderHistory",
         "summary": "해외선물옵션 당일주문내역조회",
-        "description": "\n\n원본 시트: API_해외_파생_조회_주문내역",
+        "description": "원본 시트: API_해외_파생_조회_주문내역",
         "requestBody": {
           "required": true,
           "content": {
@@ -390,11 +387,11 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "cns_dit_cd": {
                         "type": "string",
-                        "description": "체결구분코드_IO / 길이 1 / 0.전체 1.체결 2.미체결"
+                        "description": "체결구분코드 / 길이 1 / 0.전체 1.체결 2.미체결"
                       },
                       "fdv_fno_dit_cd": {
                         "type": "string",
@@ -415,23 +412,21 @@
                       },
                       "iqr_bse": {
                         "type": "string",
-                        "description": "조회기준_IO / 길이 1 / 1.주문기준 2.체결기준"
+                        "description": "조회기준 / 길이 1 / 1.주문기준 2.체결기준"
                       },
                       "sot_dit": {
                         "type": "string",
-                        "description": "정렬구분_IO / 길이 1 / 1.주문번호순 2.역순"
+                        "description": "정렬구분 / 길이 1 / 1.주문번호순 2.역순"
                       },
                       "fdv_excg_cd": {
                         "type": "string",
                         "description": "해외파생거래소코드 / 길이 10 / .전체조회 CBOE.Chicago Board Options Exchange CME.Chicago Mercantile Exchange HKEX.Hong Kong Exchanges OPRA.OPRA"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 100 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
-                      "act_no"
+                      "act_no",
+                      "sta_dt",
+                      "end_dt"
                     ]
                   }
                 }
@@ -471,14 +466,6 @@
                             "format": "int64",
                             "description": "해외파생모주문번호 / 길이 18"
                           },
-                          "act_no": {
-                            "type": "string",
-                            "description": "계좌번호 / 길이 11"
-                          },
-                          "act_nm": {
-                            "type": "string",
-                            "description": "계좌명 / 길이 60"
-                          },
                           "fdv_cns_no": {
                             "type": "integer",
                             "format": "int64",
@@ -514,19 +501,19 @@
                           },
                           "fdv_orr_tp_cd_nm": {
                             "type": "string",
-                            "description": "해외파생주문유형코드명_IO / 길이 20"
+                            "description": "해외파생주문유형코드명 / 길이 20"
                           },
                           "fdv_orr_dit_cd": {
                             "type": "string",
-                            "description": "해외파생주문구분코드 / 길이 1 / 0:DAY, 1:GTC, 2:GTD"
+                            "description": "해외파생주문구분코드 / 길이 1 / 0:DAY 1:GTC 2:GTD"
                           },
                           "fdv_orr_dit_cd_nm": {
                             "type": "string",
-                            "description": "해외파생주문구분코드명_IO / 길이 20"
+                            "description": "해외파생주문구분코드명 / 길이 20"
                           },
                           "nmn_pr_sts_dit_cd": {
                             "type": "string",
-                            "description": "호가상태구분코드 / 길이 1 / 1:신규, 2:정정, 3:취소"
+                            "description": "호가상태구분코드 / 길이 1 / 1:신규 2:정정 3:취소"
                           },
                           "nmn_pr_sts_dit_cd_nm": {
                             "type": "string",
@@ -538,7 +525,7 @@
                           },
                           "fdv_orr_pcs_sts_cd_nm": {
                             "type": "string",
-                            "description": "해외파생주문처리상태코드명_IO / 길이 20"
+                            "description": "해외파생주문처리상태코드명 / 길이 20"
                           },
                           "trd_orn_dit_cd": {
                             "type": "string",
@@ -550,7 +537,7 @@
                           },
                           "fdv_pr_idc_dit_cd": {
                             "type": "string",
-                            "description": "해외파생가격표시구분코드 / 길이 1"
+                            "description": "해외파생가격표시구분코드 / 길이 1 / 0.1/1 1.1/10 2.1/100 3.1/1000 4.1/10000 5.1/100000 6.1/1000000 7.1/10000000 8.1/100000000 A.1/2 B.1/4 C.1/8 D.1/16 E.1/32 F.1/64 G.1/128 H.1/256 I.0.5/32 J.0.5/64 K.0.25/32 L.0.125/32"
                           },
                           "fdv_orr_pr": {
                             "type": "number",
@@ -665,7 +652,7 @@
                           },
                           "fdv_pcs_sts_cd_nm": {
                             "type": "string",
-                            "description": "해외파생처리상태코드명_IO / 길이 20"
+                            "description": "해외파생처리상태코드명 / 길이 20"
                           },
                           "apm_lqd_dit_cd": {
                             "type": "string",
@@ -706,7 +693,7 @@
                           },
                           "twap_end_dt": {
                             "type": "string",
-                            "description": "TWAP종료일자 / 길이 8"
+                            "description": "TWAP종료일자 / 길이 8 / YYYYMMDD"
                           },
                           "twap_end_hur": {
                             "type": "string",
@@ -727,15 +714,15 @@
                           },
                           "orr_dtm": {
                             "type": "string",
-                            "description": "주문일시_IO / 길이 20"
+                            "description": "주문일시 / 길이 20 / YYYYMMDDHHMMSS"
                           },
                           "cns_dtm": {
                             "type": "string",
-                            "description": "체결일시_IO / 길이 20"
+                            "description": "체결일시 / 길이 20 / YYYYMMDDHHMMSS"
                           },
                           "fdv_excg_cd": {
                             "type": "string",
-                            "description": "해외파생거래소코드 / 길이 10 / CBOE.Chicago Board Options Exchange CME.Chicago Mercantile Exchange ECBOT.Chicago Board of Trade EUREX.Eurex Exchange HKEX.Hong Kong Exchanges ICE EU.Inter Continental Exchange ICE US.Inter Continental Exchange LME.London Metal Exchange MSE.Montreal Exchange OPRA.OPRA OSE.Osaka Exchange SGX.Singapore Exchange"
+                            "description": "해외파생거래소코드 / 길이 10 / CBOE.Chicago Board Options Exchange CME.Chicago Mercantile Exchange HKEX.Hong Kong Exchanges OPRA.OPRA"
                           }
                         }
                       }
@@ -756,14 +743,14 @@
         ]
       }
     },
-    "/gbfuture/TODO/op": {
+    "/gbfuture/TODO/API_해외_파생_조회_미체결내역": {
       "post": {
         "tags": [
           "조회 (Inquiry)"
         ],
-        "operationId": "gbfutureTODOOp",
+        "operationId": "gbfutureTODOAPI_해외_파생_조회_미체결내역",
         "summary": "해외선물옵션 미체결내역조회(잔고)",
-        "description": "\n\n원본 시트: API_해외_파생_조회_미체결내역",
+        "description": "원본 시트: API_해외_파생_조회_미체결내역",
         "requestBody": {
           "required": true,
           "content": {
@@ -949,6 +936,7 @@
             }
           }
         },
+        "x-todo": "원본 명세서에 URI 미정",
         "parameters": [
           {
             "$ref": "#/components/parameters/CtsHeader"
@@ -963,7 +951,7 @@
         ],
         "operationId": "gbfutureInquiryOrderable",
         "summary": "해외선물옵션 주문가능조회",
-        "description": "\n\n원본 시트: API_해외_파생_조회_주문가능",
+        "description": "원본 시트: API_해외_파생_조회_주문가능",
         "requestBody": {
           "required": true,
           "content": {
@@ -984,7 +972,7 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "fdv_orr_pr": {
                         "type": "number",
@@ -1048,12 +1036,12 @@
                           "orr_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량_IO / 길이 10"
+                            "description": "주문가능수량 / 길이 10"
                           },
                           "lqd_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "청산가능수량_IO / 길이 15"
+                            "description": "청산가능수량 / 길이 15"
                           }
                         }
                       }
@@ -1081,7 +1069,7 @@
         ],
         "operationId": "gbfutureInquiryPnl",
         "summary": "해외선물옵션 기간계좌손익 일별",
-        "description": "\n\n원본 시트: API_해외_파생_조회_손익",
+        "description": "원본 시트: API_해외_파생_조회_손익",
         "requestBody": {
           "required": true,
           "content": {
@@ -1094,7 +1082,7 @@
                     "properties": {
                       "iqr_dit_cd": {
                         "type": "string",
-                        "description": "조회구분코드_IO / 길이 2 / 10.종목별 20.상품별"
+                        "description": "조회구분코드 / 길이 2 / 10.종목별 20.상품별"
                       },
                       "sta_dt": {
                         "type": "string",
@@ -1114,7 +1102,7 @@
                       },
                       "ose_iem_cd": {
                         "type": "string",
-                        "description": "해외종목코드 / 길이 32"
+                        "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "cur_cd": {
                         "type": "string",
@@ -1126,21 +1114,18 @@
                       },
                       "sum_iqr_yn": {
                         "type": "string",
-                        "description": "합계조회여부_IO / 길이 1"
+                        "description": "합계조회여부 / 길이 1"
                       },
                       "fdv_excg_cd": {
                         "type": "string",
                         "description": "해외파생거래소코드 / 길이 10 / .전체조회 CBOE.Chicago Board Options Exchange CME.Chicago Mercantile Exchange HKEX.Hong Kong Exchanges OPRA.OPRA"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 100 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
                       "iqr_dit_cd",
                       "sta_dt",
-                      "end_dt"
+                      "end_dt",
+                      "act_no"
                     ]
                   }
                 }
@@ -1241,7 +1226,7 @@
         ],
         "operationId": "gbfutureInquiryDeposit",
         "summary": "해외선물옵션 예수금현황",
-        "description": "\n\n원본 시트: API_해외_파생_조회_예수금",
+        "description": "원본 시트: API_해외_파생_조회_예수금",
         "requestBody": {
           "required": true,
           "content": {
@@ -1418,7 +1403,7 @@
         ],
         "operationId": "gbfutureInquiryMargin",
         "summary": "해외선물옵션 증거금상세",
-        "description": "\n\n원본 시트: API_해외_파생_조회_증거금",
+        "description": "원본 시트: API_해외_파생_조회_증거금",
         "requestBody": {
           "required": true,
           "content": {
@@ -1440,10 +1425,6 @@
                       "cur_cd": {
                         "type": "string",
                         "description": "통화코드 / 길이 3 / USD.달러 KRW.원화"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 32 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
@@ -1563,7 +1544,7 @@
         ],
         "operationId": "gbfutureQuoteCurrent",
         "summary": "해외선물종목현재가",
-        "description": "\n\n원본 시트: API_해외_파생_시세_현재가",
+        "description": "원본 시트: API_해외_파생_시세_현재가",
         "requestBody": {
           "required": true,
           "content": {
@@ -1580,7 +1561,7 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
@@ -1781,7 +1762,7 @@
         ],
         "operationId": "gbfutureQuoteSymbolDetail",
         "summary": "해외선물종목상세",
-        "description": "\n\n원본 시트: API_해외_파생_시세_종목상세",
+        "description": "원본 시트: API_해외_파생_시세_종목상세",
         "requestBody": {
           "required": true,
           "content": {
@@ -1798,7 +1779,7 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
@@ -2407,7 +2388,7 @@
         ],
         "operationId": "gbfutureQuoteQuote",
         "summary": "해외선물 호가",
-        "description": "\n\n원본 시트: API_해외_파생_시세_호가",
+        "description": "원본 시트: API_해외_파생_시세_호가",
         "requestBody": {
           "required": true,
           "content": {
@@ -2424,7 +2405,7 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
@@ -2482,7 +2463,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "전일대비구분 / 길이 1 / 0.보합 2.상승 5.하락"
+                            "description": "전일대비구분 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "rate": {
                             "type": "number",
@@ -2838,7 +2819,7 @@
         ],
         "operationId": "gbfutureQuoteMinute",
         "summary": "해외선물 분봉조회",
-        "description": "\n\n원본 시트: API_해외_파생_시세_분봉",
+        "description": "원본 시트: API_해외_파생_시세_분봉",
         "requestBody": {
           "required": true,
           "content": {
@@ -2855,15 +2836,11 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
-                      },
-                      "ctsz52": {
-                        "type": "string",
-                        "description": "ctsz52 / 길이 52"
                       }
                     },
                     "required": [
@@ -2999,10 +2976,6 @@
                           "kfrhm": {
                             "type": "string",
                             "description": "한국거래시작시간 / 길이 12"
-                          },
-                          "ctsz52": {
-                            "type": "string",
-                            "description": "ctsz52 / 길이 52"
                           }
                         }
                       }
@@ -3025,7 +2998,7 @@
         ],
         "operationId": "gbfutureQuoteExecutionTrendTick",
         "summary": "해외선물 체결추이(틱)",
-        "description": "\n\n원본 시트: API_해외_파생_시세_틱봉",
+        "description": "원본 시트: API_해외_파생_시세_틱봉",
         "requestBody": {
           "required": true,
           "content": {
@@ -3042,15 +3015,11 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
-                      },
-                      "ctsz52": {
-                        "type": "string",
-                        "description": "ctsz52 / 길이 52"
                       }
                     },
                     "required": [
@@ -3090,11 +3059,11 @@
                           },
                           "kymd": {
                             "type": "string",
-                            "description": "한국일자 / 길이 8"
+                            "description": "한국일자 / 길이 8 / YYYYMMDD"
                           },
                           "khms": {
                             "type": "string",
-                            "description": "한국시간 / 길이 12"
+                            "description": "한국시간 / 길이 12 / HHMMSS"
                           },
                           "sseq": {
                             "type": "integer",
@@ -3103,7 +3072,7 @@
                           },
                           "tymd": {
                             "type": "string",
-                            "description": "거래일자 / 길이 8"
+                            "description": "거래일자 / 길이 8 / YYYYMMDD"
                           },
                           "seqn": {
                             "type": "integer",
@@ -3112,11 +3081,11 @@
                           },
                           "xymd": {
                             "type": "string",
-                            "description": "거래소일자 / 길이 8"
+                            "description": "거래소일자 / 길이 8 / YYYYMMDD"
                           },
                           "xhms": {
                             "type": "string",
-                            "description": "거래소시간 / 길이 12"
+                            "description": "거래소시간 / 길이 12 / HHMMSS"
                           },
                           "last": {
                             "type": "number",
@@ -3125,7 +3094,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "전일대비구분 / 길이 1 / 0.보합 2.상승 5.하락"
+                            "description": "전일대비구분 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "diff": {
                             "type": "number",
@@ -3195,10 +3164,6 @@
                             "type": "integer",
                             "format": "int32",
                             "description": "최종상승하락타입 / 길이 10 / 43.+ 45.-"
-                          },
-                          "ctsz52": {
-                            "type": "string",
-                            "description": "ctsz52 / 길이 52"
                           }
                         }
                       }
@@ -3221,7 +3186,7 @@
         ],
         "operationId": "gbfutureQuoteExecutionTrendDaily",
         "summary": "해외선물 체결추이(일간)",
-        "description": "\n\n원본 시트: API_해외_파생_시세_일봉",
+        "description": "원본 시트: API_해외_파생_시세_일봉",
         "requestBody": {
           "required": true,
           "content": {
@@ -3238,7 +3203,7 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "ssymd": {
                         "type": "string",
@@ -3247,10 +3212,6 @@
                       "quotyn": {
                         "type": "string",
                         "description": "현재가포함여부 / 길이 1 / Y.포함 N.미포함"
-                      },
-                      "ctsz40": {
-                        "type": "string",
-                        "description": "ctsz40 / 길이 40"
                       }
                     },
                     "required": [
@@ -3331,7 +3292,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "전일대비구분 / 길이 1 / 0.보합 2.상승 5.하락"
+                            "description": "전일대비구분 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "diff": {
                             "type": "number",
@@ -3380,10 +3341,6 @@
                           "ehms": {
                             "type": "string",
                             "description": "종료시간 / 길이 12"
-                          },
-                          "ctsz40": {
-                            "type": "string",
-                            "description": "ctsz40 / 길이 40"
                           }
                         }
                       }
@@ -3406,7 +3363,7 @@
         ],
         "operationId": "gbfutureQuoteExecutionTrendWeekly",
         "summary": "해외선물 체결추이(주간)",
-        "description": "\n\n원본 시트: API_해외_파생_시세_주봉",
+        "description": "원본 시트: API_해외_파생_시세_주봉",
         "requestBody": {
           "required": true,
           "content": {
@@ -3423,15 +3380,15 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
                       },
-                      "ctsz40": {
+                      "req_cnt": {
                         "type": "string",
-                        "description": "ctsz40 / 길이 40"
+                        "description": "요청건수 / 길이 4"
                       }
                     },
                     "required": [
@@ -3504,7 +3461,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "전주대비구분 / 길이 1 / 0.보합 2.상승 5.하락"
+                            "description": "전주대비구분 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "diff": {
                             "type": "number",
@@ -3525,10 +3482,6 @@
                             "type": "number",
                             "format": "double",
                             "description": "누적거래대금 / 길이 17"
-                          },
-                          "ctsz40": {
-                            "type": "string",
-                            "description": "ctsz40 / 길이 40"
                           }
                         }
                       }
@@ -3551,7 +3504,7 @@
         ],
         "operationId": "gbfutureQuoteExecutionTrendMonthly",
         "summary": "해외선물 체결추이(월간)",
-        "description": "\n\n원본 시트: API_해외_파생_시세_월봉",
+        "description": "원본 시트: API_해외_파생_시세_월봉",
         "requestBody": {
           "required": true,
           "content": {
@@ -3568,15 +3521,15 @@
                       },
                       "isym": {
                         "type": "string",
-                        "description": "내부종목코드 / 길이 32"
+                        "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
                       },
-                      "ctsz40": {
+                      "req_cnt": {
                         "type": "string",
-                        "description": "ctsz40 / 길이 40"
+                        "description": "요청건수 / 길이 4"
                       }
                     },
                     "required": [
@@ -3617,7 +3570,7 @@
                           },
                           "msymd": {
                             "type": "string",
-                            "description": "월초일자 / 길이 8"
+                            "description": "월초일자 / 길이 8 / YYYYMMDD"
                           },
                           "nday": {
                             "type": "integer",
@@ -3646,7 +3599,7 @@
                           },
                           "sign": {
                             "type": "string",
-                            "description": "전월대비구분 / 길이 1 / 0.보합 2.상승 5.하락"
+                            "description": "전월대비구분 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "diff": {
                             "type": "number",
@@ -3667,10 +3620,6 @@
                             "type": "number",
                             "format": "double",
                             "description": "누적거래대금 / 길이 17"
-                          },
-                          "ctsz40": {
-                            "type": "string",
-                            "description": "ctsz40 / 길이 40"
                           }
                         }
                       }
@@ -3693,7 +3642,7 @@
         ],
         "operationId": "gbfutureQuoteProductInfo",
         "summary": "해외선물 상품기본정보",
-        "description": "\n\n원본 시트: API_해외_파생_시세_상품정보",
+        "description": "원본 시트: API_해외_파생_시세_상품정보",
         "requestBody": {
           "required": true,
           "content": {
@@ -3719,14 +3668,6 @@
                       "req_cnt": {
                         "type": "string",
                         "description": "요청건수 / 길이 4"
-                      },
-                      "IsPageUp": {
-                        "type": "string",
-                        "description": "ISPAGEUP / 길이 1"
-                      },
-                      "ctsz40": {
-                        "type": "string",
-                        "description": "ctsz40 / 길이 40"
                       }
                     },
                     "required": [
@@ -3801,15 +3742,15 @@
                           },
                           "bsnsd": {
                             "type": "string",
-                            "description": "영업일자 / 길이 8"
+                            "description": "영업일자 / 길이 8 / YYYYMMDD"
                           },
                           "skhms": {
                             "type": "string",
-                            "description": "장시작한국시간 / 길이 6"
+                            "description": "장시작한국시간 / 길이 6 / HHMMSS"
                           },
                           "ekhms": {
                             "type": "string",
-                            "description": "장마감한국시간 / 길이 6"
+                            "description": "장마감한국시간 / 길이 6 / HHMMSS"
                           },
                           "opbr": {
                             "type": "number",
@@ -3872,10 +3813,6 @@
                             "type": "number",
                             "format": "double",
                             "description": "해외파생가격조정계수 / 길이 17"
-                          },
-                          "ctsz40": {
-                            "type": "string",
-                            "description": "ctsz40 / 길이 40"
                           }
                         }
                       }
@@ -3898,7 +3835,7 @@
         ],
         "operationId": "gbfutureQuoteMarketOperationInfo",
         "summary": "해외선물옵션 장운영시간",
-        "description": "\n\n원본 시트: API_해외_파생_시세_장운영정보",
+        "description": "원본 시트: API_해외_파생_시세_장운영정보",
         "requestBody": {
           "required": true,
           "content": {
@@ -3916,10 +3853,6 @@
                       "fdv_pdt_cd": {
                         "type": "string",
                         "description": "해외파생상품코드 / 길이 10"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 20"
                       }
                     }
                   }
@@ -3980,30 +3913,6 @@
                           "mls_lcl_hur": {
                             "type": "string",
                             "description": "장마감로컬시간 / 길이 9"
-                          },
-                          "gbl_mpn_kor_hur": {
-                            "type": "string",
-                            "description": "글로벌장개시한국시장 / 길이 9"
-                          },
-                          "gbl_mls_kor_hur": {
-                            "type": "string",
-                            "description": "글로벌장마감한국시장 / 길이 9"
-                          },
-                          "gbl_mpn_kor_smi_hur": {
-                            "type": "string",
-                            "description": "글로벌장개시한국서머타임시간 / 길이 9"
-                          },
-                          "gbl_mls_kor_smi_hur": {
-                            "type": "string",
-                            "description": "글로벌장마감한국서머타임시간 / 길이 9"
-                          },
-                          "gbl_mpn_lcl_hur": {
-                            "type": "string",
-                            "description": "글로벌장개시로컬시간 / 길이 9"
-                          },
-                          "gbl_mls_lcl_hur": {
-                            "type": "string",
-                            "description": "글로벌장마감로컬시간 / 길이 9"
                           }
                         }
                       }
@@ -4021,12 +3930,11 @@
     }
   },
   "x-realtime-channels": {
-    "endpoint": "wss://api.nhplug.com:7080",
+    "endpoint": "wss://devapi.nhplug.com:7080",
     "endpoints": {
-      "운영_나무": "wss://api.nhplug.com:7080",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7080",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+      "test": "wss://devapi.nhplug.com:7080",
+      "mock": "wss://moapi.nhplug.com:17070",
+      "live": "wss://api.nhplug.com:7080"
     },
     "protocol": {
       "transport": "WebSocket",

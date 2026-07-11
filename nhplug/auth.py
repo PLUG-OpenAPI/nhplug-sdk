@@ -7,7 +7,7 @@ _cache = {"token": None, "exp": 0.0}
 
 
 def get_base_url() -> str:
-    return os.environ.get("NHPLUG_BASE_URL", "https://devmoapi.nhplug.com:8443")
+    return os.environ.get("NHPLUG_BASE_URL", "https://devapi.nhplug.com:8443")
 
 
 def _keys():

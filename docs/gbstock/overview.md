@@ -1,19 +1,20 @@
 # NH투자증권 Open API — 해외주식 (Global Stock) Overview
 
-NH투자증권 Open API 의 **해외주식 (Global Stock)** 자산군은 주문, 계좌·자산 조회, 시세, 실시간 스트리밍을 제공합니다. (기준: API명세서 260703 / 나무 환경)
+NH투자증권 Open API 의 **해외주식 (Global Stock)** 자산군은 주문, 계좌·자산 조회, 시세, 실시간 스트리밍을 제공합니다. (기준: API명세서 260703 최신 / 나무 환경)
 
 ---
 
 ## 환경 및 접속 정보
 
+> ⚠️ 주소마다 용도가 다릅니다. **실주문은 실거래에서만 체결**됩니다. 개발·검증은 테스트/모의에서 먼저 하세요. 순서: 테스트/모의 → 검증 → 실거래.
+
 API 포탈: `https://www.nhplug.com` (나무)
 
-| 구분 | URL (나무) |
-|---|---|
-| REST | `https://api.nhplug.com:8443` |
-| 모의투자 REST | `https://moapi.nhplug.com:8443` |
-| WebSocket | `wss://api.nhplug.com:7080` |
-| 모의투자 WebSocket | `wss://moapi.nhplug.com:17070` |
+| 용도 | REST | WebSocket |
+|---|---|---|
+| 🟢 테스트 (실매매 전 검증) | `https://devapi.nhplug.com:8443` | `wss://devapi.nhplug.com:7080` |
+| 🟢 모의투자 (교육이수) | `https://moapi.nhplug.com:8443` | `wss://moapi.nhplug.com:17070` |
+| 🔴 실거래 (실제 주문) | `https://api.nhplug.com:8443` | `wss://api.nhplug.com:7080` |
 
 > WS 포트: 국내 7070 · 해외 7080 · 모의 17070. N2 환경은 추후.
 
@@ -29,13 +30,13 @@ API 포탈: `https://www.nhplug.com` (나무)
 
 ### 요청·응답 규약
 
-REST 는 `POST` + `application/json`. 요청 `Input_0` / 응답 `Output_0`(배열) + `message` 봉투. 모든 필드에 한글명·영문명 병기.
+REST 는 `POST` + `application/json`. 요청 `Input_0` / 응답 `Output_0`(배열) + `message` 봉투. 각 필드 설명(한글명·길이·코드값)은 openapi.json 의 description 참조.
 
 ---
 
 ## 기능 목록
 
-전체 목록·operationId 는 [README.md](https://www.nhplug.com/openapi-docs/gbstock/README.md), 필드·스키마는 [openapi.json](https://www.nhplug.com/openapi-docs/gbstock/openapi.json) 정본 참조.
+전체 목록·operationId 는 [README.md](https://www.nhplug.com/openapi-docs/gbstock/README.md), 필드·스키마·설명은 [openapi.json](https://www.nhplug.com/openapi-docs/gbstock/openapi.json) 정본 참조.
 
 
 ### 주문 (Order)
@@ -101,14 +102,8 @@ REST 는 `POST` + `application/json`. 요청 `Input_0` / 응답 `Output_0`(배�
 
 ---
 
-## 페이지네이션 (연속조회)
-
-목록성 조회 API 는 요청 헤더 `cts` 로 연속조회를 제어합니다. 첫 조회는 비우고, 응답 연속키를 다음 요청 `cts` 헤더에 세팅.
-
----
-
 ## 비고
 
-- 본 문서는 **해외주식 (Global Stock)** 자산군, API명세서 **260703** / **나무** 환경 기준입니다.
+- 본 문서는 **해외주식 (Global Stock)** 자산군, API명세서 **260703 최신** / **나무** 환경 기준입니다.
 - 공통 에러 코드 표는 미제공, 처리 결과는 응답 `message` 봉투로 확인.
 - 실시간 heartbeat·푸시 인코딩·통보 암호화 등 일부 규약은 미확정(TODO).

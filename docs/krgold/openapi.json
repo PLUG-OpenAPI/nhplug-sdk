@@ -3,24 +3,20 @@
   "info": {
     "title": "NH투자증권 Open API — 국내금현물 (KR Gold)",
     "version": "v1",
-    "description": "NH투자증권 Open API 중 **국내금현물 (KR Gold)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+    "description": "NH투자증권 Open API 중 **국내금현물 (KR Gold)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 최신 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token.\n- 각 필드 description 에 한글명·길이·원본 설명(코드값 포함)을 담았습니다."
   },
   "servers": [
     {
-      "url": "https://api.nhplug.com:8443",
-      "description": "운영 · 나무 (실거래)"
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "🟢 테스트 (Test) — 실매매 전 검증 [기본]"
     },
     {
       "url": "https://moapi.nhplug.com:8443",
-      "description": "운영 모의투자 · 나무"
+      "description": "🟢 모의투자 (Mock) — 교육이수"
     },
     {
-      "url": "https://devapi.nhplug.com:8443",
-      "description": "개발 · 나무 (실거래)"
-    },
-    {
-      "url": "https://devmoapi.nhplug.com:8443",
-      "description": "개발 모의투자 · 나무"
+      "url": "https://api.nhplug.com:8443",
+      "description": "🔴 실거래 (Live) — 실제 주문 체결 (검증 후에만)"
     }
   ],
   "security": [
@@ -31,22 +27,23 @@
     }
   ],
   "x-environments": {
-    "portal": {
-      "나무": "https://www.nhplug.com"
+    "portal": "https://www.nhplug.com",
+    "note": "⚠️ 실주문은 실거래(live) 에서만 체결됩니다. 개발·검증은 반드시 test 또는 mock 에서 먼저 하세요. 권장 순서: 테스트/모의 → 검증 → 실거래. 현재 나무(Namuh) 기준(N2 추후).",
+    "test": {
+      "desc": "테스트 — 실매매 전 검증",
+      "rest": "https://devapi.nhplug.com:8443",
+      "websocket": "wss://devapi.nhplug.com:7070"
     },
-    "rest": {
-      "운영_나무": "https://api.nhplug.com:8443",
-      "운영모의_나무": "https://moapi.nhplug.com:8443",
-      "개발_나무": "https://devapi.nhplug.com:8443",
-      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    "mock": {
+      "desc": "모의투자 — 교육이수",
+      "rest": "https://moapi.nhplug.com:8443",
+      "websocket": "wss://moapi.nhplug.com:17070"
     },
-    "websocket": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
-    },
-    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+    "live": {
+      "desc": "실거래 — 실제 주문 체결",
+      "rest": "https://api.nhplug.com:8443",
+      "websocket": "wss://api.nhplug.com:7070"
+    }
   },
   "tags": [
     {
@@ -70,7 +67,7 @@
         ],
         "operationId": "krgoldOrderGoldBuy",
         "summary": "금현물 매수주문",
-        "description": "\n\n원본 시트: API_국내_금현물_주문_매수",
+        "description": "원본 시트: API_국내_금현물_주문_매수",
         "requestBody": {
           "required": true,
           "content": {
@@ -140,10 +137,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -170,7 +163,7 @@
         ],
         "operationId": "krgoldOrderGoldSell",
         "summary": "금현물 매도주문",
-        "description": "\n\n원본 시트: API_국내_금현물_주문_매도",
+        "description": "원본 시트: API_국내_금현물_주문_매도",
         "requestBody": {
           "required": true,
           "content": {
@@ -270,7 +263,7 @@
         ],
         "operationId": "krgoldOrderGoldModify",
         "summary": "금현물 정정주문",
-        "description": "\n\n원본 시트: API_국내_금현물_주문_정정",
+        "description": "원본 시트: API_국내_금현물_주문_정정",
         "requestBody": {
           "required": true,
           "content": {
@@ -335,10 +328,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -365,7 +354,7 @@
         ],
         "operationId": "krgoldOrderGoldCancel",
         "summary": "금현물 취소주문",
-        "description": "\n\n원본 시트: API_국내_금현물_주문_취소",
+        "description": "원본 시트: API_국내_금현물_주문_취소",
         "requestBody": {
           "required": true,
           "content": {
@@ -396,7 +385,7 @@
                       "cor_qty": {
                         "type": "integer",
                         "format": "int64",
-                        "description": "정정수량 / 길이 18"
+                        "description": "취소수량 / 길이 18"
                       }
                     },
                     "required": [
@@ -424,10 +413,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -454,7 +439,7 @@
         ],
         "operationId": "krgoldInquiryGoldOrderableQuantity",
         "summary": "금현물 주문가능수량조회",
-        "description": "\n\n원본 시트: API_국내_금현물_조회_주문가능수량",
+        "description": "원본 시트: API_국내_금현물_조회_주문가능수량",
         "requestBody": {
           "required": true,
           "content": {
@@ -510,12 +495,12 @@
                           "orr_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량_IO / 길이 10"
+                            "description": "주문가능수량 / 길이 10"
                           },
-                          "orr_pbl_amt9": {
+                          "orr_pbl_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능금액9_IO / 길이 18"
+                            "description": "주문가능금액 / 길이 18"
                           }
                         }
                       }
@@ -543,7 +528,7 @@
         ],
         "operationId": "krgoldInquiryGoldExecution",
         "summary": "금현물 주문체결조회",
-        "description": "\n\n원본 시트: API_국내_금현물_조회_체결",
+        "description": "원본 시트: API_국내_금현물_조회_체결",
         "requestBody": {
           "required": true,
           "content": {
@@ -570,10 +555,6 @@
                       "ost_cns_dit": {
                         "type": "string",
                         "description": "체결구분 / 길이 1 / 0.전체 1.미체결 2.체결"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 17 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
@@ -636,11 +617,11 @@
                           },
                           "nmn_pr_tp_cd_nm": {
                             "type": "string",
-                            "description": "호가유형코드명_IO / 길이 30"
+                            "description": "호가유형코드명 / 길이 30"
                           },
                           "orr_cnd_dit_cd_nm": {
                             "type": "string",
-                            "description": "주문조건구분코드명_IO / 길이 60"
+                            "description": "주문조건구분코드명 / 길이 60"
                           },
                           "orr_qty": {
                             "type": "integer",
@@ -655,7 +636,7 @@
                           "tot_cns_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총체결수량_IO / 길이 23"
+                            "description": "총체결수량 / 길이 23"
                           },
                           "cns_avg_uit_pr": {
                             "type": "number",
@@ -675,7 +656,7 @@
                           "ny_cns_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "미체결수량_IO / 길이 23"
+                            "description": "미체결수량 / 길이 23"
                           },
                           "can_qty": {
                             "type": "integer",
@@ -684,11 +665,11 @@
                           },
                           "orr_mdi": {
                             "type": "string",
-                            "description": "주문매체_IO / 길이 20"
+                            "description": "주문매체 / 길이 20"
                           },
                           "orr_rjt_rsn_cd_nm": {
                             "type": "string",
-                            "description": "주문거부사유코드명_IO / 길이 4"
+                            "description": "주문거부사유코드명 / 길이 4"
                           },
                           "rmt_mkt_cd": {
                             "type": "string",
@@ -724,7 +705,7 @@
         ],
         "operationId": "krgoldInquiryGoldDepositAndBalance",
         "summary": "금현물 예수금및잔고",
-        "description": "\n\n원본 시트: API_국내_금현물_조회_잔고",
+        "description": "원본 시트: API_국내_금현물_조회_잔고",
         "requestBody": {
           "required": true,
           "content": {
@@ -735,10 +716,6 @@
                   "Input_0": {
                     "type": "object",
                     "properties": {
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 151 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
-                      },
                       "act_no": {
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
@@ -774,7 +751,7 @@
                           "nxt_dd_dca": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "익일예수금_IO / 길이 15 / D+1 예수금"
+                            "description": "익일예수금 / 길이 15 / D+1 예수금"
                           },
                           "nxt2_dd_dca": {
                             "type": "integer",
@@ -804,7 +781,7 @@
                           "orr_pbl_amt4": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능금액4_IO / 길이 18 / 100%주문가능금액"
+                            "description": "주문가능금액4 / 길이 18 / 100%주문가능금액"
                           },
                           "iem_nm": {
                             "type": "string",
@@ -816,7 +793,7 @@
                           },
                           "tp_cd_nm": {
                             "type": "string",
-                            "description": "유형코드명_IO / 길이 30"
+                            "description": "유형코드명 / 길이 30"
                           },
                           "itg_bnc_qty": {
                             "type": "number",
@@ -861,7 +838,7 @@
                           "sll_pls_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "매도손익금액_IO / 길이 18"
+                            "description": "매도손익금액 / 길이 18"
                           },
                           "pft_rt": {
                             "type": "number",
@@ -894,7 +871,7 @@
         ],
         "operationId": "krgoldQuoteGoldCurrent",
         "summary": "금현물 현재가",
-        "description": "\n\n원본 시트: API_국내_금현물_시세_현재가",
+        "description": "원본 시트: API_국내_금현물_시세_현재가",
         "requestBody": {
           "required": true,
           "content": {
@@ -1034,7 +1011,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "integer",
@@ -1318,7 +1295,7 @@
                           },
                           "antc_vrss_sign": {
                             "type": "string",
-                            "description": "예상체결부호 / 길이 1"
+                            "description": "예상체결부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "antc_cntg_vrss": {
                             "type": "integer",
@@ -1486,7 +1463,7 @@
         ],
         "operationId": "krgoldQuoteGoldDailyInvestorTrade",
         "summary": "금현물 일별투자매매현황",
-        "description": "\n\n원본 시트: API_국내_금현물_시세_일별투자매매현황",
+        "description": "원본 시트: API_국내_금현물_시세_일별투자매매현황",
         "requestBody": {
           "required": true,
           "content": {
@@ -1540,7 +1517,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "integer",
@@ -1636,14 +1613,14 @@
         }
       }
     },
-    "/krgold/TODO/op": {
+    "/krgold/TODO/API_국내_금현물_시세_괴리율": {
       "post": {
         "tags": [
           "시세 (Market Data)"
         ],
-        "operationId": "krgoldTODOOp",
+        "operationId": "krgoldTODOAPI_국내_금현물_시세_괴리율",
         "summary": "금현물 괴리율",
-        "description": "\n\n원본 시트: API_국내_금현물_시세_괴리율",
+        "description": "원본 시트: API_국내_금현물_시세_괴리율",
         "requestBody": {
           "required": true,
           "content": {
@@ -1787,7 +1764,8 @@
               }
             }
           }
-        }
+        },
+        "x-todo": "원본 명세서에 URI 미정"
       }
     },
     "/krgold/quote/v1/goldDailyTrend": {
@@ -1797,7 +1775,7 @@
         ],
         "operationId": "krgoldQuoteGoldDailyTrend",
         "summary": "금현물 일별추이",
-        "description": "\n\n원본 시트: API_국내_금현물_시세_일별추이",
+        "description": "원본 시트: API_국내_금현물_시세_일별추이",
         "requestBody": {
           "required": true,
           "content": {
@@ -1873,7 +1851,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "integer",
@@ -1916,7 +1894,7 @@
         ],
         "operationId": "krgoldQuoteGoldVolatilityTrade",
         "summary": "금현물 변동거래",
-        "description": "\n\n원본 시트: API_국내_금현물_시세_변동거래",
+        "description": "원본 시트: API_국내_금현물_시세_변동거래",
         "requestBody": {
           "required": true,
           "content": {
@@ -1970,7 +1948,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1 / 2.상승 3.보합 5.하락"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "integer",
@@ -2018,12 +1996,11 @@
     }
   },
   "x-realtime-channels": {
-    "endpoint": "wss://api.nhplug.com:7070",
+    "endpoint": "wss://devapi.nhplug.com:7070",
     "endpoints": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+      "test": "wss://devapi.nhplug.com:7070",
+      "mock": "wss://moapi.nhplug.com:17070",
+      "live": "wss://api.nhplug.com:7070"
     },
     "protocol": {
       "transport": "WebSocket",

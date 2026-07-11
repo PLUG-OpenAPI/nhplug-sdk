@@ -2,7 +2,7 @@
 
 > NH투자증권 Open API 문서를 외부 LLM 과 AI coding agent 가 직접 읽기 위한 안내 파일입니다. 정본 위치: https://www.nhplug.com/llms.txt
 >
-> 기준: API명세서 260703 / 나무(Namuh) 환경 (N2 환경은 추후 추가)
+> 기준: API명세서 260703 최신본 / 나무(Namuh) 환경 (N2 환경은 추후 추가)
 
 NH투자증권 Open API 는 국내·해외 주식, 국내·해외 파생, 국내 채권, 국내 금현물의 주문, 계좌·자산 조회, 시세, 실시간 스트리밍을 제공하는 REST 및 WebSocket API 입니다.
 
@@ -15,27 +15,19 @@ NH투자증권 Open API 는 국내·해외 주식, 국내·해외 파생, 국내
 
 ## 환경 및 접속 정보 (Environments)
 
+> ⚠️ **중요 — AI·개발자 필수 규칙**: 주소마다 **용도가 다릅니다.** **실주문은 실거래(Live) 주소에서만 실제로 체결됩니다.** 개발·검증·호출 테스트는 **반드시 테스트 또는 모의투자 주소에서 먼저** 하세요. 권장 순서: **① 테스트/모의투자 → ② 검증 완료 → ③ 실거래**. 절대 처음부터 실거래 주소로 주문을 내지 마세요.
+
 현재 문서는 **나무(Namuh)** 환경 기준입니다. (N2 환경은 추후 추가) **API 포탈**: `https://www.nhplug.com`
 
-### 운영 (Production)
+| 용도 | REST | WebSocket |
+|---|---|---|
+| 🟢 **테스트 (Test)** — 실매매 전 검증용 | `https://devapi.nhplug.com:8443` | `wss://devapi.nhplug.com:7070` (국내) / `:7080` (해외) |
+| 🟢 **모의투자 (Mock)** — 모의투자·교육이수용 | `https://moapi.nhplug.com:8443` | `wss://moapi.nhplug.com:17070` |
+| 🔴 **실거래 (Live)** — 실제 주문 체결 | `https://api.nhplug.com:8443` | `wss://api.nhplug.com:7070` (국내) / `:7080` (해외) |
 
-| 구분 | URL (나무) |
-|---|---|
-| REST | `https://api.nhplug.com:8443` |
-| WebSocket | `wss://api.nhplug.com:7070` (국내) / `:7080` (해외) |
-| 모의투자 REST | `https://moapi.nhplug.com:8443` |
-| 모의투자 WebSocket | `wss://moapi.nhplug.com:17070` |
-
-### 개발 (Development)
-
-| 구분 | URL (나무) |
-|---|---|
-| REST | `https://devapi.nhplug.com:8443` |
-| WebSocket | `wss://devapi.nhplug.com:7070` (국내) / `:7080` (해외) |
-| 모의투자 REST | `https://devmoapi.nhplug.com:8443` |
-| 모의투자 WebSocket | `wss://devmoapi.nhplug.com:17070` |
-
-WebSocket 포트 규칙: **국내 자산군 `7070`, 해외 자산군 `7080`**, 모의투자는 `17070` 공용. 각 자산군 `openapi.json` 의 `x-environments` 에 환경별 주소가 정본으로 담겨 있습니다.
+- **🟢 테스트·모의투자**: 안전하게 호출·검증할 수 있는 환경입니다. 개발과 테스트는 여기서 하세요.
+- **🔴 실거래**: 주문이 **실제로 체결**됩니다. 테스트/모의에서 검증을 마친 뒤에만 사용하세요.
+- WebSocket 포트: 국내 `7070`, 해외 `7080`, 모의투자 `17070`. 각 자산군 `openapi.json` 의 `x-environments` 에 용도별 주소가 정본으로 담겨 있습니다.
 
 ## 수수료 (Why NH투자증권 Open API)
 

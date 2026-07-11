@@ -3,24 +3,20 @@
   "info": {
     "title": "NH투자증권 Open API — 국내채권 (KR Bond)",
     "version": "v1",
-    "description": "NH투자증권 Open API 중 **국내채권 (KR Bond)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket. 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token."
+    "description": "NH투자증권 Open API 중 **국내채권 (KR Bond)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 최신 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token.\n- 각 필드 description 에 한글명·길이·원본 설명(코드값 포함)을 담았습니다."
   },
   "servers": [
     {
-      "url": "https://api.nhplug.com:8443",
-      "description": "운영 · 나무 (실거래)"
+      "url": "https://devapi.nhplug.com:8443",
+      "description": "🟢 테스트 (Test) — 실매매 전 검증 [기본]"
     },
     {
       "url": "https://moapi.nhplug.com:8443",
-      "description": "운영 모의투자 · 나무"
+      "description": "🟢 모의투자 (Mock) — 교육이수"
     },
     {
-      "url": "https://devapi.nhplug.com:8443",
-      "description": "개발 · 나무 (실거래)"
-    },
-    {
-      "url": "https://devmoapi.nhplug.com:8443",
-      "description": "개발 모의투자 · 나무"
+      "url": "https://api.nhplug.com:8443",
+      "description": "🔴 실거래 (Live) — 실제 주문 체결 (검증 후에만)"
     }
   ],
   "security": [
@@ -31,22 +27,23 @@
     }
   ],
   "x-environments": {
-    "portal": {
-      "나무": "https://www.nhplug.com"
+    "portal": "https://www.nhplug.com",
+    "note": "⚠️ 실주문은 실거래(live) 에서만 체결됩니다. 개발·검증은 반드시 test 또는 mock 에서 먼저 하세요. 권장 순서: 테스트/모의 → 검증 → 실거래. 현재 나무(Namuh) 기준(N2 추후).",
+    "test": {
+      "desc": "테스트 — 실매매 전 검증",
+      "rest": "https://devapi.nhplug.com:8443",
+      "websocket": "wss://devapi.nhplug.com:7070"
     },
-    "rest": {
-      "운영_나무": "https://api.nhplug.com:8443",
-      "운영모의_나무": "https://moapi.nhplug.com:8443",
-      "개발_나무": "https://devapi.nhplug.com:8443",
-      "개발모의_나무": "https://devmoapi.nhplug.com:8443"
+    "mock": {
+      "desc": "모의투자 — 교육이수",
+      "rest": "https://moapi.nhplug.com:8443",
+      "websocket": "wss://moapi.nhplug.com:17070"
     },
-    "websocket": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
-    },
-    "note": "나무(Namuh) 환경 기준. N2 는 추후. WS 포트: 국내 7070 / 해외 7080, 모의 17070."
+    "live": {
+      "desc": "실거래 — 실제 주문 체결",
+      "rest": "https://api.nhplug.com:8443",
+      "websocket": "wss://api.nhplug.com:7070"
+    }
   },
   "tags": [
     {
@@ -70,7 +67,7 @@
         ],
         "operationId": "krbondOrderBondBuy",
         "summary": "장내채권 매수주문",
-        "description": "\n\n원본 시트: API_국내_채권_주문_매수",
+        "description": "원본 시트: API_국내_채권_주문_매수",
         "requestBody": {
           "required": true,
           "content": {
@@ -87,7 +84,7 @@
                       },
                       "iem_cd": {
                         "type": "string",
-                        "description": "종목코드 / 길이 12"
+                        "description": "종목코드 / 길이 12 / 예시> 국고02000-3106(21-5)인 경우, C03502GB6"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -129,10 +126,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -159,7 +152,7 @@
         ],
         "operationId": "krbondOrderBondSell",
         "summary": "장내채권 매도주문",
-        "description": "\n\n원본 시트: API_국내_채권_주문_매도",
+        "description": "원본 시트: API_국내_채권_주문_매도",
         "requestBody": {
           "required": true,
           "content": {
@@ -176,7 +169,7 @@
                       },
                       "iem_cd": {
                         "type": "string",
-                        "description": "종목코드 / 길이 12"
+                        "description": "종목코드 / 길이 12 / 예시> 국고02000-3106(21-5)인 경우, C03502GB6"
                       },
                       "orr_qty": {
                         "type": "integer",
@@ -228,10 +221,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -258,7 +247,7 @@
         ],
         "operationId": "krbondOrderBondModify",
         "summary": "장내채권 정정주문",
-        "description": "\n\n원본 시트: API_국내_채권_주문_정정",
+        "description": "원본 시트: API_국내_채권_주문_정정",
         "requestBody": {
           "required": true,
           "content": {
@@ -284,7 +273,7 @@
                       },
                       "iem_cd": {
                         "type": "string",
-                        "description": "종목코드 / 길이 12"
+                        "description": "종목코드 / 길이 12 / 예시> 국고02000-3106(21-5)인 경우, C03502GB6"
                       },
                       "cor_qty": {
                         "type": "integer",
@@ -323,10 +312,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -353,7 +338,7 @@
         ],
         "operationId": "krbondOrderBondCancel",
         "summary": "장내채권 취소주문",
-        "description": "\n\n원본 시트: API_국내_채권_주문_취소",
+        "description": "원본 시트: API_국내_채권_주문_취소",
         "requestBody": {
           "required": true,
           "content": {
@@ -379,7 +364,7 @@
                       },
                       "iem_cd": {
                         "type": "string",
-                        "description": "종목코드 / 길이 12"
+                        "description": "종목코드 / 길이 12 / 예시> 국고02000-3106(21-5)인 경우, C03502GB6"
                       },
                       "cor_qty": {
                         "type": "integer",
@@ -412,10 +397,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "orr_gno_tab_cd": {
-                            "type": "string",
-                            "description": "주문채번팀점코드 / 길이 4"
-                          },
                           "mkt_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -442,7 +423,7 @@
         ],
         "operationId": "krbondOrderBondSubstituteSell",
         "summary": "장내채권 대용매도주문",
-        "description": "\n\n원본 시트: API_국내_채권_주문_대용매도",
+        "description": "원본 시트: API_국내_채권_주문_대용매도",
         "requestBody": {
           "required": true,
           "content": {
@@ -541,7 +522,7 @@
         ],
         "operationId": "krbondInquiryBondOrderableQuantity",
         "summary": "장내채권 주문가능수량 조회",
-        "description": "\n\n원본 시트: API_국내_채권_조회_주문가능수량",
+        "description": "원본 시트: API_국내_채권_조회_주문가능수량",
         "requestBody": {
           "required": true,
           "content": {
@@ -624,12 +605,12 @@
                           "orr_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량_IO / 길이 18"
+                            "description": "주문가능수량 / 길이 18"
                           },
                           "orr_pbl_qty1": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "주문가능수량1_IO / 길이 18"
+                            "description": "주문가능수량1 / 길이 18"
                           }
                         }
                       }
@@ -650,14 +631,14 @@
         ]
       }
     },
-    "/krbond/TODO/op": {
+    "/krbond/TODO/API_국내_채권_조회_정정취소가능주문": {
       "post": {
         "tags": [
           "조회 (Inquiry)"
         ],
-        "operationId": "krbondTODOOp",
+        "operationId": "krbondTODOAPI_국내_채권_조회_정정취소가능주문",
         "summary": "장내채권 정정취소가능주문 조회",
-        "description": "\n\n원본 시트: API_국내_채권_조회_정정취소가능주문",
+        "description": "원본 시트: API_국내_채권_조회_정정취소가능주문",
         "requestBody": {
           "required": true,
           "content": {
@@ -825,6 +806,7 @@
             }
           }
         },
+        "x-todo": "원본 명세서에 URI 미정",
         "parameters": [
           {
             "$ref": "#/components/parameters/CtsHeader"
@@ -839,7 +821,7 @@
         ],
         "operationId": "krbondInquiryBondModifiableOrder",
         "summary": "장내채권 주문체결내역 조회",
-        "description": "\n\n원본 시트: API_국내_채권_조회_체결내역",
+        "description": "원본 시트: API_국내_채권_조회_체결내역",
         "requestBody": {
           "required": true,
           "content": {
@@ -870,10 +852,6 @@
                       "ost_cns_dit": {
                         "type": "string",
                         "description": "체결구분 / 길이 1 / 0.전체 1.미체결 2.체결"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 17 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
@@ -900,10 +878,6 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "cus_fnm": {
-                            "type": "string",
-                            "description": "고객성명 / 길이 40"
-                          },
                           "itg_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -940,11 +914,11 @@
                           },
                           "nmn_pr_tp_cd_nm": {
                             "type": "string",
-                            "description": "호가유형코드명_IO / 길이 30"
+                            "description": "호가유형코드명 / 길이 30"
                           },
                           "orr_cnd_dit_cd_nm": {
                             "type": "string",
-                            "description": "주문조건구분코드명_IO / 길이 60"
+                            "description": "주문조건구분코드명 / 길이 60"
                           },
                           "orr_qty": {
                             "type": "integer",
@@ -959,7 +933,7 @@
                           "tot_cns_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총체결수량_IO / 길이 23"
+                            "description": "총체결수량 / 길이 23"
                           },
                           "cns_avg_uit_pr": {
                             "type": "number",
@@ -979,7 +953,7 @@
                           "ny_cns_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "미체결수량_IO / 길이 23"
+                            "description": "미체결수량 / 길이 23"
                           },
                           "can_qty": {
                             "type": "integer",
@@ -988,11 +962,11 @@
                           },
                           "orr_mdi": {
                             "type": "string",
-                            "description": "주문매체_IO / 길이 20"
+                            "description": "주문매체 / 길이 20"
                           },
                           "orr_rjt_rsn_cd_nm": {
                             "type": "string",
-                            "description": "주문거부사유코드명_IO / 길이 4"
+                            "description": "주문거부사유코드명 / 길이 4"
                           },
                           "rmt_mkt_cd": {
                             "type": "string",
@@ -1028,7 +1002,7 @@
         ],
         "operationId": "krbondInquiryBondBalance",
         "summary": "장내채권 잔고조회",
-        "description": "\n\n원본 시트: API_국내_채권_조회_잔고",
+        "description": "원본 시트: API_국내_채권_조회_잔고",
         "requestBody": {
           "required": true,
           "content": {
@@ -1039,10 +1013,6 @@
                   "Input_0": {
                     "type": "object",
                     "properties": {
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 81 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
-                      },
                       "act_no": {
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
@@ -1053,7 +1023,7 @@
                       },
                       "iqr_dit": {
                         "type": "string",
-                        "description": "조회구분_IO / 길이 1 / 0.매수일별 조회 1.종목별조회"
+                        "description": "조회구분 / 길이 1 / 0.매수일별 조회 1.종목별조회"
                       }
                     },
                     "required": [
@@ -1098,7 +1068,7 @@
                           "tot_eal_pls": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총평가손익_IO / 길이 18"
+                            "description": "총평가손익 / 길이 18"
                           },
                           "dca": {
                             "type": "integer",
@@ -1108,7 +1078,7 @@
                           "tot_lon_amt": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "총대출금액_IO / 길이 18"
+                            "description": "총대출금액 / 길이 18"
                           },
                           "pdt_tp_nm": {
                             "type": "string",
@@ -1143,7 +1113,7 @@
                           "itg_bnc_qty_sum": {
                             "type": "number",
                             "format": "double",
-                            "description": "통합잔고수량합계_IO / 길이 18.3"
+                            "description": "통합잔고수량합계 / 길이 18.3"
                           },
                           "nsv_qty": {
                             "type": "integer",
@@ -1200,7 +1170,7 @@
                           "tax_sum": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "세금합계_IO / 길이 18"
+                            "description": "세금합계 / 길이 18"
                           },
                           "cfd_eal_ogt_cfd_grd_cd1": {
                             "type": "string",
@@ -1208,7 +1178,7 @@
                           },
                           "tp_cd_nm": {
                             "type": "string",
-                            "description": "유형코드명_IO / 길이 30"
+                            "description": "유형코드명 / 길이 30"
                           },
                           "fc_sec_trd_nat_cd": {
                             "type": "string",
@@ -1216,7 +1186,7 @@
                           },
                           "nat_cd_nm": {
                             "type": "string",
-                            "description": "국가코드명_IO / 길이 40"
+                            "description": "국가코드명 / 길이 40"
                           },
                           "pft_rt": {
                             "type": "number",
@@ -1249,7 +1219,7 @@
         ],
         "operationId": "krbondInquiryBondSubstituteBalance",
         "summary": "장내채권 대용잔고조회",
-        "description": "\n\n원본 시트: API_국내_채권_조회_대용잔고",
+        "description": "원본 시트: API_국내_채권_조회_대용잔고",
         "requestBody": {
           "required": true,
           "content": {
@@ -1267,10 +1237,6 @@
                       "ahi_act_no": {
                         "type": "string",
                         "description": "현물계좌번호 / 길이 11"
-                      },
-                      "CTS": {
-                        "type": "string",
-                        "description": "CTS / 길이 34 / 다음 데이터 조회를 위한 값. 이전 CTS값과 동일한 값이거나 공백일 경우 마지막 데이터"
                       }
                     },
                     "required": [
@@ -1315,7 +1281,7 @@
                           "sba_pbl_qty": {
                             "type": "integer",
                             "format": "int64",
-                            "description": "대용가능수량_IO / 길이 18"
+                            "description": "대용가능수량 / 길이 18"
                           },
                           "frs_sba_apm_qty": {
                             "type": "integer",
@@ -1369,7 +1335,7 @@
         ],
         "operationId": "krbondQuoteBondCurrent",
         "summary": "장내채권 현재가",
-        "description": "\n\n원본 시트: API_국내_채권_시세_현재가",
+        "description": "원본 시트: API_국내_채권_시세_현재가",
         "requestBody": {
           "required": true,
           "content": {
@@ -1689,7 +1655,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "number",
@@ -1792,7 +1758,7 @@
         ],
         "operationId": "krbondQuoteBondDetail",
         "summary": "장내채권 상세정보 조회",
-        "description": "\n\n원본 시트: API_국내_채권_시세_상세정보",
+        "description": "원본 시트: API_국내_채권_시세_상세정보",
         "requestBody": {
           "required": true,
           "content": {
@@ -1844,23 +1810,23 @@
                           },
                           "grt_ogt_cd_nm": {
                             "type": "string",
-                            "description": "보증기관코드명_IO / 길이 40"
+                            "description": "보증기관코드명 / 길이 40"
                           },
                           "cco_ogt_cd_nm": {
                             "type": "string",
-                            "description": "주간사기관코드명_IO / 길이 40"
+                            "description": "주간사기관코드명 / 길이 40"
                           },
                           "pym_agy_ogt_cd_nm": {
                             "type": "string",
-                            "description": "지급대행기관코드명_IO / 길이 40"
+                            "description": "지급대행기관코드명 / 길이 40"
                           },
                           "pbs_ogt_cd_nm": {
                             "type": "string",
-                            "description": "발행기관코드명_IO / 길이 40"
+                            "description": "발행기관코드명 / 길이 40"
                           },
                           "tct_ogt_cd_nm": {
                             "type": "string",
-                            "description": "수탁기관코드명_IO / 길이 40"
+                            "description": "수탁기관코드명 / 길이 40"
                           },
                           "std_iem_cd": {
                             "type": "string",
@@ -1868,7 +1834,7 @@
                           },
                           "iem_cd1": {
                             "type": "string",
-                            "description": "종목코드1_IO / 길이 12"
+                            "description": "종목코드1 / 길이 12"
                           },
                           "pbs_dt": {
                             "type": "string",
@@ -1888,7 +1854,7 @@
                           },
                           "int_pym_mtd_tp_cd_nm": {
                             "type": "string",
-                            "description": "이자지급방법유형코드명_IO / 길이 30"
+                            "description": "이자지급방법유형코드명 / 길이 30"
                           },
                           "srf_int_rt": {
                             "type": "number",
@@ -1963,7 +1929,7 @@
                           },
                           "bnd_tp_cd_nm": {
                             "type": "string",
-                            "description": "채권유형코드명_IO / 길이 50"
+                            "description": "채권유형코드명 / 길이 50"
                           },
                           "abs_dit_cd": {
                             "type": "string",
@@ -1971,11 +1937,11 @@
                           },
                           "ltg_nst_tp_cd_nm": {
                             "type": "string",
-                            "description": "상장비상장유형코드명_IO / 길이 20"
+                            "description": "상장비상장유형코드명 / 길이 20"
                           },
                           "rdp_mtd_nm": {
                             "type": "string",
-                            "description": "상환방법명_IO / 길이 20"
+                            "description": "상환방법명 / 길이 20"
                           },
                           "dfm_te_cnt": {
                             "type": "integer",
@@ -2053,7 +2019,7 @@
                           },
                           "opt_knd_cd_nm": {
                             "type": "string",
-                            "description": "옵션종류코드명_IO / 길이 20"
+                            "description": "옵션종류코드명 / 길이 20"
                           },
                           "xrn_dfn_int_rt": {
                             "type": "number",
@@ -2062,19 +2028,19 @@
                           },
                           "osf_fds_amn_tp_cd_nm": {
                             "type": "string",
-                            "description": "자기자본관리유형코드명_IO / 길이 20"
+                            "description": "자기자본관리유형코드명 / 길이 20"
                           },
                           "sby_fbd_dit_cd_nm": {
                             "type": "string",
-                            "description": "매매금지구분코드명_IO / 길이 20"
+                            "description": "매매금지구분코드명 / 길이 20"
                           },
                           "lon_pbl_yn_nm": {
                             "type": "string",
-                            "description": "대출가능여부명_IO / 길이 20"
+                            "description": "대출가능여부명 / 길이 20"
                           },
                           "nat_bnd_sby_obj_yn_nm": {
                             "type": "string",
-                            "description": "국채매매대상여부명_IO / 길이 20"
+                            "description": "국채매매대상여부명 / 길이 20"
                           },
                           "plt_cnd_nm": {
                             "type": "string",
@@ -2105,7 +2071,7 @@
         ],
         "operationId": "krbondQuoteBondTradingStatus",
         "summary": "장내채권 매매현황",
-        "description": "\n\n원본 시트: API_국내_채권_시세_매매현황",
+        "description": "원본 시트: API_국내_채권_시세_매매현황",
         "requestBody": {
           "required": true,
           "content": {
@@ -2258,7 +2224,7 @@
         ],
         "operationId": "krbondQuoteBondDaily",
         "summary": "장내채권 일자별시세",
-        "description": "\n\n원본 시트: API_국내_채권_시세_일자별",
+        "description": "원본 시트: API_국내_채권_시세_일자별",
         "requestBody": {
           "required": true,
           "content": {
@@ -2355,7 +2321,7 @@
                           },
                           "prdy_vrss_sign": {
                             "type": "string",
-                            "description": "등락부호 / 길이 1"
+                            "description": "등락부호 / 길이 1 / 1or6.상한가 2or7.상승 3or0.보합 4or8.하한 5or9.하락 그외.보함+리버스(기세)"
                           },
                           "prdy_vrss": {
                             "type": "number",
@@ -2423,7 +2389,7 @@
         ],
         "operationId": "krbondQuoteBondIssuance",
         "summary": "장내채권 발행현황",
-        "description": "\n\n원본 시트: API_국내_채권_시세_발행현황",
+        "description": "원본 시트: API_국내_채권_시세_발행현황",
         "requestBody": {
           "required": true,
           "content": {
@@ -2512,7 +2478,7 @@
         ],
         "operationId": "krbondQuoteBondFairValue",
         "summary": "장내채권 민간평간단가조회",
-        "description": "\n\n원본 시트: API_국내_채권_시세_민평단가",
+        "description": "원본 시트: API_국내_채권_시세_민평단가",
         "requestBody": {
           "required": true,
           "content": {
@@ -2600,7 +2566,7 @@
         ],
         "operationId": "krbondQuoteInflationBond",
         "summary": "물가연동채권물가계수일괄조회",
-        "description": "\n\n원본 시트: API_국내_채권_시세_물가연동채권",
+        "description": "원본 시트: API_국내_채권_시세_물가연동채권",
         "requestBody": {
           "required": true,
           "content": {
@@ -2691,7 +2657,7 @@
         ],
         "operationId": "krbondQuoteYieldTrend",
         "summary": "채권 수익률 추이",
-        "description": "\n\n원본 시트: API_국내_채권_시세_수익률추이",
+        "description": "원본 시트: API_국내_채권_시세_수익률추이",
         "requestBody": {
           "required": true,
           "content": {
@@ -2802,7 +2768,7 @@
         ],
         "operationId": "krbondQuoteRateSpreadDailyYield",
         "summary": "채권 금리 스프레드 일별 수익률",
-        "description": "\n\n원본 시트: API_국내_채권_시세_금리스프레드일별수익률",
+        "description": "원본 시트: API_국내_채권_시세_금리스프레드일별수익률",
         "requestBody": {
           "required": true,
           "content": {
@@ -2932,7 +2898,7 @@
         ],
         "operationId": "krbondQuoteYieldComparisonByType",
         "summary": "채권 유형별 수익률 비교",
-        "description": "\n\n원본 시트: API_국내_채권_시세_유형별수익률비교",
+        "description": "원본 시트: API_국내_채권_시세_유형별수익률비교",
         "requestBody": {
           "required": true,
           "content": {
@@ -3073,7 +3039,7 @@
         ],
         "operationId": "krbondQuoteFairValueYield",
         "summary": "채권 시가평가 수익률(민평)",
-        "description": "\n\n원본 시트: API_국내_채권_시세_시가평가수익률민평",
+        "description": "원본 시트: API_국내_채권_시세_시가평가수익률민평",
         "requestBody": {
           "required": true,
           "content": {
@@ -3118,7 +3084,7 @@
                         "properties": {
                           "coi_yn": {
                             "type": "string",
-                            "description": "선택여부_IO / 길이 1"
+                            "description": "선택여부 / 길이 1"
                           },
                           "bnd_lknd_cd": {
                             "type": "string",
@@ -3244,7 +3210,7 @@
         ],
         "operationId": "krbondQuoteSmallBondIssuance",
         "summary": "소액채권발행현황",
-        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권발행현황",
+        "description": "원본 시트: API_국내_채권_시세_소액채권발행현황",
         "requestBody": {
           "required": true,
           "content": {
@@ -3309,7 +3275,7 @@
                           },
                           "int_pym_mtd_tp_cd_nm": {
                             "type": "string",
-                            "description": "이자지급방법유형코드명_IO / 길이 30"
+                            "description": "이자지급방법유형코드명 / 길이 30"
                           }
                         }
                       }
@@ -3332,7 +3298,7 @@
         ],
         "operationId": "krbondQuoteSmallBondQuoteTrading",
         "summary": "소액채권호가매매현황",
-        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권호가매매현황",
+        "description": "원본 시트: API_국내_채권_시세_소액채권호가매매현황",
         "requestBody": {
           "required": true,
           "content": {
@@ -3444,7 +3410,7 @@
         ],
         "operationId": "krbondQuoteSmallBondTimeCurrent",
         "summary": "소액채권시간대별현재가",
-        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권시간대별현재가",
+        "description": "원본 시트: API_국내_채권_시세_소액채권시간대별현재가",
         "requestBody": {
           "required": true,
           "content": {
@@ -3458,10 +3424,15 @@
                       "data_cls_code": {
                         "type": "string",
                         "description": "조회구분 / 길이 1 / 1.국민주택 2.서울철도 3.지역개발 4.지방철도 5.지역개발1"
+                      },
+                      "array_cnt": {
+                        "type": "string",
+                        "description": "읽을갯수 / 길이 3"
                       }
                     },
                     "required": [
-                      "data_cls_code"
+                      "data_cls_code",
+                      "array_cnt"
                     ]
                   }
                 }
@@ -3527,7 +3498,7 @@
         ],
         "operationId": "krbondQuoteSmallBondReportedYield",
         "summary": "소액채권신고수익률",
-        "description": "\n\n원본 시트: API_국내_채권_시세_소액채권신고수익률",
+        "description": "원본 시트: API_국내_채권_시세_소액채권신고수익률",
         "requestBody": {
           "required": true,
           "content": {
@@ -3627,12 +3598,11 @@
     }
   },
   "x-realtime-channels": {
-    "endpoint": "wss://api.nhplug.com:7070",
+    "endpoint": "wss://devapi.nhplug.com:7070",
     "endpoints": {
-      "운영_나무": "wss://api.nhplug.com:7070",
-      "운영모의_나무": "wss://moapi.nhplug.com:17070",
-      "개발_나무": "wss://devapi.nhplug.com:7070",
-      "개발모의_나무": "wss://devmoapi.nhplug.com:17070"
+      "test": "wss://devapi.nhplug.com:7070",
+      "mock": "wss://moapi.nhplug.com:17070",
+      "live": "wss://api.nhplug.com:7070"
     },
     "protocol": {
       "transport": "WebSocket",
@@ -3926,64 +3896,6 @@
           "ord_cond_prc",
           "sor_orrgb",
           "mkt_order_qty"
-        ]
-      },
-      {
-        "name": "채권지수 실시간 체결가",
-        "sheet": "API_국내_채권_실시간_채권지수체결가",
-        "tr_cd": "uB",
-        "tr_key": {
-          "name": "jisuid",
-          "kor": "지수ID",
-          "length": "6"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "uB",
-            "tr_key": "<jisuid>"
-          }
-        },
-        "fields": [
-          "jisuid",
-          "time",
-          "grossprofit",
-          "gross_sign",
-          "gross_change",
-          "gross_open",
-          "gross_high",
-          "gross_hightime",
-          "gross_low",
-          "gross_lowtime",
-          "gross_chrate",
-          "cleanprice",
-          "clean_sign",
-          "clean_change",
-          "clean_open",
-          "clean_high",
-          "clean_hightime",
-          "clean_low",
-          "clean_lowtime",
-          "clean_chrate",
-          "marketprice",
-          "market_sign",
-          "market_change",
-          "market_open",
-          "market_high",
-          "market_hightime",
-          "market_low",
-          "market_lowtime",
-          "market_chrate",
-          "callreinvest",
-          "zeroreinvest",
-          "theoryprice",
-          "avgduration",
-          "avgconvexity",
-          "avgytm",
-          "avgguidanceytm"
         ]
       }
     ]

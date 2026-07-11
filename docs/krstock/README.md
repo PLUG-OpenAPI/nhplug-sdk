@@ -1,6 +1,6 @@
 # NH투자증권 Open API — 국내주식 (Domestic Stock) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 / 나무)
+All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
 
 > 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/krstock/openapi.json) 입니다.
 
@@ -10,19 +10,19 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 | API Name | Method | URI | operationId |
 |---|---|---|---|
 | 주식주문(정정취소) 취소 | POST | `/krstock/order/v1/cancel` | krstockOrderCancel |
-| 주식예약주문정정취소 | POST | `/krstock/order/v1/cancel#dup-krstockOrderCancel` | krstockOrderCancel |
 | 주식주문(현금) 매수 | POST | `/krstock/order/v1/cashBuy` | krstockOrderCashBuy |
 | 주식주문(현금) 매도 | POST | `/krstock/order/v1/cashSell` | krstockOrderCashSell |
 | 주식주문(신용) 매수 | POST | `/krstock/order/v1/creditBuy` | krstockOrderCreditBuy |
 | 주식주문(신용) 매도 | POST | `/krstock/order/v1/creditSell` | krstockOrderCreditSell |
 | 주식주문(정정취소) 정정 | POST | `/krstock/order/v1/modify` | krstockOrderModify |
 | 주식예약주문 | POST | `/krstock/order/v1/reservedOrder` | krstockOrderReservedOrder |
+| 주식예약주문취소 | POST | `/krstock/order/v1/reservedOrder` | krstockOrderReservedOrder |
 
 ## 조회 (Inquiry)
 
 | API Name | Method | URI | operationId |
 |---|---|---|---|
-| 주식정정취소가능주문조회 | POST | `/krstock/TODO/op` | krstockTODOOp |
+| 주식정정취소가능주문조회 | POST | `/krstock/TODO/API_국내_주식_조회_정정취소` | krstockTODOAPI_국내_주식_조회_정정취소 |
 | 투자계좌자산현황조회 | POST | `/krstock/inquiry/v1/assetStatus` | krstockInquiryAssetStatus |
 | 주식잔고조회 | POST | `/krstock/inquiry/v1/balance` | krstockInquiryBalance |
 | 매수가능수량조회 | POST | `/krstock/inquiry/v1/buyableQuantity` | krstockInquiryBuyableQuantity |
@@ -78,3 +78,4 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 | 국내주식 실시간프로그램매매NXT | `nn` | `code`(종목코드) | 30 |
 | 국내주식 실시간체결통보 | `d2` | `userid`(사용자ID) | 21 |
 | 국내주식 실시간주문내역통보 | `d3` | `userid`(사용자ID) | 24 |
+| 채권지수 실시간 체결가 | `uB` | `jisuid`(지수ID) | 36 |

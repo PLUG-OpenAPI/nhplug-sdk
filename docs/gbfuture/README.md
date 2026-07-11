@@ -1,6 +1,6 @@
 # NH투자증권 Open API — 해외파생 (Global Derivatives) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 / 나무)
+All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
 
 > 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/gbfuture/openapi.json) 입니다.
 
@@ -17,7 +17,7 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 
 | API Name | Method | URI | operationId |
 |---|---|---|---|
-| 해외선물옵션 미체결내역조회(잔고) | POST | `/gbfuture/TODO/op` | gbfutureTODOOp |
+| 해외선물옵션 미체결내역조회(잔고) | POST | `/gbfuture/TODO/API_해외_파생_조회_미체결내역` | gbfutureTODOAPI_해외_파생_조회_미체결내역 |
 | 해외선물옵션 예수금현황 | POST | `/gbfuture/inquiry/v1/deposit` | gbfutureInquiryDeposit |
 | 해외선물옵션 증거금상세 | POST | `/gbfuture/inquiry/v1/margin` | gbfutureInquiryMargin |
 | 해외선물옵션 주문가능조회 | POST | `/gbfuture/inquiry/v1/orderable` | gbfutureInquiryOrderable |

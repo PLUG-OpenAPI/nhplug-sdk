@@ -1,6 +1,6 @@
 # NH투자증권 Open API — 국내금현물 (KR Gold) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 / 나무)
+All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
 
 > 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/krgold/openapi.json) 입니다.
 
@@ -26,7 +26,7 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 
 | API Name | Method | URI | operationId |
 |---|---|---|---|
-| 금현물 괴리율 | POST | `/krgold/TODO/op` | krgoldTODOOp |
+| 금현물 괴리율 | POST | `/krgold/TODO/API_국내_금현물_시세_괴리율` | krgoldTODOAPI_국내_금현물_시세_괴리율 |
 | 금현물 현재가 | POST | `/krgold/quote/v1/goldCurrent` | krgoldQuoteGoldCurrent |
 | 금현물 일별투자매매현황 | POST | `/krgold/quote/v1/goldDailyInvestorTrade` | krgoldQuoteGoldDailyInvestorTrade |
 | 금현물 일별추이 | POST | `/krgold/quote/v1/goldDailyTrend` | krgoldQuoteGoldDailyTrend |

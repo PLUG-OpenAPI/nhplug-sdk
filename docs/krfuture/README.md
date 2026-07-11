@@ -1,6 +1,6 @@
 # NH투자증권 Open API — 국내파생 (KR Derivatives) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 / 나무)
+All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
 
 > 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/krfuture/openapi.json) 입니다.
 
@@ -55,8 +55,8 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 | 지수선물 실시간호가KQ150 | `fH` | `fuitem`(종목코드) | 36 |
 | 지수선물 실시간호가미니 | `hH` | `fuitem`(종목코드) | 36 |
 | 지수선물 실시간체결가KP200 | `f8` | `fuitem`(종목코드) | 29 |
-| 지수선물 실시간체결가KQ150 | `fc` | `fuitem`(종목코드) | 29 |
-| 지수선물 실시간체결가미니 | `hc` | `fuitem`(종목코드) | 29 |
+| 지수선물 실시간체결가KQ150 | `fC` | `fuitem`(종목코드) | 29 |
+| 지수선물 실시간체결가미니 | `hC` | `fuitem`(종목코드) | 29 |
 | 지수선물 실시간예상체결KP200 | `fE` | `fuitem`(종목코드) | 8 |
 | 지수선물 실시간예상체결KQ150 | `fP` | `fuitem`(종목코드) | 8 |
 | 지수선물 실시간예상체결미니 | `hE` | `fuitem`(종목코드) | 8 |
