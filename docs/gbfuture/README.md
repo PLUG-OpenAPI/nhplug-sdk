@@ -1,8 +1,8 @@
 # NH투자증권 Open API — 해외파생 (Global Derivatives) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
+All REST URIs relative to 테스트 `https://devapi.nhplug.com:8443` · Method 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260721 / 나무)
 
-> 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/gbfuture/openapi.json) 입니다.
+> 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/gbfuture/openapi.json). ⚠️ 실주문은 실거래(api...) 에서만 체결 — 개발은 테스트/모의 우선.
 
 
 ## 주문 (Order)
@@ -10,7 +10,7 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 | API Name | Method | URI | operationId |
 |---|---|---|---|
 | 해외선물옵션 주문 | POST | `/gbfuture/order/v1/buy` | gbfutureOrderBuy |
-| 해외선물옵션 정정취소주문취소 | POST | `/gbfuture/order/v1/cancel` | gbfutureOrderCancel |
+| 해외선물옵션 정정취소주문정정 | POST | `/gbfuture/order/v1/cancel` | gbfutureOrderCancel |
 | 해외선물옵션 정정취소주문정정 | POST | `/gbfuture/order/v1/modify` | gbfutureOrderModify |
 
 ## 조회 (Inquiry)
@@ -41,13 +41,13 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 
 ## 실시간 (Realtime, WebSocket)
 
-운영 나무 Endpoint: `wss://api.nhplug.com:7080` · 구독 메시지·인증은 [openapi.json](https://www.nhplug.com/openapi-docs/gbfuture/openapi.json) 의 `x-realtime-channels.protocol` 참조.
+테스트 Endpoint: `wss://devapi.nhplug.com:7080` · 구독·인증·푸시 규약은 [openapi.json](https://www.nhplug.com/openapi-docs/gbfuture/openapi.json) 의 `x-realtime-channels.protocol` 참조.
 
 | 채널 | tr_cd | tr_key | 응답 필드 수 |
 |---|---|---|---|
-| 해외선물옵션 실시간호가 | `FH` | `isym`(내부종목코드) | 39 |
-| 해외선물옵션 지연호가 | `fh` | `isym`(내부종목코드) | 39 |
-| 해외선물옵션 실시간체결가 | `FC` | `isym`(내부종목코드) | 15 |
-| 해외선물옵션 지연체결가 | `fc` | `isym`(내부종목코드) | 15 |
-| 해외선물옵션 실시간체결통보 | `dk` | `userid`(사용자ID) | 20 |
-| 해외선물옵션 실시간주문내역통보 | `dj` | `userid`(사용자ID) | 25 |
+| 해외선물옵션 실시간호가 | `FH` | `isym`(종목코드) | 43 |
+| 해외선물옵션 지연호가 | `fh` | `isym`(종목코드) | 43 |
+| 해외선물옵션 실시간체결가 | `FC` | `isym`(종목코드) | 19 |
+| 해외선물옵션 지연체결가 | `fc` | `isym`(종목코드) | 19 |
+| 해외선물옵션 실시간체결통보 | `dk` | `userid`(사용자ID) | 21 |
+| 해외선물옵션 실시간주문내역통보 | `dj` | `userid`(사용자ID) | 26 |

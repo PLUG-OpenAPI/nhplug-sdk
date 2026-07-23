@@ -3,7 +3,7 @@
   "info": {
     "title": "NH투자증권 Open API — 해외파생 (Global Derivatives)",
     "version": "v1",
-    "description": "NH투자증권 Open API 중 **해외파생 (Global Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260703 최신 / 나무 환경)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 구독 규약은 x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 메시지 header.token.\n- 각 필드 description 에 한글명·길이·원본 설명(코드값 포함)을 담았습니다."
+    "description": "NH투자증권 Open API 중 **해외파생 (Global Derivatives)** 자산군의 REST 및 실시간(WebSocket) API 문서입니다. (기준: API명세서 260721 / 나무 환경 · 필드명은 명세서 C열 기준)\n\n- REST: POST + JSON, 요청 Input_0 / 응답 Output_0(배열) + message.\n- 실시간: WebSocket, 푸시=JSON. x-realtime-channels.protocol 참조.\n- 인증: POST /oauth2/token → REST 는 Authorization/x-client-id/x-client-secret, WS 는 header.token."
   },
   "servers": [
     {
@@ -28,7 +28,7 @@
   ],
   "x-environments": {
     "portal": "https://www.nhplug.com",
-    "note": "⚠️ 실주문은 실거래(live) 에서만 체결됩니다. 개발·검증은 반드시 test 또는 mock 에서 먼저 하세요. 권장 순서: 테스트/모의 → 검증 → 실거래. 현재 나무(Namuh) 기준(N2 추후).",
+    "note": "⚠️ 실주문은 실거래(live)에서만 체결. 개발·검증은 test/mock 우선. 순서: 테스트/모의→검증→실거래. 나무(Namuh) 기준(N2 추후).",
     "test": {
       "desc": "테스트 — 실매매 전 검증",
       "rest": "https://devapi.nhplug.com:8443",
@@ -86,7 +86,7 @@
                         "type": "string",
                         "description": "매도매수유형코드 / 길이 1 / 1.매도 2.매수"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -121,7 +121,7 @@
                     "required": [
                       "act_no",
                       "sll_byn_tp_cd",
-                      "ose_iem_cd",
+                      "iem_cd",
                       "orr_qty",
                       "fdv_orr_dit_cd",
                       "fdv_orr_tp_cd"
@@ -145,6 +145,10 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "amn_tab_cd": {
+                            "type": "string",
+                            "description": "관리팀점코드 / 길이 4"
+                          },
                           "fdv_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -195,7 +199,7 @@
                         "type": "string",
                         "description": "계좌번호 / 길이 11"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -221,7 +225,7 @@
                     },
                     "required": [
                       "act_no",
-                      "ose_iem_cd",
+                      "iem_cd",
                       "fdv_fr_orr_no",
                       "fdv_orr_tp_cd"
                     ]
@@ -244,6 +248,10 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "amn_tab_cd": {
+                            "type": "string",
+                            "description": "관리팀점코드 / 길이 4"
+                          },
                           "fdv_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -278,7 +286,7 @@
           "주문 (Order)"
         ],
         "operationId": "gbfutureOrderCancel",
-        "summary": "해외선물옵션 정정취소주문취소",
+        "summary": "해외선물옵션 정정취소주문정정",
         "description": "원본 시트: API_해외_파생_주문_취소",
         "requestBody": {
           "required": true,
@@ -299,7 +307,7 @@
                         "format": "int64",
                         "description": "해외파생원주문번호 / 길이 18"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -311,7 +319,7 @@
                     "required": [
                       "act_no",
                       "fdv_fr_orr_no",
-                      "ose_iem_cd"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -332,6 +340,10 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "amn_tab_cd": {
+                            "type": "string",
+                            "description": "관리팀점코드 / 길이 4"
+                          },
                           "fdv_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -385,7 +397,7 @@
                         "type": "string",
                         "description": "종료일자 / 길이 8 / YYYYMMDD"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -451,6 +463,14 @@
                             "type": "string",
                             "description": "주문일자 / 길이 8 / YYYYMMDD"
                           },
+                          "act_amn_tab_cd": {
+                            "type": "string",
+                            "description": "계좌관리팀점코드 / 길이 4"
+                          },
+                          "act_amn_tab_cd_nm": {
+                            "type": "string",
+                            "description": "계좌관리팀점코드명 / 길이 40"
+                          },
                           "fdv_orr_no": {
                             "type": "integer",
                             "format": "int64",
@@ -466,6 +486,14 @@
                             "format": "int64",
                             "description": "해외파생모주문번호 / 길이 18"
                           },
+                          "act_no": {
+                            "type": "string",
+                            "description": "계좌번호 / 길이 11"
+                          },
+                          "act_nm": {
+                            "type": "string",
+                            "description": "계좌명 / 길이 60"
+                          },
                           "fdv_cns_no": {
                             "type": "integer",
                             "format": "int64",
@@ -475,7 +503,7 @@
                             "type": "string",
                             "description": "해외파생상품코드 / 길이 10"
                           },
-                          "ose_iem_cd": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "해외종목코드 / 길이 32"
                           },
@@ -519,6 +547,14 @@
                             "type": "string",
                             "description": "호가상태구분코드명 / 길이 20"
                           },
+                          "sgy_orr_dit_cd": {
+                            "type": "string",
+                            "description": "전략주문구분코드 / 길이 1 / 1:일반, 2:OCO"
+                          },
+                          "sgy_orr_dit_cd_nm": {
+                            "type": "string",
+                            "description": "전략주문구분코드명 / 길이 20"
+                          },
                           "fdv_orr_pcs_sts_cd": {
                             "type": "string",
                             "description": "해외파생주문처리상태코드 / 길이 1 / 0.접수전 1.정상접수 2.접수거부 3.처리완료"
@@ -534,6 +570,22 @@
                           "trd_orn_dit_cd_nm": {
                             "type": "string",
                             "description": "거래발생구분코드명 / 길이 40"
+                          },
+                          "cuc_mdi_cd": {
+                            "type": "string",
+                            "description": "통신매체코드 / 길이 2"
+                          },
+                          "cuc_mdi_cd_nm": {
+                            "type": "string",
+                            "description": "통신매체코드명 / 길이 50"
+                          },
+                          "orr_mdi_dit_cd": {
+                            "type": "string",
+                            "description": "주문매체구분코드 / 길이 2"
+                          },
+                          "orr_mdi_dit_cd_nm": {
+                            "type": "string",
+                            "description": "주문매체구분코드명 / 길이 50"
                           },
                           "fdv_pr_idc_dit_cd": {
                             "type": "string",
@@ -712,6 +764,22 @@
                             "type": "string",
                             "description": "비고 / 길이 100"
                           },
+                          "usr_ip_adr": {
+                            "type": "string",
+                            "description": "사용자IP주소 / 길이 32"
+                          },
+                          "pcs_tab_cd": {
+                            "type": "string",
+                            "description": "처리팀점코드 / 길이 4"
+                          },
+                          "pcs_tab_cd_nm": {
+                            "type": "string",
+                            "description": "처리팀점코드명 / 길이 50"
+                          },
+                          "ode_id": {
+                            "type": "string",
+                            "description": "주문자ID / 길이 6"
+                          },
                           "orr_dtm": {
                             "type": "string",
                             "description": "주문일시 / 길이 20 / YYYYMMDDHHMMSS"
@@ -771,15 +839,15 @@
                       },
                       "fdv_fno_dit_cd": {
                         "type": "string",
-                        "description": "해외파생선물옵션구분코드 / 길이 1"
+                        "description": "해외파생선물옵션구분코드 / 길이 1 / A.전체 F.선물 O.옵션 S.주식옵션"
                       },
                       "sll_byn_tp_cd": {
                         "type": "string",
-                        "description": "매도매수유형코드 / 길이 1"
+                        "description": "매도매수유형코드 / 길이 1 / 0.전체 1.매도 2.매수"
                       },
                       "cur_cd": {
                         "type": "string",
-                        "description": "통화코드 / 길이 3"
+                        "description": "통화코드 / 길이 3 / USD.달러 KRW.원화"
                       },
                       "iqr_bse": {
                         "type": "string",
@@ -936,7 +1004,7 @@
             }
           }
         },
-        "x-todo": "원본 명세서에 URI 미정",
+        "x-todo": "원본 명세서 URI 미정",
         "parameters": [
           {
             "$ref": "#/components/parameters/CtsHeader"
@@ -970,7 +1038,7 @@
                         "type": "string",
                         "description": "매도매수유형코드 / 길이 1 / 1.매도 2.매수"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -1001,7 +1069,7 @@
                     "required": [
                       "act_no",
                       "sll_byn_tp_cd",
-                      "ose_iem_cd",
+                      "iem_cd",
                       "fdv_orr_tp_cd"
                     ]
                   }
@@ -1100,7 +1168,7 @@
                         "type": "string",
                         "description": "해외파생상품코드 / 길이 10"
                       },
-                      "ose_iem_cd": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "해외종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -1174,7 +1242,7 @@
                             "type": "string",
                             "description": "상품명 / 길이 50"
                           },
-                          "ose_iem_cd": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "해외종목코드 / 길이 32"
                           },
@@ -1376,6 +1444,53 @@
                             "type": "number",
                             "format": "double",
                             "description": "해외파생미수금액 / 길이 21.3"
+                          },
+                          "fdv_rpm_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생입금금액 / 길이 21.3"
+                          },
+                          "fdv_drn_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생출금금액 / 길이 21.3"
+                          },
+                          "fdvf_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생입출금액 / 길이 21.3"
+                          },
+                          "fdv_ny_stl_eal_pls": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생미결제평가손익 / 길이 21.3"
+                          },
+                          "fdv_opt_eal_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생옵션평가금액 / 길이 21.3"
+                          },
+                          "atf_wtm_use_krw_amt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "사후증거금사용원화금액 / 길이 21.3"
+                          },
+                          "fdv_tot_rsk_rt": {
+                            "type": "number",
+                            "format": "double",
+                            "description": "해외파생총위험율 / 길이 24.9"
+                          },
+                          "brg_osf_dit_cd": {
+                            "type": "string",
+                            "description": "위탁자기구분코드 / 길이 1"
+                          },
+                          "atf_wtm_dit_cd": {
+                            "type": "string",
+                            "description": "사후증거금구분코드 / 길이 1"
+                          },
+                          "fdv_oln_ofl_dit_cd": {
+                            "type": "string",
+                            "description": "해외파생온라인오프라인구분코드 / 길이 1"
                           }
                         }
                       }
@@ -1474,7 +1589,7 @@
                             "type": "string",
                             "description": "통화코드 / 길이 3"
                           },
-                          "ose_iem_cd": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "해외종목코드 / 길이 32"
                           },
@@ -1559,14 +1674,14 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -1595,7 +1710,7 @@
                             "type": "string",
                             "description": "종목코드 / 길이 32"
                           },
-                          "isym": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -1603,7 +1718,7 @@
                             "type": "string",
                             "description": "실시간종목코드 / 길이 32"
                           },
-                          "enam": {
+                          "iem_nm": {
                             "type": "string",
                             "description": "영문종목명 / 길이 80"
                           },
@@ -1733,7 +1848,7 @@
                             "format": "double",
                             "description": "전일종가 / 길이 17"
                           },
-                          "cur1": {
+                          "cur": {
                             "type": "string",
                             "description": "거래통화 / 길이 3"
                           },
@@ -1777,14 +1892,14 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -1809,7 +1924,7 @@
                             "type": "string",
                             "description": "종목코드 / 길이 32"
                           },
-                          "isym": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -1842,7 +1957,7 @@
                             "type": "string",
                             "description": "CFI코드 / 길이 7"
                           },
-                          "enam": {
+                          "iem_nm": {
                             "type": "string",
                             "description": "영문종목명 / 길이 80"
                           },
@@ -1937,15 +2052,15 @@
                           },
                           "exym": {
                             "type": "string",
-                            "description": "만기년월 / 길이 8"
+                            "description": "만기년월 / 길이 8 / YYYYMMDD"
                           },
                           "lymd": {
                             "type": "string",
-                            "description": "최초거래일 / 길이 8"
+                            "description": "최초거래일 / 길이 8 / YYYYMMDD"
                           },
                           "zymd": {
                             "type": "string",
-                            "description": "최종거래일 / 길이 8"
+                            "description": "최종거래일 / 길이 8 / YYYYMMDD"
                           },
                           "jjis": {
                             "type": "integer",
@@ -2014,7 +2129,7 @@
                           },
                           "hidy_notuse": {
                             "type": "string",
-                            "description": "최고가일 / 길이 8"
+                            "description": "최고가일 / 길이 8 / YYYYMMDD"
                           },
                           "lopr_notuse": {
                             "type": "number",
@@ -2023,7 +2138,7 @@
                           },
                           "lody_notuse": {
                             "type": "string",
-                            "description": "최저가일 / 길이 8"
+                            "description": "최저가일 / 길이 8 / YYYYMMDD"
                           },
                           "hian_notuse": {
                             "type": "number",
@@ -2032,7 +2147,7 @@
                           },
                           "hdan_notuse": {
                             "type": "string",
-                            "description": "연중최고일 / 길이 8"
+                            "description": "연중최고일 / 길이 8 / YYYYMMDD"
                           },
                           "loan_notuse": {
                             "type": "number",
@@ -2041,7 +2156,7 @@
                           },
                           "ldan_notuse": {
                             "type": "string",
-                            "description": "연중최저일 / 길이 8"
+                            "description": "연중최저일 / 길이 8 / YYYYMMDD"
                           },
                           "opts": {
                             "type": "string",
@@ -2115,11 +2230,11 @@
                           },
                           "psymd": {
                             "type": "string",
-                            "description": "전일거래일자 / 길이 8"
+                            "description": "전일거래일자 / 길이 8 / YYYYMMDD"
                           },
                           "ppymd_notuse": {
                             "type": "string",
-                            "description": "전전일거래일자 / 길이 8"
+                            "description": "전전일거래일자 / 길이 8 / YYYYMMDD"
                           },
                           "pbase_notuse": {
                             "type": "number",
@@ -2182,7 +2297,7 @@
                           },
                           "puymd_notuse": {
                             "type": "string",
-                            "description": "전일업데이트일자 / 길이 8"
+                            "description": "전일업데이트일자 / 길이 8 / YYYYMMDD"
                           },
                           "puhms_notuse": {
                             "type": "string",
@@ -2226,11 +2341,11 @@
                           },
                           "fwdy": {
                             "type": "string",
-                            "description": "주의거래시작일 / 길이 8"
+                            "description": "주의거래시작일 / 길이 8 / YYYYMMDD"
                           },
                           "twdy": {
                             "type": "string",
-                            "description": "주의거래종료일 / 길이 8"
+                            "description": "주의거래종료일 / 길이 8 / YYYYMMDD"
                           },
                           "tfhm_notuse": {
                             "type": "string",
@@ -2243,23 +2358,23 @@
                           },
                           "pymd": {
                             "type": "string",
-                            "description": "전영업일 / 길이 8"
+                            "description": "전영업일 / 길이 8 / YYYYMMDD"
                           },
                           "tymd": {
                             "type": "string",
-                            "description": "거래일자 / 길이 8"
+                            "description": "거래일자 / 길이 8 / YYYYMMDD"
                           },
                           "oymd": {
                             "type": "string",
-                            "description": "장시작일 / 길이 8"
+                            "description": "장시작일 / 길이 8 / YYYYMMDD"
                           },
                           "cymd": {
                             "type": "string",
-                            "description": "장종료일 / 길이 8"
+                            "description": "장종료일 / 길이 8 / YYYYMMDD"
                           },
                           "uymd": {
                             "type": "string",
-                            "description": "업데이트일자 / 길이 8"
+                            "description": "업데이트일자 / 길이 8 / YYYYMMDD"
                           },
                           "uhms": {
                             "type": "string",
@@ -2297,7 +2412,7 @@
                           },
                           "kymda1": {
                             "type": "string",
-                            "description": "예비정산가수신일자 / 길이 8"
+                            "description": "예비정산가수신일자 / 길이 8 / YYYYMMDD"
                           },
                           "khmsa1": {
                             "type": "string",
@@ -2314,7 +2429,7 @@
                           },
                           "kymda2_notuse": {
                             "type": "string",
-                            "description": "틱사이즈예비정산가수신일자 / 길이 8"
+                            "description": "틱사이즈예비정산가수신일자 / 길이 8 / YYYYMMDD"
                           },
                           "khmsa2_notuse": {
                             "type": "string",
@@ -2331,7 +2446,7 @@
                           },
                           "kymdb1": {
                             "type": "string",
-                            "description": "실제정산가수신일자 / 길이 8"
+                            "description": "실제정산가수신일자 / 길이 8 / YYYYMMDD"
                           },
                           "khmsb1": {
                             "type": "string",
@@ -2339,7 +2454,7 @@
                           },
                           "dateb1": {
                             "type": "string",
-                            "description": "실제정산가일자 / 길이 8"
+                            "description": "실제정산가일자 / 길이 8 / YYYYMMDD"
                           },
                           "baseb1": {
                             "type": "number",
@@ -2348,7 +2463,7 @@
                           },
                           "kymdb2_notuse": {
                             "type": "string",
-                            "description": "틱사이즈실제정산가수신일자 / 길이 8"
+                            "description": "틱사이즈실제정산가수신일자 / 길이 8 / YYYYMMDD"
                           },
                           "khmsb2_notuse": {
                             "type": "string",
@@ -2356,7 +2471,7 @@
                           },
                           "dateb2_notuse": {
                             "type": "string",
-                            "description": "틱사이즈실제정산가일자 / 길이 8"
+                            "description": "틱사이즈실제정산가일자 / 길이 8 / YYYYMMDD"
                           },
                           "baseb2_notuse": {
                             "type": "number",
@@ -2403,14 +2518,14 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -2439,7 +2554,7 @@
                             "type": "string",
                             "description": "종목코드 / 길이 32"
                           },
-                          "isym": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -2834,18 +2949,22 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "req_cnt": {
+                        "type": "string",
+                        "description": "요청건수 / 길이 4"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -2878,25 +2997,37 @@
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
+                          "inrt": {
+                            "type": "string",
+                            "description": "내부루트종목코드 / 길이 32"
+                          },
+                          "pind": {
+                            "type": "string",
+                            "description": "priceindicator / 길이 1"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "내부종목코드 / 길이 32"
+                          },
                           "kymd": {
                             "type": "string",
-                            "description": "한국일자 / 길이 8"
+                            "description": "한국일자 / 길이 8 / YYYYMMDD"
                           },
                           "khms": {
                             "type": "string",
-                            "description": "한국시간 / 길이 12"
+                            "description": "한국시간 / 길이 12 / HHMMSS"
                           },
                           "xymd": {
                             "type": "string",
-                            "description": "거래소일자 / 길이 8"
+                            "description": "거래소일자 / 길이 8 / YYYYMMDD"
                           },
                           "xhms": {
                             "type": "string",
-                            "description": "거래소시간 / 길이 12"
+                            "description": "거래소시간 / 길이 12 / HHMMSS"
                           },
                           "tymd": {
                             "type": "string",
-                            "description": "거래일자 / 길이 8"
+                            "description": "거래일자 / 길이 8 / YYYYMMDD"
                           },
                           "open": {
                             "type": "number",
@@ -2973,9 +3104,32 @@
                             "format": "double",
                             "description": "전일종가 / 길이 17"
                           },
+                          "opin_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "미결제잔량 / 길이 10"
+                          },
+                          "seqn_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "순번 / 길이 10"
+                          },
+                          "sseq_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "초당순번 / 길이 10"
+                          },
                           "kfrhm": {
                             "type": "string",
                             "description": "한국거래시작시간 / 길이 12"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz52": {
+                            "type": "string",
+                            "description": "ctsz52 / 길이 52 / Symb(32)+Kymd(8)+Khms(12)"
                           }
                         }
                       }
@@ -3013,18 +3167,22 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
                       "kymd": {
                         "type": "string",
                         "description": "한국일자 / 길이 8 / YYYYMMDD"
+                      },
+                      "req_cnt": {
+                        "type": "string",
+                        "description": "요청건수 / 길이 4"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -3054,6 +3212,18 @@
                             "description": "종목코드 / 길이 32"
                           },
                           "isym": {
+                            "type": "string",
+                            "description": "내부종목코드 / 길이 32"
+                          },
+                          "inrt": {
+                            "type": "string",
+                            "description": "내부루트종목코드 / 길이 32"
+                          },
+                          "pind": {
+                            "type": "string",
+                            "description": "priceindicator / 길이 1"
+                          },
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -3164,6 +3334,14 @@
                             "type": "integer",
                             "format": "int32",
                             "description": "최종상승하락타입 / 길이 10 / 43.+ 45.-"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz52": {
+                            "type": "string",
+                            "description": "ctsz52 / 길이 52 / Symb(32)+Kymd(8)+Khms(12)"
                           }
                         }
                       }
@@ -3201,7 +3379,7 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -3212,11 +3390,15 @@
                       "quotyn": {
                         "type": "string",
                         "description": "현재가포함여부 / 길이 1 / Y.포함 N.미포함"
+                      },
+                      "req_cnt": {
+                        "type": "string",
+                        "description": "요청건수 / 길이 4"
                       }
                     },
                     "required": [
                       "exnm",
-                      "isym",
+                      "iem_cd",
                       "ssymd",
                       "quotyn"
                     ]
@@ -3248,6 +3430,18 @@
                             "description": "종목코드 / 길이 32"
                           },
                           "isym": {
+                            "type": "string",
+                            "description": "내부종목코드 / 길이 32"
+                          },
+                          "inrt": {
+                            "type": "string",
+                            "description": "내부루트종목코드 / 길이 32"
+                          },
+                          "pind": {
+                            "type": "string",
+                            "description": "priceindicator / 길이 1"
+                          },
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -3314,6 +3508,16 @@
                             "format": "double",
                             "description": "누적거래대금 / 길이 17"
                           },
+                          "opin_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "미결제잔량 / 길이 15"
+                          },
+                          "seqn_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "순번 / 길이 10"
+                          },
                           "upvo": {
                             "type": "integer",
                             "format": "int32",
@@ -3341,6 +3545,19 @@
                           "ehms": {
                             "type": "string",
                             "description": "종료시간 / 길이 12"
+                          },
+                          "sseq_notuse": {
+                            "type": "integer",
+                            "format": "int32",
+                            "description": "초당순번 / 길이 10"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz40": {
+                            "type": "string",
+                            "description": "ctsz40 / 길이 40 / Symb(32)+Kymd(8)"
                           }
                         }
                       }
@@ -3378,7 +3595,7 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -3393,7 +3610,7 @@
                     },
                     "required": [
                       "exnm",
-                      "isym"
+                      "iem_cd"
                     ]
                   }
                 }
@@ -3426,13 +3643,25 @@
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
+                          "inrt": {
+                            "type": "string",
+                            "description": "내부루트종목코드 / 길이 32"
+                          },
+                          "pind": {
+                            "type": "string",
+                            "description": "priceindicator / 길이 1"
+                          },
+                          "iem_cd": {
+                            "type": "string",
+                            "description": "내부종목코드 / 길이 32"
+                          },
                           "wsymd": {
                             "type": "string",
-                            "description": "주초일자 / 길이 8"
+                            "description": "주초일자 / 길이 8 / YYYYMMDD"
                           },
                           "weymd": {
                             "type": "string",
-                            "description": "주말일자 / 길이 8"
+                            "description": "주말일자 / 길이 8 / YYYYMMDD"
                           },
                           "nday": {
                             "type": "integer",
@@ -3482,6 +3711,14 @@
                             "type": "number",
                             "format": "double",
                             "description": "누적거래대금 / 길이 17"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz40": {
+                            "type": "string",
+                            "description": "ctsz40 / 길이 40 / Symb(32)+Kymd(8)"
                           }
                         }
                       }
@@ -3519,7 +3756,7 @@
                         "type": "string",
                         "description": "거래소코드 / 길이 8 / FCME.CME지수선물 OOPR.OPRA주식옵션 OCME.CME지수옵션 FHKE.HKEX선물 OHKE.HKEX옵션"
                       },
-                      "isym": {
+                      "iem_cd": {
                         "type": "string",
                         "description": "내부종목코드 / 길이 32 / 예시> E-mini S&P 500 -2609인 경우, ESU26"
                       },
@@ -3534,7 +3771,7 @@
                     },
                     "required": [
                       "exnm",
-                      "isym",
+                      "iem_cd",
                       "kymd"
                     ]
                   }
@@ -3565,6 +3802,18 @@
                             "description": "종목코드 / 길이 32"
                           },
                           "isym": {
+                            "type": "string",
+                            "description": "내부종목코드 / 길이 32"
+                          },
+                          "inrt": {
+                            "type": "string",
+                            "description": "내부루트종목코드 / 길이 32"
+                          },
+                          "pind": {
+                            "type": "string",
+                            "description": "priceindicator / 길이 1"
+                          },
+                          "iem_cd": {
                             "type": "string",
                             "description": "내부종목코드 / 길이 32"
                           },
@@ -3620,6 +3869,14 @@
                             "type": "number",
                             "format": "double",
                             "description": "누적거래대금 / 길이 17"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz40": {
+                            "type": "string",
+                            "description": "ctsz40 / 길이 40 / Symb(32)+Kymd(8)"
                           }
                         }
                       }
@@ -3710,7 +3967,7 @@
                             "type": "string",
                             "description": "거래소ID / 길이 3"
                           },
-                          "enam": {
+                          "iem_cd": {
                             "type": "string",
                             "description": "영문종목명 / 길이 80"
                           },
@@ -3779,7 +4036,7 @@
                           },
                           "fsmc": {
                             "type": "string",
-                            "description": "결제방식 / 길이 1"
+                            "description": "결제방식 / 길이 1 / 1.현금결제 2.실물인수도"
                           },
                           "feamt": {
                             "type": "number",
@@ -3813,6 +4070,14 @@
                             "type": "number",
                             "format": "double",
                             "description": "해외파생가격조정계수 / 길이 17"
+                          },
+                          "nextbutton": {
+                            "type": "string",
+                            "description": "NEXTBUTTON / 길이 1"
+                          },
+                          "ctsz40": {
+                            "type": "string",
+                            "description": "ctsz40 / 길이 40 / exnm(8)+root(32)"
                           }
                         }
                       }
@@ -3913,6 +4178,54 @@
                           "mls_lcl_hur": {
                             "type": "string",
                             "description": "장마감로컬시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_sta_kor_hur": {
+                            "type": "string",
+                            "description": "익일거래시작한국시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_end_kor_hur": {
+                            "type": "string",
+                            "description": "익일거래종료한국시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_sta_kor_smi_hur": {
+                            "type": "string",
+                            "description": "익일거래시작한국서머타임시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_end_kor_smi_hur": {
+                            "type": "string",
+                            "description": "익일거래종료한국서머타임시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_lcl_sta_hur": {
+                            "type": "string",
+                            "description": "익일거래로컬시작시간 / 길이 9"
+                          },
+                          "nxt_dd_trd_lcl_end_hur": {
+                            "type": "string",
+                            "description": "익일거래로컬종료시간 / 길이 9"
+                          },
+                          "nom_mpn_kor_hur": {
+                            "type": "string",
+                            "description": "정규장개시한국시장 / 길이 9"
+                          },
+                          "nom_mls_kor_hur": {
+                            "type": "string",
+                            "description": "정규장마감한국시장 / 길이 9"
+                          },
+                          "nom_mpn_kor_smi_hur": {
+                            "type": "string",
+                            "description": "정규장개시한국서머타임시간 / 길이 9"
+                          },
+                          "nom_mls_kor_smi_hur": {
+                            "type": "string",
+                            "description": "정규장마감한국서머타임시간 / 길이 9"
+                          },
+                          "nom_mpn_lcl_hur": {
+                            "type": "string",
+                            "description": "정규장개시로컬시간 / 길이 9"
+                          },
+                          "nom_mls_lcl_hur": {
+                            "type": "string",
+                            "description": "정규장마감로컬시간 / 길이 9"
                           }
                         }
                       }
@@ -3938,7 +4251,8 @@
     },
     "protocol": {
       "transport": "WebSocket",
-      "auth": "메시지 header 의 token 필드에 access token(POST /oauth2/token 으로 발급)을 전달합니다. REST 와 달리 Authorization: Bearer · x-client-id · x-client-secret 헤더는 사용하지 않습니다.",
+      "connection": "wss 접속(국내 :7070 / 해외 :7080, 모의투자 :17070) 후 구독 메시지 전송. URI 는 /websocket.",
+      "auth": "메시지 header 의 token 필드에 access token(POST /oauth2/token) 전달. REST 와 달리 Authorization/x-client-id/x-client-secret 헤더는 미사용.",
       "subscribe_message": {
         "header": {
           "token": "{access_token}",
@@ -3949,20 +4263,28 @@
           "tr_key": "<구독키>"
         }
       },
+      "unsubscribe": "동일 메시지에서 tr_type 을 '2' 로 전송",
       "tr_type": {
         "1": "등록(구독)",
         "2": "해제"
       },
-      "response_routing": "서버 푸시 메시지는 header 에 tr_cd(채널) 와 tr_key(구독키) 를 포함하여 채널·종목을 식별합니다.",
-      "open_items_TODO": [
-        "heartbeat 주기/포맷 미정",
-        "푸시 payload 인코딩(JSON vs 구분자) 미확정",
-        "통보 채널 암호화 여부 미정",
-        "연결/구독 한도 미정",
-        "재연결 규약 미정"
-      ]
+      "push_message": {
+        "format": "JSON",
+        "delivery": "비정기적 — 데이터 발생 시마다 서버가 push (요청/응답 1:1 아님)",
+        "structure": {
+          "header": {
+            "tr_cd": "채널코드",
+            "tr_key": "구독키"
+          },
+          "body": {
+            "<응답필드>": "..."
+          }
+        }
+      },
+      "heartbeat": "불필요 — 연결 유지 신호(ping/pong) 없음",
+      "encryption": "없음 — 체결/주문 통보 포함 모두 평문 JSON"
     },
-    "note": "실시간 시세·통보는 WebSocket. 구독 포맷·인증은 protocol, 환경별 주소는 endpoints, 채널코드는 channels[].tr_cd 참조.",
+    "note": "실시간 시세·통보는 WebSocket. 구독=protocol.subscribe_message, 서버 푸시=JSON {header,body}. 채널별 실제 예시는 channels[].subscribe_example / push_example.",
     "channels": [
       {
         "name": "해외선물옵션 실시간호가",
@@ -3970,23 +4292,17 @@
         "tr_cd": "FH",
         "tr_key": {
           "name": "isym",
-          "kor": "내부종목코드",
+          "kor": "종목코드",
           "length": "32"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "FH",
-            "tr_key": "<isym>"
-          }
         },
         "fields": [
           "isym",
+          "trxc",
+          "exid",
+          "dven",
           "date",
           "time",
+          "mseq",
           "trdt",
           "trtm",
           "nbid1",
@@ -4023,7 +4339,68 @@
           "vbid",
           "nask",
           "vask"
-        ]
+        ],
+        "subscribe_example": {
+          "header": {
+            "token": "TOKEN",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "FH",
+            "tr_key": "ESU26"
+          }
+        },
+        "push_example": {
+          "header": {
+            "tr_cd": "FH",
+            "tr_key": "ESU26"
+          },
+          "body": {
+            "isym": "ESU26",
+            "trxc": "T31",
+            "exid": "E01",
+            "dven": "",
+            "date": "20260710",
+            "time": "103647665751",
+            "mseq": "",
+            "trdt": "20260710",
+            "trtm": "103647665630",
+            "nbid1": "17",
+            "vbid1": "21",
+            "pbid1": "7579.25",
+            "nask1": "12",
+            "vask1": "14",
+            "pask1": "7579.75",
+            "nbid2": "10",
+            "vbid2": "12",
+            "pbid2": "7579.00",
+            "nask2": "11",
+            "vask2": "26",
+            "pask2": "7580.00",
+            "nbid3": "11",
+            "vbid3": "15",
+            "pbid3": "7578.75",
+            "nask3": "11",
+            "vask3": "13",
+            "pask3": "7580.25",
+            "nbid4": "9",
+            "vbid4": "12",
+            "pbid4": "7578.50",
+            "nask4": "13",
+            "vask4": "20",
+            "pask4": "7580.50",
+            "nbid5": "17",
+            "vbid5": "24",
+            "pbid5": "7578.25",
+            "nask5": "11",
+            "vask5": "17",
+            "pask5": "7580.75",
+            "nbid": "64",
+            "vbid": "84",
+            "nask": "58",
+            "vask": "90"
+          }
+        }
       },
       {
         "name": "해외선물옵션 지연호가",
@@ -4031,23 +4408,17 @@
         "tr_cd": "fh",
         "tr_key": {
           "name": "isym",
-          "kor": "내부종목코드",
+          "kor": "종목코드",
           "length": "32"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "fh",
-            "tr_key": "<isym>"
-          }
         },
         "fields": [
           "isym",
+          "trxc",
+          "exid",
+          "dven",
           "date",
           "time",
+          "mseq",
           "trdt",
           "trtm",
           "nbid1",
@@ -4084,7 +4455,68 @@
           "vbid",
           "nask",
           "vask"
-        ]
+        ],
+        "subscribe_example": {
+          "header": {
+            "token": "TOKEN",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "fh",
+            "tr_key": "ESU26"
+          }
+        },
+        "push_example": {
+          "header": {
+            "tr_cd": "fh",
+            "tr_key": "ESU26"
+          },
+          "body": {
+            "isym": "ESU26",
+            "trxc": "T31",
+            "exid": "E01",
+            "dven": "",
+            "date": "20260710",
+            "time": "103647665751",
+            "mseq": "",
+            "trdt": "20260710",
+            "trtm": "103647665630",
+            "nbid1": "17",
+            "vbid1": "21",
+            "pbid1": "7579.25",
+            "nask1": "12",
+            "vask1": "14",
+            "pask1": "7579.75",
+            "nbid2": "10",
+            "vbid2": "12",
+            "pbid2": "7579.00",
+            "nask2": "11",
+            "vask2": "26",
+            "pask2": "7580.00",
+            "nbid3": "11",
+            "vbid3": "15",
+            "pbid3": "7578.75",
+            "nask3": "11",
+            "vask3": "13",
+            "pask3": "7580.25",
+            "nbid4": "9",
+            "vbid4": "12",
+            "pbid4": "7578.50",
+            "nask4": "13",
+            "vask4": "20",
+            "pask4": "7580.50",
+            "nbid5": "17",
+            "vbid5": "24",
+            "pbid5": "7578.25",
+            "nask5": "11",
+            "vask5": "17",
+            "pask5": "7580.75",
+            "nbid": "64",
+            "vbid": "84",
+            "nask": "58",
+            "vask": "90"
+          }
+        }
       },
       {
         "name": "해외선물옵션 실시간체결가",
@@ -4092,23 +4524,17 @@
         "tr_cd": "FC",
         "tr_key": {
           "name": "isym",
-          "kor": "내부종목코드",
+          "kor": "종목코드",
           "length": "32"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "FC",
-            "tr_key": "<isym>"
-          }
         },
         "fields": [
           "isym",
+          "trxc",
+          "exid",
+          "dven",
           "date",
           "time",
+          "mseq",
           "trdt",
           "trtm",
           "last",
@@ -4121,7 +4547,44 @@
           "diff",
           "rate",
           "bsnsd"
-        ]
+        ],
+        "subscribe_example": {
+          "header": {
+            "token": "TOKEN",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "FC",
+            "tr_key": "ESU26"
+          }
+        },
+        "push_example": {
+          "header": {
+            "tr_cd": "FC",
+            "tr_key": "ESU26"
+          },
+          "body": {
+            "isym": "ESU26",
+            "trxc": "T21",
+            "exid": "E01",
+            "dven": "0",
+            "date": "20260710",
+            "time": "115832830451",
+            "mseq": "",
+            "trdt": "20260710",
+            "trtm": "115832830214",
+            "last": "7585.00",
+            "tqty": "1",
+            "tvol": "37592",
+            "open": "7587.25",
+            "high": "7591.75",
+            "low": "7574.50",
+            "sign": "5",
+            "diff": "-3.75",
+            "rate": "-0.05",
+            "bsnsd": "20260707"
+          }
+        }
       },
       {
         "name": "해외선물옵션 지연체결가",
@@ -4129,23 +4592,17 @@
         "tr_cd": "fc",
         "tr_key": {
           "name": "isym",
-          "kor": "내부종목코드",
+          "kor": "종목코드",
           "length": "32"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "fc",
-            "tr_key": "<isym>"
-          }
         },
         "fields": [
           "isym",
+          "trxc",
+          "exid",
+          "dven",
           "date",
           "time",
+          "mseq",
           "trdt",
           "trtm",
           "last",
@@ -4158,7 +4615,44 @@
           "diff",
           "rate",
           "bsnsd"
-        ]
+        ],
+        "subscribe_example": {
+          "header": {
+            "token": "TOKEN",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "fc",
+            "tr_key": "ESU26"
+          }
+        },
+        "push_example": {
+          "header": {
+            "tr_cd": "fc",
+            "tr_key": "ESU26"
+          },
+          "body": {
+            "isym": "ESU26",
+            "trxc": "T21",
+            "exid": "E01",
+            "dven": "0",
+            "date": "20260710",
+            "time": "115832830451",
+            "mseq": "",
+            "trdt": "20260710",
+            "trtm": "115832830214",
+            "last": "7585.00",
+            "tqty": "1",
+            "tvol": "37592",
+            "open": "7587.25",
+            "high": "7591.75",
+            "low": "7574.50",
+            "sign": "5",
+            "diff": "-3.75",
+            "rate": "-0.05",
+            "bsnsd": "20260707"
+          }
+        }
       },
       {
         "name": "해외선물옵션 실시간체결통보",
@@ -4168,16 +4662,6 @@
           "name": "userid",
           "kor": "사용자ID",
           "length": "8"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "dk",
-            "tr_key": "<userid>"
-          }
         },
         "fields": [
           "userid",
@@ -4199,8 +4683,47 @@
           "indicator",
           "apm_lqd_dit_cd",
           "apm_lqd_cns_pr",
-          "act_amn_tab_cd"
-        ]
+          "act_amn_tab_cd",
+          "filler"
+        ],
+        "subscribe_example": {
+          "header": {
+            "token": "TOKEN",
+            "tr_type": "1"
+          },
+          "body": {
+            "tr_cd": "dk",
+            "tr_key": ""
+          }
+        },
+        "push_example": {
+          "header": {
+            "tr_cd": "dk"
+          },
+          "body": {
+            "userid": "ID",
+            "pdt_dit_cd": "",
+            "act_no": "ACCOUNT NUMBER",
+            "orr_sno": "26070700000015",
+            "iem_cd": "NQU26",
+            "s_iem_cd": "FDF000001148",
+            "sby_dit_cd": "1",
+            "cns_qty": "0000000001",
+            "cns_pr": "29742.00",
+            "cns_tm": "143305",
+            "cor_can_dit_cd": "0",
+            "ost_rjt_cfc": "0",
+            "cns_no": "202607070000000005",
+            "cur_cd": "USD",
+            "orr_dt": "20260707",
+            "iem_nm": "E-mini NASDAQ-100 -2609",
+            "indicator": "2",
+            "apm_lqd_dit_cd": "0",
+            "apm_lqd_cns_pr": "0.00",
+            "act_amn_tab_cd": "0202",
+            "filler": ""
+          }
+        }
       },
       {
         "name": "해외선물옵션 실시간주문내역통보",
@@ -4210,16 +4733,6 @@
           "name": "userid",
           "kor": "사용자ID",
           "length": "8"
-        },
-        "subscribe_example": {
-          "header": {
-            "token": "{access_token}",
-            "tr_type": "1"
-          },
-          "body": {
-            "tr_cd": "dj",
-            "tr_key": "<userid>"
-          }
         },
         "fields": [
           "userid",
@@ -4246,8 +4759,43 @@
           "end_dt",
           "apm_lqd_dit_cd",
           "apm_lqd_cns_pr",
-          "act_amn_tab_cd"
-        ]
+          "act_amn_tab_cd",
+          "filler"
+        ],
+        "subscribe_example": "{\n    \"header\": {\n        \"token\": \"TOKEN\",\n        \"tr_type\": \"1\"\n    },\n    \"body\": {\n        \"tr_cd\": \"dj\"\",\n        \"tr_key\": \"\"\n    }\n}",
+        "push_example": {
+          "header": {
+            "tr_cd": "dj"
+          },
+          "body": {
+            "userid": "ID",
+            "pdt_dit_cd": "",
+            "act_no": "ACCOUNT NUMBER",
+            "orr_sno": "26070700000015",
+            "org_orr_no": "",
+            "ost_orr_dit": "11",
+            "iem_cd": "NQU26",
+            "s_iem_cd": "FDF000001148",
+            "iem_nm": "E-mini NASDAQ-100 -2609",
+            "sby_dit_cd": "1",
+            "nmn_pr_tp_cd": "2",
+            "orr_qty": "0000000001",
+            "orr_pr": "29611.00",
+            "pcs_dit_cd": "00",
+            "cuc_mdi_cd": "F5",
+            "ost_orr_cnd": "",
+            "ost_grp_no": "",
+            "orr_tm": "143305",
+            "cur_cd": "USD",
+            "indicator": "2",
+            "fdv_stop_pr": "0.00",
+            "end_dt": "",
+            "apm_lqd_dit_cd": "0",
+            "apm_lqd_cns_pr": "0.00",
+            "act_amn_tab_cd": "0202",
+            "filler": ""
+          }
+        }
       }
     ]
   },
@@ -4277,7 +4825,7 @@
         "schema": {
           "type": "string"
         },
-        "description": "연속조회 키. 목록 조회 응답의 연속키를 다음 요청 헤더에 세팅"
+        "description": "연속조회 키. 목록 조회 응답 연속키를 다음 요청 헤더에 세팅"
       }
     },
     "schemas": {

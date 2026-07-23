@@ -1,8 +1,8 @@
 # NH투자증권 Open API — 국내금현물 (KR Gold) Endpoint Index
 
-All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Method 는 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260703 최신 / 나무)
+All REST URIs relative to 테스트 `https://devapi.nhplug.com:8443` · Method 모두 `POST` · 요청 `Input_0` / 응답 `Output_0`+`message`. (기준: 260721 / 나무)
 
-> 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/krgold/openapi.json) 입니다.
+> 정본은 [openapi.json](https://www.nhplug.com/openapi-docs/krgold/openapi.json). ⚠️ 실주문은 실거래(api...) 에서만 체결 — 개발은 테스트/모의 우선.
 
 
 ## 주문 (Order)
@@ -34,12 +34,12 @@ All REST URIs relative to `https://api.nhplug.com:8443` (운영 나무) · Metho
 
 ## 실시간 (Realtime, WebSocket)
 
-운영 나무 Endpoint: `wss://api.nhplug.com:7070` · 구독 메시지·인증은 [openapi.json](https://www.nhplug.com/openapi-docs/krgold/openapi.json) 의 `x-realtime-channels.protocol` 참조.
+테스트 Endpoint: `wss://devapi.nhplug.com:7070` · 구독·인증·푸시 규약은 [openapi.json](https://www.nhplug.com/openapi-docs/krgold/openapi.json) 의 `x-realtime-channels.protocol` 참조.
 
 | 채널 | tr_cd | tr_key | 응답 필드 수 |
 |---|---|---|---|
 | 금현물 실시간 호가 | `g5` | `shcode`(종목코드) | 65 |
-| 금현물 실시간 체결가 | `g4` | `shcode`(종목코드) | 13 |
+| 금현물 실시간 체결가 | `g4` | `shcode`(종목코드) | 14 |
 | 금현물 실시간 예상체결가 | `gE` | `shcode`(종목코드) | 8 |
 | 금현물 실시간 체결내역 통보 | `de` | `userid`(사용자ID) | 12 |
 | 금현물 실시간 주문내역 통보 | `d3` | `userid`(사용자ID) | 24 |

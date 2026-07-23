@@ -1,5 +1,8 @@
 # nhplug-sdk
 
+> 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
+> 대화형 AI(Claude 등)로 쓰려면 → [`nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) &nbsp;|&nbsp; 코드로 개발·자동매매하려면 → 이 저장소(`nhplug-sdk`)
+
 NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한 **샘플코드 · 전략 파이프라인 · 문서** 모음입니다. Python 개발자와 AI 코딩 도구(Antigravity·Cursor·Claude) 모두를 위한 개발자 키트입니다.
 
 > 대화형으로 API 를 쓰고 싶다면 로컬 MCP [`plug-support/nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) 를, 코드로 개발하려면 이 저장소를 사용하세요.
