@@ -70,6 +70,10 @@ python krstock_examples.py
 - 주문 샘플은 기본 **드라이런**입니다. 실주문은 `dry_run=False`로, 반드시 모의투자(`moapi`)에서 검증 후.
 - 앱키/시크릿은 코드에 넣지 말고 `.env`로 관리(`.gitignore` 처리됨).
 
+## 가이드
+
+- [Antigravity 로 바이브코딩하기](guides/antigravity.md) — 명세만으로 AI IDE(Antigravity·Cursor)에서 NH Open API 개발·테스트하는 준비와 절차
+
 ## 라이선스 · 문의
 
 MIT · apisupport@nhsec.com
