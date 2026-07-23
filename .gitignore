@@ -5,3 +5,14 @@ __pycache__/
 !.env.example
 .venv/
 .uv/
+
+# 도메인(www.nhplug.com)이 명세 정본(SSOT). docs 미러는 fetch_docs.py 로 받으며 커밋하지 않는다.
+# (docs/README.md 만 커밋 유지)
+docs/llms.txt
+docs/common/
+docs/krstock/
+docs/gbstock/
+docs/krfuture/
+docs/gbfuture/
+docs/krbond/
+docs/krgold/

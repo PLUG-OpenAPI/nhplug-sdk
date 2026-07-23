@@ -1,12 +1,19 @@
-# docs — API 명세 (AI 컨텍스트 정본)
+# docs — API 명세는 **도메인이 정본(SSOT)**
 
-AI 코딩 도구(Antigravity·Cursor·Claude 등)와 개발자가 참고하는 NH Open API 명세입니다.
-이 폴더의 파일이 **저장소에 포함**되어 있어, 클론만 하면 별도 다운로드 없이 바로 컨텍스트로 쓸 수 있습니다.
+NH Open API 명세의 정본은 **도메인**입니다. 이 폴더에는 사본을 커밋하지 않습니다(항상 최신 유지, 재동기화 불필요).
 
-- `llms.txt`                : 전체 개요·인증·공통 규약 (정본 위치: https://www.nhplug.com/llms.txt)
-- `common/openapi.json`     : 토큰 발급·계좌목록 (플랫폼 공통)
-- `krstock/openapi.json`    : 국내주식
-- `gbstock/ krfuture/ gbfuture/ krbond/ krgold/` : 각 자산군 openapi.json + overview.md + README.md
-- `error_codes.md`, `rate_limits.md` : 에러코드·호출제한 (템플릿 — 실제 값으로 보강)
+- 전체 개요·인증·공통 규약: **https://www.nhplug.com/llms.txt**
+- 자산군별 정본: **https://www.nhplug.com/openapi-docs/&lt;자산&gt;/{openapi.json, overview.md, README.md}**
+  - 자산: `common` · `krstock` · `gbstock` · `krfuture` · `gbfuture` · `krbond` · `krgold`
 
-> 원본이 갱신되면 이 폴더의 사본도 함께 갱신하세요. AI 에이전트에게는 "docs 폴더의 명세를 먼저 읽어줘"라고 지시하면 정확도가 올라갑니다.
+## 로컬 사본이 필요하면 (오프라인·AI 컨텍스트용)
+
+```bash
+python scripts/fetch_docs.py
+```
+
+도메인에서 최신 `llms.txt` + 7개 자산 문서를 이 폴더로 내려받습니다. 받은 파일은 `.gitignore` 처리되어 커밋되지 않습니다.
+
+> AI 에이전트에게는 위 URL 을 직접 컨텍스트로 주거나, `fetch_docs.py` 로 받은 뒤 "docs 폴더의 명세를 먼저 읽어줘"라고 지시하세요.
+
+> 에러 처리 규약(`rsp_cd` `00000`/`00166`=정상, `IGW…` 코드)과 호출 제한은 llms.txt·각 openapi.json 및 포털 정책을 따릅니다.

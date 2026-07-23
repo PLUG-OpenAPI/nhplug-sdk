@@ -7,13 +7,14 @@
 - `snippets/` : 기능 단위 실행 샘플(기능당 폴더 = 호출.py + chk_검증.py). 특정 기능 구현 시 참고.
 - `examples/` : 카테고리 통합 예제.
 - `pipeline/` : 설계→검증→실행 파이프라인 골격.
-- `docs/` : API 명세 정본. 코드 작성 전 반드시 참고한다.
+- `docs/` : 도메인 명세의 로컬 사본 위치(`scripts/fetch_docs.py` 로 받음, 커밋 안 함). 정본은 도메인 URL(아래).
 
-## 문서 (Source of Truth)
-- 전체 개요·인증·공통 규약: `docs/llms.txt`
-- 공통(토큰·계좌목록): `docs/common/openapi.json`
-- 국내주식: `docs/krstock/openapi.json` (그 외 자산군: `docs/<domain>/openapi.json`)
-- 엔드포인트·필드·형식은 위 openapi.json 을 정본으로 따른다. 에러코드는 `docs/error_codes.md`, 호출제한은 `docs/rate_limits.md`.
+## 문서 (Source of Truth) — 도메인이 정본(SSOT)
+- 전체 개요·인증·공통 규약: https://www.nhplug.com/llms.txt
+- 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/
+  (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
+- 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
+- 에러 처리: `rsp_cd` `00000`/`00166` 계열=정상, 그 외는 실패로 간주. `IGW…` 계열은 인증·키·환경 문제. 호출제한·상세 코드는 포털 정책 참조.
 
 ## 인증·통신 규약
 - 토큰 발급: POST /oauth2/token, 쿼리파라미터 appkey, appsecretkey, grant_type=client_credentials, scope=oob,

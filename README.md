@@ -18,7 +18,8 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 │   └── gbstock/{current_price, balance, buyable_amount, order_buy}  # 해외주식
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
-docs/              # API 명세(llms.txt/openapi) 배치 + 에러코드/레이트리밋
+scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기
+docs/              # 명세 로컬 사본(fetch_docs 로 생성, 커밋 안 함) — 정본은 도메인
 AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주문형식) — 자동 로드
 ```
 
@@ -33,6 +34,9 @@ uv sync           # 또는: pip install requests python-dotenv
 
 # 자격증명 설정
 cp .env.example .env   # .env 에 APP_KEY / APP_SECRET / BASE_URL 입력
+
+# (선택) 도메인에서 최신 API 명세를 docs/ 로 내려받기 (AI 컨텍스트·오프라인용)
+python scripts/fetch_docs.py
 ```
 
 ### 동작 확인 (함수 단위 샘플)
