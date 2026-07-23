@@ -28,7 +28,7 @@
 - 종목코드 iem_cd: 6자리 그대로 (예: 005930, 앞에 'A' 붙이지 않는다)
 - 주문가격 orr_pr: 원 단위 정수 그대로 (예: 70000). 지정가 nmn_pr_tp_cd='01' + orr_pr, 시장가='05'(orr_pr 생략)
 - 시세 조회(현재가 등) 종목코드도 iem_cd(6자리) + market_cd(KRX/NXT/UNT) 를 쓴다. (구 shrn_iscd 폐지)
-- 형식이 의심되면 docs/krstock/openapi.json 의 해당 operation 예시를 확인한다.
+- 형식이 의심되면 해당 자산군 openapi.json 의 operation 예시를 확인한다: https://www.nhplug.com/openapi-docs/<domain>/openapi.json (또는 `python scripts/fetch_docs.py` 후 docs/<domain>/openapi.json).
 
 ## 환경 (Base URL) — 호출 대상은 .env 의 NHPLUG_BASE_URL, 기본값 api(운영)
 - 🔴 운영 (Live) [기본]:             https://api.nhplug.com:8443
