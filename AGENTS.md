@@ -29,14 +29,14 @@
 - 시세 조회(현재가 등) 종목코드도 iem_cd(6자리) + market_cd(KRX/NXT/UNT) 를 쓴다. (구 shrn_iscd 폐지)
 - 형식이 의심되면 docs/krstock/openapi.json 의 해당 operation 예시를 확인한다.
 
-## 환경 (Base URL) — .env 의 NHPLUG_BASE_URL 로 분리, 기본값 devapi(테스트)
-- 🟢 테스트 (Test) [기본·검증용]: https://devapi.nhplug.com:8443
-- 🟢 모의투자 (Mock) 교육이수:    https://moapi.nhplug.com:8443
-- 🔴 실거래 (Live) 검증 후에만:   https://api.nhplug.com:8443
+## 환경 (Base URL) — 호출 대상은 .env 의 NHPLUG_BASE_URL, 기본값 api(운영)
+- 🔴 운영 (Live) [기본]:             https://api.nhplug.com:8443
+- 🟢 모의투자 (Mock) 교육·시뮬레이션: https://moapi.nhplug.com:8443
+- 접근토큰(/oauth2/token)은 운영(api) 전용 — 모의투자 미제공. 호출이 moapi 여도 토큰은 api 에서 발급(NHPLUG_AUTH_URL, 기본 api).
 
 ## 보안·안전 규칙 (필수)
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.
-- 기본 환경은 테스트(devapi). 운영 실거래(api.nhplug.com)는 명시적으로 전환할 때만.
+- 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.
 - 주문(매수/매도) 실행 전 로그를 남기고, rsp_cd 가 정상(00000)이 아니면 중단한다.
 - 실주문은 사람 확인 절차를 둔다. 완전 무인 실거래는 지양.
 

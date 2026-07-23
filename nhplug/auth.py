@@ -7,7 +7,13 @@ _cache = {"token": None, "exp": 0.0}
 
 
 def get_base_url() -> str:
-    return os.environ.get("NHPLUG_BASE_URL", "https://devapi.nhplug.com:8443")
+    """호출 대상 Base URL. 기본 운영(api). 교육·시뮬레이션은 moapi 로 설정."""
+    return os.environ.get("NHPLUG_BASE_URL", "https://api.nhplug.com:8443")
+
+
+def get_auth_url() -> str:
+    """토큰(/oauth2/token)은 운영(api) 전용 — moapi 미제공. 호출 대상과 무관하게 항상 api."""
+    return os.environ.get("NHPLUG_AUTH_URL", "https://api.nhplug.com:8443")
 
 
 def _keys():
@@ -24,7 +30,7 @@ def get_token() -> str:
     if _cache["token"] and _cache["exp"] > now + 30:
         return _cache["token"]
     app_key, app_sec = _keys()
-    url = f"{get_base_url()}/oauth2/token"
+    url = f"{get_auth_url()}/oauth2/token"
     params = {
         "appkey": app_key,
         "appsecretkey": app_sec,
