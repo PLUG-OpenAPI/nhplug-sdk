@@ -24,11 +24,22 @@ def _keys():
     return app_key, app_sec
 
 
-def get_token() -> str:
-    """유효한 토큰이 캐시에 있으면 재사용, 없으면 발급."""
+def clear_token() -> None:
+    """토큰 캐시를 비운다(다음 get_token 호출 시 강제 재발급). 토큰 무효(IGW40043) 응답 시 client 가 호출."""
+    _cache["token"] = None
+    _cache["exp"] = 0.0
+
+
+def get_token(force: bool = False) -> str:
+    """유효한 토큰이 캐시에 있으면 재사용, 없거나 force 면 재발급.
+
+    토큰 발급 일시장애(IGW40054 등)에는 짧게 재시도한다.
+    유효하지 않은 AppKey(IGW40031)는 즉시 실패한다.
+    """
     now = time.time()
-    if _cache["token"] and _cache["exp"] > now + 30:
+    if not force and _cache["token"] and _cache["exp"] > now + 30:
         return _cache["token"]
+
     app_key, app_sec = _keys()
     url = f"{get_auth_url()}/oauth2/token"
     params = {
@@ -37,13 +48,34 @@ def get_token() -> str:
         "grant_type": "client_credentials",
         "scope": "oob",
     }
-    res = requests.post(url, params=params,
-                        headers={"content-type": "application/x-www-form-urlencoded"}, timeout=10)
-    res.raise_for_status()
-    data = res.json()
-    token = data.get("access_token")
-    if not token:
-        raise RuntimeError(f"토큰 응답에 access_token 이 없습니다: {data}")
-    _cache["token"] = token
-    _cache["exp"] = now + int(data.get("expires_in", 600))
-    return token
+
+    last = ""
+    for attempt in range(3):
+        try:
+            res = requests.post(
+                url, params=params,
+                headers={"content-type": "application/x-www-form-urlencoded"}, timeout=10,
+            )
+        except requests.RequestException as e:
+            last = f"네트워크 오류 — {e}"
+            time.sleep(0.3 * (attempt + 1))
+            continue
+
+        if res.status_code == 200:
+            data = res.json()
+            token = data.get("access_token")
+            if not token:
+                raise RuntimeError(f"토큰 응답에 access_token 이 없습니다: {data}")
+            _cache["token"] = token
+            # expires_in(초)이 오면 사용, 없으면 24h. 무효 응답 시 client 자동 재발급이 안전망.
+            _cache["exp"] = now + int(data.get("expires_in", 86400))
+            return token
+
+        last = f"HTTP {res.status_code} — {res.text[:300]}"
+        # 일시장애면 재시도, 그 외(키 오류 등)는 즉시 실패
+        if "IGW40054" in res.text and attempt < 2:
+            time.sleep(0.4 * (attempt + 1))
+            continue
+        raise RuntimeError(f"토큰 발급 실패 (인증서버 {get_auth_url()}, 운영 전용): {last}")
+
+    raise RuntimeError(f"토큰 발급 실패 (재시도 후에도): {last}")
