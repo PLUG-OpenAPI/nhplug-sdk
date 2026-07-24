@@ -10,8 +10,8 @@
 - `docs/` : 도메인 명세의 로컬 사본 위치(`scripts/fetch_docs.py` 로 받음, 커밋 안 함). 정본은 도메인 URL(아래).
 
 ## 문서 (Source of Truth) — 도메인이 정본(SSOT)
-- 전체 개요·인증·공통 규약: https://www.nhplug.com/llms.txt
-- 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/
+- 전체 개요·인증·공통 규약: https://www.nhplug.com/llms.txt (나무) · https://www.n2plug.com/llms.txt (N2)
+- 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)
   (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
 - 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
 - 에러 처리: `rsp_cd` `00000`/`00166` 계열=정상, 그 외는 실패로 간주. `IGW…` 계열은 인증·키·환경 문제. 호출제한·상세 코드는 포털 정책 참조.
@@ -34,6 +34,7 @@
 - 🔴 운영 (Live) [기본]:             https://api.nhplug.com:8443
 - 🟢 모의투자 (Mock) 교육·시뮬레이션: https://moapi.nhplug.com:8443
 - 접근토큰(/oauth2/token)은 운영(api) 전용 — 모의투자 미제공. 호출이 moapi 여도 토큰은 api 에서 발급(NHPLUG_AUTH_URL, 기본 api).
+- **브랜드(도메인)**: 위는 나무(nhplug.com) 기준. **N2 고객은 NHPLUG_BASE_URL·NHPLUG_AUTH_URL 을 둘 다 n2plug.com 으로** 설정한다(운영 api.n2plug.com / 모의 moapi.n2plug.com). API·필드는 동일, 도메인만 다름. AUTH_URL 까지 같은 브랜드로 안 바꾸면 토큰 발급이 실패한다.
 
 ## 보안·안전 규칙 (필수)
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.

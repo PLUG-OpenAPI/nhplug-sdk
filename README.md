@@ -55,6 +55,17 @@ cd examples/krstock
 python krstock_examples.py
 ```
 
+## 브랜드(도메인) — 나무(Namuh) / N2
+
+API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만 다릅니다.** 아래 예시는 나무(`nhplug.com`) 기준입니다.
+
+| 브랜드 | 운영(Live) | 모의투자(Mock) | 문서·포털 |
+|---|---|---|---|
+| 나무(Namuh) | `api.nhplug.com:8443` | `moapi.nhplug.com:8443` | `www.nhplug.com` |
+| N2 | `api.n2plug.com:8443` | `moapi.n2plug.com:8443` | `www.n2plug.com` |
+
+> ⚠️ **N2 고객**은 `.env` 의 `NHPLUG_BASE_URL` 과 `NHPLUG_AUTH_URL` 을 **둘 다** n2plug 로 바꾸세요. **AUTH_URL(토큰)까지 안 바꾸면 토큰이 나무(api.nhplug)로 가서 실패합니다.**
+
 ## 환경변수
 
 | 변수 | 설명 |

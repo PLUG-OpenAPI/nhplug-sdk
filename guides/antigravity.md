@@ -188,6 +188,8 @@ NHPLUG_APP_KEY=발급받은_APP_KEY
 NHPLUG_APP_SECRET=발급받은_APP_SECRET
 NHPLUG_BASE_URL=https://api.nhplug.com:8443
 NHPLUG_AUTH_URL=https://api.nhplug.com:8443   # 토큰은 운영 전용(moapi 미제공)
+# 브랜드: 나무=nhplug.com / N2=n2plug.com (API 동일, 도메인만 다름).
+# N2 고객은 위 두 줄을 둘 다 n2plug 로 (예: api.n2plug.com:8443). AUTH_URL 도 필수!
 ```
 
 ---

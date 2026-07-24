@@ -2,9 +2,10 @@
 
 NH Open API 명세의 정본은 **도메인**입니다. 이 폴더에는 사본을 커밋하지 않습니다(항상 최신 유지, 재동기화 불필요).
 
-- 전체 개요·인증·공통 규약: **https://www.nhplug.com/llms.txt**
-- 자산군별 정본: **https://www.nhplug.com/openapi-docs/&lt;자산&gt;/{openapi.json, overview.md, README.md}**
+- 전체 개요·인증·공통 규약: **https://www.nhplug.com/llms.txt** (나무) · **https://www.n2plug.com/llms.txt** (N2)
+- 자산군별 정본: **https://www.nhplug.com/openapi-docs/&lt;자산&gt;/{openapi.json, overview.md, README.md}** (나무 / N2는 `n2plug.com`)
   - 자산: `common` · `krstock` · `gbstock` · `krfuture` · `gbfuture` · `krbond` · `krgold`
+  - 브랜드: API·필드는 동일, **접속 도메인만 다름**(나무 nhplug.com / N2 n2plug.com). 런타임엔 본인 브랜드 도메인을 쓰세요.
 
 ## 로컬 사본이 필요하면 (오프라인·AI 컨텍스트용)
 
