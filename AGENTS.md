@@ -23,6 +23,7 @@
 - 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
 - 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투. rsp_cd 가 00000 계열이면 정상.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no. 이 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
+- 실시간(WebSocket): 접속 wss://<host>:7070(국내)·7080(해외)·moapi 17070. 구독 {"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":<채널코드>,"tr_key":<종목코드>}}, 해제 tr_type=2. 푸시 {"header":{tr_cd,tr_key},"body":{...}}. 토큰은 header.token 으로만 전달(운영 발급). 채널코드·필드는 자산군 openapi.json 의 x-realtime-channels 참조. 예: snippets/krstock/realtime_execution.
 
 ## 주문 필드 형식 (중요)
 - 종목코드 iem_cd: 6자리 그대로 (예: 005930, 앞에 'A' 붙이지 않는다)
