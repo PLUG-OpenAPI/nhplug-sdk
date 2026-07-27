@@ -1,13 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "nhplug-sdk"
 version = "0.1.0"
-description = "NH투자증권 Open API 파이썬 샘플·파이프라인·문서"
+description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·업무성공(rsp_cd) 판정 공용 클라이언트"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "NH Investment & Securities Co., Ltd.", email = "apisupport@nhsec.com" }]
 requires-python = ">=3.11"
+keywords = ["nhplug", "n2plug", "nh-investment", "open-api", "trading", "korea-stock"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
 dependencies = [
     "requests>=2.31",
     "python-dotenv>=1.0",
     "websocket-client>=1.6",
 ]
+
+[project.urls]
+Homepage = "https://www.nhplug.com"
+Documentation = "https://www.nhplug.com/llms.txt"
+Repository = "https://github.com/plug-support/nhplug-sdk"
+
+# 배포 대상은 공용 클라이언트 패키지(nhplug)뿐.
+# snippets/ examples/ pipeline/ guides/ docs/ 는 저장소 참고용이라 패키지에 포함하지 않는다.
+# (이 설정이 없으면 flat-layout 자동탐색이 최상위 폴더를 전부 패키지로 인식해 설치가 실패한다)
+[tool.setuptools]
+packages = ["nhplug"]
