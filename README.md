@@ -76,6 +76,26 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_AUTH_URL` | 토큰 발급 URL. 기본 `https://api.nhplug.com:8443`(운영 전용 — moapi 미제공) |
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
 
+## 오류 처리 · 토큰 캐시
+
+```python
+from nhplug import call, NhplugError
+
+try:
+    data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
+except NhplugError as e:
+    print(e.category, e.code, e.message)   # business / rate_limit / auth / network / http
+```
+
+- **HTTP 200 이어도 `rsp_cd` 가 성공 코드(`00000`·`00166`)가 아니면 예외**입니다. 실패를 성공으로 오판하지 않습니다.
+  - 성공 코드 확장: `NHPLUG_SUCCESS_CODES=00000,00166,...`
+  - 예외 없이 원본 응답이 필요하면: `call(..., raise_on_error=False)`
+- **토큰은 24시간 유효하며 `~/.nhplug/token-*.json` 에 캐시**되어 스크립트를 여러 번 실행해도 **재발급하지 않습니다**(재발급 1회 = 보안 알림 1건).
+  - 파일 권한 `600`(macOS·Linux). Windows 는 사용자 프로필 폴더의 기본 ACL 로 보호됩니다.
+  - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`
+  - 재발급은 **401(토큰 무효)** 일 때만 합니다. `429` 재시도에는 기존 토큰을 그대로 사용합니다.
+- **429(호출 유량 초과)** 는 자동 재시도하지 않고 `category="rate_limit"` 예외로 알립니다(실측 한도 초당 5회 수준). 호출 간격을 늘려 주세요.
+
 ## ⚠️ 안전
 
 - 기본 호출 대상은 **운영(api)**. 개발·교육·시뮬레이션은 **모의투자(`moapi`)** 로 전환하세요. 접근토큰은 운영 전용이라, moapi 호출에도 토큰은 api 에서 발급됩니다.

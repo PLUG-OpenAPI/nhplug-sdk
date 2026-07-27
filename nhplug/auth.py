@@ -1,9 +1,26 @@
-"""접근 토큰 발급·캐시. NH 규약: POST /oauth2/token (쿼리파라미터, form-urlencoded)."""
+"""접근 토큰 발급·캐시. NH 규약: POST /oauth2/token (쿼리파라미터, form-urlencoded).
+
+토큰은 **24시간(expires_in=86400)** 유효하다. 재발급 1회 = 보안 알림 1건이므로
+불필요한 재발급을 피해야 한다. 파이썬 스크립트는 실행할 때마다 새 프로세스라
+메모리 캐시만으로는 매 실행 재발급되므로, **파일 캐시**로 프로세스 간 공유한다.
+
+- 캐시 경로: ~/.nhplug/token-<해시>.json  (NHPLUG_TOKEN_CACHE_DIR 로 변경 가능)
+- 해시 = sha256(앱키 + 인증URL) 앞 12자 → 브랜드(나무/N2)·계정별 분리. 앱키 원문은 저장하지 않음
+- 파일 권한은 OS 기본값을 따른다(별도 chmod 없음). Windows·macOS·Linux 모두 동일 동작
+- 끄기: NHPLUG_TOKEN_CACHE=0
+- 재발급 조건은 **만료 또는 401(토큰 무효)** 뿐. 429(유량 초과)에는 재발급하지 않는다.
+"""
+import hashlib
+import json
 import os
 import time
+from pathlib import Path
+
 import requests
 
-_cache = {"token": None, "exp": 0.0}
+from .errors import NhplugError
+
+_cache = {"token": None, "exp": 0.0}  # 프로세스 내 캐시(파일 캐시 앞단)
 
 
 def get_base_url() -> str:
@@ -20,25 +37,81 @@ def _keys():
     app_key = os.environ.get("NHPLUG_APP_KEY") or os.environ.get("APP_KEY")
     app_sec = os.environ.get("NHPLUG_APP_SECRET") or os.environ.get("APP_SECRET")
     if not app_key or not app_sec:
-        raise RuntimeError("NHPLUG_APP_KEY / NHPLUG_APP_SECRET(또는 APP_KEY/APP_SECRET) 환경변수가 필요합니다.")
+        raise NhplugError(
+            "NHPLUG_APP_KEY / NHPLUG_APP_SECRET(또는 APP_KEY/APP_SECRET) 환경변수가 필요합니다.",
+            category="auth",
+        )
     return app_key, app_sec
 
 
+# ---------------------------------------------------------------- 파일 캐시
+
+def _cache_enabled() -> bool:
+    return os.environ.get("NHPLUG_TOKEN_CACHE", "1").strip().lower() not in ("0", "false", "no")
+
+
+def cache_path() -> Path:
+    """토큰 캐시 파일 경로(디버깅·문서용으로 공개)."""
+    base = os.environ.get("NHPLUG_TOKEN_CACHE_DIR")
+    d = Path(base) if base else Path.home() / ".nhplug"
+    app_key, _ = _keys()
+    key = hashlib.sha256(f"{app_key}|{get_auth_url()}".encode("utf-8")).hexdigest()[:12]
+    return d / f"token-{key}.json"
+
+
+def _read_file_cache():
+    if not _cache_enabled():
+        return None
+    try:
+        data = json.loads(cache_path().read_text(encoding="utf-8"))
+        token, exp = data.get("token"), float(data.get("exp", 0))
+        if token and exp > time.time() + 60:
+            return token, exp
+    except Exception:
+        pass  # 캐시 없음/손상/권한 → 무시하고 새로 발급
+    return None
+
+
+def _write_file_cache(token: str, exp: float) -> None:
+    if not _cache_enabled():
+        return
+    try:
+        p = cache_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        tmp = p.with_name(p.name + ".tmp")
+        tmp.write_text(json.dumps({"token": token, "exp": exp}), encoding="utf-8")
+        os.replace(tmp, p)  # 원자적 교체(동시 실행 안전) — Windows·macOS·Linux 공통
+    except Exception:
+        pass  # 캐시 실패는 치명적이지 않음 — 메모리 캐시로 계속 동작
+
+
 def clear_token() -> None:
-    """토큰 캐시를 비운다(다음 get_token 호출 시 강제 재발급). 토큰 무효(IGW40043) 응답 시 client 가 호출."""
+    """토큰 캐시(메모리+파일)를 비운다. 401/IGW40043 응답 시 client 가 호출."""
     _cache["token"] = None
     _cache["exp"] = 0.0
+    try:
+        if _cache_enabled():
+            cache_path().unlink(missing_ok=True)
+    except Exception:
+        pass
 
+
+# ---------------------------------------------------------------- 토큰 발급
 
 def get_token(force: bool = False) -> str:
-    """유효한 토큰이 캐시에 있으면 재사용, 없거나 force 면 재발급.
+    """유효한 토큰이 있으면 재사용, 없거나 force 면 재발급.
 
-    토큰 발급 일시장애(IGW40054 등)에는 짧게 재시도한다.
-    유효하지 않은 AppKey(IGW40031)는 즉시 실패한다.
+    조회 순서: 메모리 캐시 → 파일 캐시 → 신규 발급.
+    force=True 는 **401(토큰 무효)** 일 때만 사용한다. 429 재시도에는 쓰지 않는다.
     """
     now = time.time()
-    if not force and _cache["token"] and _cache["exp"] > now + 30:
-        return _cache["token"]
+    if not force:
+        if _cache["token"] and _cache["exp"] > now + 30:
+            return _cache["token"]
+        cached = _read_file_cache()
+        if cached:
+            _cache["token"], _cache["exp"] = cached
+            return _cache["token"]
 
     app_key, app_sec = _keys()
     url = f"{get_auth_url()}/oauth2/token"
@@ -65,17 +138,19 @@ def get_token(force: bool = False) -> str:
             data = res.json()
             token = data.get("access_token")
             if not token:
-                raise RuntimeError(f"토큰 응답에 access_token 이 없습니다: {data}")
-            _cache["token"] = token
-            # expires_in(초)이 오면 사용, 없으면 24h. 무효 응답 시 client 자동 재발급이 안전망.
-            _cache["exp"] = now + int(data.get("expires_in", 86400))
+                raise NhplugError(f"토큰 응답에 access_token 이 없습니다: {data}",
+                                  category="auth", status=200, raw=data)
+            exp = now + int(data.get("expires_in", 86400))  # 기본 24h
+            _cache["token"], _cache["exp"] = token, exp
+            _write_file_cache(token, exp)
             return token
 
         last = f"HTTP {res.status_code} — {res.text[:300]}"
-        # 일시장애면 재시도, 그 외(키 오류 등)는 즉시 실패
+        # 인증 서버 일시장애(IGW40054)만 짧게 재시도. 키 오류 등은 즉시 실패.
         if "IGW40054" in res.text and attempt < 2:
             time.sleep(0.4 * (attempt + 1))
             continue
-        raise RuntimeError(f"토큰 발급 실패 (인증서버 {get_auth_url()}, 운영 전용): {last}")
+        raise NhplugError(f"토큰 발급 실패 (인증서버 {get_auth_url()}, 운영 전용): {last}",
+                          category="auth", status=res.status_code, raw=res.text)
 
-    raise RuntimeError(f"토큰 발급 실패 (재시도 후에도): {last}")
+    raise NhplugError(f"토큰 발급 실패 (재시도 후에도): {last}", category="auth")

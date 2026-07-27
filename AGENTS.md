@@ -14,7 +14,12 @@
 - 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)
   (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
 - 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
-- 에러 처리: `rsp_cd` `00000`/`00166` 계열=정상, 그 외는 실패로 간주. `IGW…` 계열은 인증·키·환경 문제. 호출제한·상세 코드는 포털 정책 참조.
+- **에러 처리(중요)**: **HTTP 200 ≠ 업무 성공.** 응답 `rsp_cd` 가 `00000`/`00166` 이 아니면 실패다.
+  `nhplug.call()` 이 이를 자동 판정해 `NhplugError`(category: auth|rate_limit|business|network|http)를 던진다.
+  성공 코드 확장은 `NHPLUG_SUCCESS_CODES`, 예외 없이 원본이 필요하면 `call(..., raise_on_error=False)`.
+- **토큰(중요)**: 24시간 유효. `~/.nhplug/` 에 **파일 캐시**되어 프로세스가 바뀌어도 재사용된다(재발급 1회 = 보안 알림 1건).
+  **재발급은 401(토큰 무효)일 때만.** `429`(유량 초과) 재시도에는 기존 토큰을 그대로 쓴다 — 토큰을 직접 재발급하는 코드를 새로 만들지 말 것.
+- **429(IGW42902)**: 자동 재시도하지 않는다. `NhplugError(category="rate_limit")` 로 올라오며 `retry_after_ms` 를 참고해 **호출 간격을 늘려서**(실측 초당 5회 수준) 재시도할지 호출자가 결정한다.
 
 ## 인증·통신 규약
 - 토큰 발급: POST /oauth2/token, 쿼리파라미터 appkey, appsecretkey, grant_type=client_credentials, scope=oob,
