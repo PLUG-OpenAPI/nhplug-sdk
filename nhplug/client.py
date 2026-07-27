@@ -14,8 +14,15 @@ from .errors import NhplugError
 
 _INVALID_TOKEN_RE = re.compile(r"유효하지\s*않은\s*token", re.IGNORECASE)
 
-#: 업무 성공으로 간주하는 rsp_cd. 필요 시 NHPLUG_SUCCESS_CODES=00000,00166,XXXXX 로 확장.
-DEFAULT_SUCCESS_CODES = ("00000", "00166")
+#: 업무 성공으로 확인된 rsp_cd (라이브 검증 기준).
+#:   00000 현재가·계좌목록 / 00166 잔고·자산현황·손익 / 00221 매수가능수량 / 13578 조회 내역 없음(빈 결과)
+#: NH 가 정상코드 전체 목록을 공식 문서화하지 않아, 아래 목록 + "완료" 메시지 안전망으로 판정한다.
+#: 필요 시 NHPLUG_SUCCESS_CODES=00000,00166,... 로 완전히 대체할 수 있다.
+DEFAULT_SUCCESS_CODES = ("00000", "00166", "00221", "13578")
+
+#: 성공 메시지 안전망. NH 성공 응답은 일관되게 "…완료되었습니다" 형태다.
+#: allowlist 에 없는 미지의 정상코드를 실패로 오판하지 않기 위한 2차 방어.
+_SUCCESS_MSG_RE = re.compile(r"완료")
 
 
 def success_codes() -> set[str]:
@@ -23,6 +30,15 @@ def success_codes() -> set[str]:
     if env:
         return {c.strip() for c in env.split(",") if c.strip()}
     return set(DEFAULT_SUCCESS_CODES)
+
+
+def is_success(rsp_cd: str | None, rsp_msg: str | None = None) -> bool:
+    """업무 성공 여부. allowlist 우선, 없으면 메시지에 '완료'가 있으면 성공으로 본다."""
+    if rsp_cd is None:
+        return True  # 봉투에 rsp_cd 가 없는 응답(토큰 등)은 판정 대상 아님
+    if str(rsp_cd) in success_codes():
+        return True
+    return bool(rsp_msg and _SUCCESS_MSG_RE.search(rsp_msg))
 
 
 def _is_invalid_token(status: int, text: str) -> bool:
@@ -119,7 +135,7 @@ def call(path: str, input_0: dict | None = None, cts: str | None = None,
     # ---- HTTP 200 이지만 업무 오류(rsp_cd) ----
     if isinstance(data, dict):
         rsp_cd = data.get("rsp_cd")
-        if rsp_cd is not None and str(rsp_cd) not in success_codes():
+        if not is_success(rsp_cd, data.get("rsp_msg")):
             raise NhplugError(
                 data.get("rsp_msg") or "업무 오류",
                 category="business", code=str(rsp_cd), status=200, path=path,
