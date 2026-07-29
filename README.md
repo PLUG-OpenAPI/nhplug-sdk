@@ -14,9 +14,10 @@ nhplug/            # 공용 클라이언트 (인증·토큰캐시·Input_0 봉�
 snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파일 + chk_ 검증 파일)
 │   ├── auth/issue_token
 │   ├── common/list_accounts
-│   ├── krstock/{current_price, current_daily, balance, buyable_quantity, order_cash_buy, order_cash_sell, realtime_execution}
+│   ├── krstock/{current_price, current_daily, balance, buyable_quantity, sellable_quantity, order_cash_buy, order_cash_sell, realtime_execution}
 │   │        └ realtime_execution = 실시간 체결가 WebSocket 구독 예제
-│   └── gbstock/{current_price, balance, buyable_amount, order_buy}  # 해외주식
+│   └── gbstock/{current_price, balance, buyable_amount, sellable_quantity, order_buy}  # 해외주식
+│            └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기

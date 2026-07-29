@@ -30,6 +30,15 @@
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no. 이 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 - 실시간(WebSocket): 접속 wss://<host>:7070(국내)·7080(해외)·moapi 17070. 구독 {"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":<채널코드>,"tr_key":<종목코드>}}, 해제 tr_type=2. 푸시 {"header":{tr_cd,tr_key},"body":{...}}. 토큰은 header.token 으로만 전달(운영 발급). 채널코드·필드는 자산군 openapi.json 의 x-realtime-channels 참조. 예: snippets/krstock/realtime_execution.
 
+## 주문가능수량 — 국내·해외 구조가 다르다 (중요)
+- **국내**: 매수 `/krstock/inquiry/v1/buyableQuantity` · 매도 `/krstock/inquiry/v1/sellableQuantity` — **API 2개로 분리**.
+  매도는 명세상 iem_cd 가 선택이지만 **실제로는 필수**(없으면 rsp_cd 10006 "종목코드 항목을 입력하세요").
+- **해외**: `/gbstock/inquiry/v1/buyableAmount` **API 1개**에서 `pcs_dit` 로 구분한다.
+  1.매수가능금액 2.매수가능수량 **3.매도가능수량** 4.예약매수금액/수량 5.예약매도수량.
+  (엔드포인트 이름이 "buyable" 이라 매도가 없어 보이지만, pcs_dit=3 으로 조회한다)
+- 응답의 매도가능수량 필드는 국내·해외 모두 `sll_pbl_qty`.
+- 샘플: `snippets/krstock/sellable_quantity`, `snippets/gbstock/sellable_quantity`.
+
 ## 주문 필드 형식 (중요)
 - 종목코드 iem_cd: 6자리 그대로 (예: 005930, 앞에 'A' 붙이지 않는다)
 - 주문가격 orr_pr: 원 단위 정수 그대로 (예: 70000). 지정가 nmn_pr_tp_cd='01' + orr_pr, 시장가='05'(orr_pr 생략)
