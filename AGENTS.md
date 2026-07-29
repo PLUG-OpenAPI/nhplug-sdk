@@ -39,6 +39,13 @@
 - 응답의 매도가능수량 필드는 국내·해외 모두 `sll_pbl_qty`.
 - 샘플: `snippets/krstock/sellable_quantity`, `snippets/gbstock/sellable_quantity`.
 
+## 종목마스터(.mst) — instruments/
+- 구조체 **정본은 `instruments/headers/<키>.h`** (오프셋·길이·코드값·다운로드 URL·레코드 크기 포함). 파서(`instruments/master.py`)가 이 헤더를 읽어 동작하므로 **필드를 추측하지 말고 헤더를 읽을 것**.
+- 사용: `from master import load_master; df = load_master("m_new_stock")` (자동 다운로드·캐시). 포털에서 받은 파일은 `path=` 로 지정.
+- 공통 규칙: CP949 · 고정길이 · 파일헤더 없음 · 레코드 끝 1B LF · **반드시 "rb" 로 열 것** · NUL 종료 아님(길이 슬라이싱 후 rstrip) · **파일크기 % 레코드크기 == 0** 검증 필수.
+- 함정(파서가 이미 처리): 지수옵션 `sPrice`는 ×100이라 **/100** 필요(주식옵션 `sValue`는 스케일 없음) · 위클리 `sMonth`는 **YYMMWW(주차)** · 콜풋은 **CP949 한글 2바이트** · 지수편입은 **`=="Y"`로만** 판정(공백≠N) · 한글종목명 선두 `*`·`#`는 지수 마커.
+- `.mst` 원본은 **커밋 금지**(gitignore). 매일 갱신되며 포털이 배포 정본.
+
 ## 주문 필드 형식 (중요)
 - 종목코드 iem_cd: 6자리 그대로 (예: 005930, 앞에 'A' 붙이지 않는다)
 - 주문가격 orr_pr: 원 단위 정수 그대로 (예: 70000). 지정가 nmn_pr_tp_cd='01' + orr_pr, 시장가='05'(orr_pr 생략)

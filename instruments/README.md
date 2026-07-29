@@ -1,0 +1,83 @@
+# 종목마스터(.mst) — 구조체 문서 + 파서
+
+NH투자증권이 배포하는 **종목마스터 파일 28종**을 파싱하는 샘플입니다.
+
+- **`headers/*.h`** — 마스터별 구조체 정의 **(정본)**. 필드 오프셋·길이·코드값·다운로드 URL·레코드 크기가 모두 들어 있습니다.
+- **`master.py`** — 위 `.h` 를 **읽어서** 동작하는 파서. 문서와 코드가 어긋날 수 없습니다.
+- **`chk_all_masters.py`** — 28종 일괄 검증(성공/실패 리포트).
+- `tools/build_headers.py` — 통합명세서(엑셀) → `.h` 생성기(관리자용).
+
+> `.mst` 원본은 저장소에 포함하지 않습니다. 매일 갱신되는 데이터라 포털이 정본입니다.
+
+## 빠른 시작
+
+```bash
+pip install pandas          # 선택. 없으면 dict 리스트로 반환
+python master.py m_new_stock
+```
+
+```python
+from master import load_master, list_masters
+
+list_masters()                       # 제공 중인 28종 키 목록
+df = load_master("m_new_stock")      # 자동 다운로드(캐시 6h) → 파싱 → DataFrame
+df = load_master("m_optksp")         # 지수옵션 (행사가 자동 /100)
+
+# 포털에서 직접 받은 파일을 쓰는 경우
+df = load_master("m_new_stock", path="./m_new_stock.mst")
+```
+
+## 전체 검증
+
+```bash
+python chk_all_masters.py                    # 28종 전부
+python chk_all_masters.py m_new_stock m_optksp   # 일부만
+python chk_all_masters.py --local ./mst          # 포털에서 받은 폴더 사용
+```
+
+레코드 크기가 실제 파일과 맞지 않으면 해당 마스터가 ❌ 로 보고됩니다(구조체·파일 점검 필요).
+
+## 파서가 대신 처리해 주는 것 (⚠️ 직접 짤 때 자주 틀리는 부분)
+
+| 함정 | 파서 동작 |
+|---|---|
+| 지수옵션 `sPrice` 는 **실제 행사가 ×100** | `strike_price` 컬럼에 `/100` 적용 (`m_optksp·moption·soption·woption·qoption`) |
+| 주식옵션 `m_optstp` `sValue` 는 **스케일 없음** | `/100` 을 **적용하지 않음** |
+| 위클리옵션 `sMonth` 는 **YYMMWW(주차)** | `expiry_yy·expiry_mm·expiry_week` 로 분해 (날짜 오파싱 방지) |
+| 콜풋은 **CP949 한글 2바이트**("콜"/"풋") | `call_put` = `C`/`P` |
+| 지수 편입은 **`== "Y"` 로만** 판정 | `is_krx100·is_krx300·is_kospi50·is_kospi100·is_kosdaq150` (공백은 False) |
+| 한글종목명 선두 마커 `*`(KOSPI200)·`#`(코스닥150) | `index_marker` 분리, `name` 은 마커 제거본 |
+| 파일이 손상되거나 구조체가 다름 | `파일크기 % 레코드크기 != 0` 이면 **즉시 실패** |
+
+원문 필드는 그대로 두고 파생 컬럼을 추가하므로 손실이 없습니다.
+
+## 공통 규칙 (전 파일 적용)
+
+- `#pragma pack(1)` — 패딩 없음. `sizeof` = 항목길이 합계
+- 파일 헤더 없음. 0번 오프셋부터 첫 레코드
+- 고정 길이. **레코드수 = 파일크기 ÷ 레코드크기, 나머지는 반드시 0**
+- 인코딩 **CP949** (UTF-8 아님)
+- 좌측정렬 + 공백(0x20) 우측 패딩
+- 레코드 끝 1바이트 **LF(0x0A)** — CRLF 아님
+- 반드시 **`"rb"`(바이너리)** 로 열 것 — 텍스트 모드는 CRLF 축약·0x1A EOF 로 레코드가 어긋남
+- NUL 종료 문자열이 **아님** → `strlen` 금지, 길이 기반 슬라이싱 후 우측 공백 제거
+
+## 제공 마스터 (28종)
+
+| 구분 | 마스터 |
+|---|---|
+| 국내주식 | `m_new_stock` |
+| 해외주식 | `m_gtsstock` |
+| 국내 선물 | `m_future`·`m_futsp`·`m_starfut`·`m_starfutsp`·`m_stkfut`·`m_stkfutsp`·`m_vfuture`·`m_vfutsp`·`m_mfuture`·`m_mfutsp`·`m_kfuture`·`m_kfutsp`·`m_new_xfuture`·`m_new_xfutsp` |
+| 국내 옵션 | `m_optksp`·`m_moption`·`m_soption`·`m_woption`·`m_qoption`·`m_optstp` |
+| 해외파생 | `foitem_h`·`fucode_h`·`fucode_fhke_h`·`opcode_h`·`opcode_ohke_h` |
+| 국내 장내채권 | `bond_hts` |
+
+각 마스터의 필드 정의는 `headers/<키>.h` 를 보세요. 금현물은 마스터 파일이 없고 전문(`IVOGLDREQ01`)으로 조회합니다.
+
+## 명세가 갱신되면
+
+```bash
+python tools/build_headers.py 종목마스터_통합명세서.xlsx   # headers/*.h 재생성
+python chk_all_masters.py                                  # 28종 재검증
+```
