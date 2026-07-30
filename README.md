@@ -80,6 +80,29 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
 | `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
 
+## 계좌구분(`acct_type`) — 환경에 맞는 계좌 고르기
+
+계좌목록(`/n2/acctinfo`)은 **여러 구분의 계좌를 섞어서** 내려줍니다. 계좌구분이 사용 환경을 결정합니다.
+
+| `acct_type` | 용도 | 사용 도메인 |
+|---|---|---|
+| `01` | 🔴 운영 (일반) | `api.nhplug.com:8443` |
+| `02` | 🔴 운영 (주문대리인) | `api.nhplug.com:8443` |
+| `03` | 🟢 모의투자 | `moapi.nhplug.com:8443` |
+
+> ⚠️ **운영 도메인에 `03` 계좌를, 모의투자 도메인에 `01`·`02` 계좌를 쓰면 실패합니다.** 목록의 첫 계좌를 그대로 쓰지 마세요.
+
+```python
+from snippets.common.list_accounts.list_accounts import usable_accounts, current_env
+
+current_env()        # 'live' | 'mock'  — NHPLUG_BASE_URL 기준
+usable_accounts()    # 현재 환경에서 쓸 수 있는 계좌만
+```
+
+```bash
+python snippets/common/list_accounts/list_accounts.py   # 계좌별 환경·사용가능 여부 표로 출력
+```
+
 ## 오류 처리 · 토큰 캐시
 
 ```python
