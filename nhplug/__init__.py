@@ -10,11 +10,11 @@
 토큰은 24시간 유효하며 ~/.nhplug/ 에 파일 캐시되어 프로세스가 바뀌어도 재사용됩니다
 (불필요한 재발급 = 보안 알림 발생). 끄려면 NHPLUG_TOKEN_CACHE=0.
 """
-try:
-    from dotenv import load_dotenv  # .env 자동 로드(있으면)
-    load_dotenv()
-except Exception:
-    pass
+from ._env import global_env_path, load_env, loaded_files
+
+# 설정 파일 자동 로드. 한 곳(.env)만 고치면 모든 코드에 적용된다.
+#   실제 환경변수 > NHPLUG_ENV_FILE > 프로젝트 .env(CWD 기준) > 전역 ~/.nhplug/.env
+load_env()
 
 from .auth import get_token, get_base_url, get_auth_url, clear_token, cache_path
 from .client import call, success_codes
@@ -26,6 +26,7 @@ __all__ = [
     "call", "success_codes",
     "get_token", "get_base_url", "get_auth_url", "clear_token", "cache_path",
     "NhplugError",
+    "load_env", "loaded_files", "global_env_path",
     "__version__",
 ]
 

@@ -77,6 +77,29 @@ cd examples/krstock
 python krstock_examples.py
 ```
 
+## 설정 — 파일 하나만 관리하면 됩니다
+
+자격증명과 도메인은 **`.env` 한 곳**에서 읽습니다. 코드마다 따로 지정할 필요가 없습니다.
+
+| 순위 | 위치 | 용도 |
+|---|---|---|
+| 1 | **실제 환경변수** | CI·컨테이너·`claude_desktop_config.json` 등이 항상 이깁니다 |
+| 2 | `NHPLUG_ENV_FILE=경로` | 팀 공용 설정 파일을 직접 지정 |
+| 3 | **프로젝트 `.env`** | 현재 폴더에서 위로 올라가며 탐색 — 프로젝트별로 다르게 쓸 때 |
+| 4 | **`~/.nhplug/.env`** | **한 번 만들면 모든 프로젝트에 공통 적용** (권장) |
+
+빈 값은 다음 순위에서 보충되므로, 전역에 공통 설정을 두고 프로젝트에서 필요한 줄만 덮어쓸 수 있습니다.
+
+```bash
+# 전역 설정 (한 번만)
+mkdir -p ~/.nhplug && cp .env.example ~/.nhplug/.env   # Windows: %USERPROFILE%\.nhplug\.env
+```
+
+```python
+from nhplug import loaded_files, get_base_url, get_auth_url
+loaded_files()     # 어떤 설정 파일을 읽었는지 확인 (문제 생기면 여기부터)
+```
+
 ## 브랜드(도메인) — 나무(Namuh) / N2
 
 API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만 다릅니다.** 아래 예시는 나무(`nhplug.com`) 기준입니다.
@@ -86,8 +109,15 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | 나무(Namuh) | `api.nhplug.com:8443` | `moapi.nhplug.com:8443` | `www.nhplug.com` |
 | N2 | `api.n2plug.com:8443` | `moapi.n2plug.com:8443` | `www.n2plug.com` |
 
-> ⚠️ **N2 고객**은 `.env` 의 `NHPLUG_BASE_URL` 과 `NHPLUG_AUTH_URL` 을 **둘 다** n2plug 로 바꾸세요. **AUTH_URL(토큰)까지 안 바꾸면 토큰이 나무(api.nhplug)로 가서 실패합니다.**
-> 종목마스터를 쓴다면 `NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments` 도 함께 설정하세요.
+> ⚠️ **N2 고객은 `.env` 에서 세 줄을 모두 n2plug 로** 바꾸세요. 하나라도 빠지면 그 기능만 조용히 나무 도메인으로 갑니다.
+>
+> ```env
+> NHPLUG_BASE_URL=https://api.n2plug.com:8443          # 호출 (모의투자는 moapi.n2plug.com:8443)
+> NHPLUG_AUTH_URL=https://api.n2plug.com:8443          # 토큰 — 안 바꾸면 인증 실패
+> NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments   # 종목마스터
+> ```
+>
+> 실시간(WebSocket) 주소는 `NHPLUG_BASE_URL` 에서 **자동으로 유도**되므로 따로 설정하지 않아도 됩니다.
 
 ## 환경변수
 

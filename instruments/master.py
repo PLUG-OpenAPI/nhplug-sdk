@@ -40,6 +40,21 @@ from urllib.parse import urlsplit
 HEADER_DIR = Path(__file__).resolve().parent / "headers"
 
 
+def _load_env() -> None:
+    """설정 파일(.env) 로드. 패키지로 import 되면 nhplug 가 이미 처리하지만,
+    이 파일을 단독 스크립트로 실행할 때도 같은 설정을 쓰도록 한 번 더 시도한다."""
+    try:
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from nhplug._env import load_env
+        load_env()
+    except Exception:
+        pass  # nhplug 를 못 찾으면 실제 환경변수만 사용
+
+
+_load_env()
+
+
 def _default_cache_dir() -> Path:
     """마스터 캐시 위치.
 

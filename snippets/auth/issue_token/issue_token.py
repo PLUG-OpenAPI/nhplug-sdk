@@ -9,5 +9,6 @@ def issue_token() -> str:
 
 
 if __name__ == "__main__":
+    # 🔒 토큰 값은 일부라도 출력하지 않는다(화면 공유·로그 캡처로 유출될 수 있음).
     tok = issue_token()
-    print("access_token:", tok[:16], "...")
+    print(f"토큰 발급 성공 (길이 {len(tok)}자) ✅")

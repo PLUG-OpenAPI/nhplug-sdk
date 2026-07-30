@@ -82,6 +82,14 @@
 - 접근토큰(/oauth2/token)은 운영(api) 전용 — 모의투자 미제공. 호출이 moapi 여도 토큰은 api 에서 발급(NHPLUG_AUTH_URL, 기본 api).
 - **브랜드(도메인)**: 위는 나무(nhplug.com) 기준. **N2 고객은 NHPLUG_BASE_URL·NHPLUG_AUTH_URL 을 둘 다 n2plug.com 으로** 설정한다(운영 api.n2plug.com / 모의 moapi.n2plug.com). API·필드는 동일, 도메인만 다름. AUTH_URL 까지 같은 브랜드로 안 바꾸면 토큰 발급이 실패한다.
 
+## 설정 파일 — 한 곳만 고친다 (중요)
+- 자격증명·도메인은 **`.env` 한 파일**에서 읽는다. 코드에 URL·키를 직접 쓰거나 스크립트마다 따로 지정하지 말 것.
+- 우선순위: **실제 환경변수 > `NHPLUG_ENV_FILE` > 프로젝트 `.env`(CWD 기준 상위 탐색) > 전역 `~/.nhplug/.env`**.
+  빈 값은 다음 순위에서 보충되므로, 전역에 공통 설정을 두고 프로젝트에서 필요한 줄만 덮어쓸 수 있다.
+- 어떤 파일을 읽었는지는 `from nhplug import loaded_files; loaded_files()` 로 확인한다(설정 문제 진단 1순위).
+- ⚠️ **브랜드 전환은 3줄 모두**: `NHPLUG_BASE_URL`(호출) · `NHPLUG_AUTH_URL`(토큰) · `NHPLUG_INSTRUMENTS_BASE`(종목마스터).
+  하나라도 빠지면 그 기능만 조용히 나무 도메인으로 간다. 실시간(WS) 주소는 BASE_URL 에서 자동 유도된다.
+
 ## 보안·안전 규칙 (필수)
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.
 - 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.

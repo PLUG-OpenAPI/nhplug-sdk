@@ -13,6 +13,7 @@
 import hashlib
 import json
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -20,7 +21,40 @@ import requests
 
 from .errors import NhplugError
 
-_cache = {"token": None, "exp": 0.0}  # 프로세스 내 캐시(파일 캐시 앞단)
+# 프로세스 내 캐시(파일 캐시 앞단). scope 로 (앱키, 인증서버) 조합을 묶어
+# 브랜드·키가 바뀌면 이전 토큰을 재사용하지 않는다.
+_cache = {"token": None, "exp": 0.0, "scope": None}
+
+
+def _host(url: str) -> str:
+    return url.split("://", 1)[-1].split("/", 1)[0].split(":", 1)[0].lower()
+
+
+def brand_of(url: str) -> str:
+    """URL 이 어느 브랜드인지. 'nhplug'(나무) · 'n2plug' · 'unknown'."""
+    host = _host(url)
+    if host.endswith("nhplug.com"):
+        return "nhplug"
+    if host.endswith("n2plug.com"):
+        return "n2plug"
+    return "unknown"
+
+
+def check_brand_consistency() -> str | None:
+    """호출(BASE_URL)과 토큰(AUTH_URL)의 브랜드가 다르면 경고 문구를 돌려준다.
+
+    나무 키를 N2 도메인에 쓰는(또는 그 반대) 설정 실수를 잡기 위한 것.
+    두 파일(.env)에 나눠 적다가 한쪽만 바꾸면 조용히 어긋난다.
+    """
+    b_call, b_auth = brand_of(get_base_url()), brand_of(get_auth_url())
+    if "unknown" in (b_call, b_auth) or b_call == b_auth:
+        return None
+    return (
+        f"⚠️ 브랜드 불일치: 호출은 {b_call}({_host(get_base_url())}), "
+        f"토큰은 {b_auth}({_host(get_auth_url())}) 입니다. "
+        f"NHPLUG_BASE_URL·NHPLUG_AUTH_URL·NHPLUG_INSTRUMENTS_BASE 를 같은 브랜드로 맞추세요. "
+        f"(설정 출처: nhplug.loaded_files())"
+    )
 
 
 def get_base_url() -> str:
@@ -31,6 +65,12 @@ def get_base_url() -> str:
 def get_auth_url() -> str:
     """토큰(/oauth2/token)은 운영(api) 전용 — moapi 미제공. 호출 대상과 무관하게 항상 api."""
     return os.environ.get("NHPLUG_AUTH_URL", "https://api.nhplug.com:8443")
+
+
+def _cache_scope() -> str:
+    """토큰이 유효한 범위 = (앱키, 인증서버). 값 자체는 남기지 않고 해시만 쓴다."""
+    app_key, _ = _keys()
+    return hashlib.sha256(f"{app_key}|{get_auth_url()}".encode("utf-8")).hexdigest()[:16]
 
 
 def _keys():
@@ -105,6 +145,12 @@ def get_token(force: bool = False) -> str:
     force=True 는 **401(토큰 무효)** 일 때만 사용한다. 429 재시도에는 쓰지 않는다.
     """
     now = time.time()
+    # 🔒 메모리 캐시는 (앱키, 인증서버) 조합에 묶는다.
+    #    한 프로세스에서 브랜드(나무↔N2)나 키를 바꿔도 이전 토큰이 재사용되지 않도록.
+    scope = _cache_scope()
+    if _cache["scope"] != scope:
+        _cache["token"], _cache["exp"], _cache["scope"] = None, 0.0, scope
+
     if not force:
         if _cache["token"] and _cache["exp"] > now + 30:
             return _cache["token"]
@@ -114,6 +160,9 @@ def get_token(force: bool = False) -> str:
             return _cache["token"]
 
     app_key, app_sec = _keys()
+    warn = check_brand_consistency()
+    if warn:  # 잘못된 브랜드 조합으로 키가 나가기 전에 알린다
+        print(warn, file=sys.stderr)
     url = f"{get_auth_url()}/oauth2/token"
     params = {
         "appkey": app_key,
