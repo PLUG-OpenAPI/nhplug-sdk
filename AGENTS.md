@@ -2,8 +2,15 @@
 
 이 저장소로 개발하는 AI 코딩 에이전트(Antigravity·Cursor·Claude Code 등)는 아래 규칙을 따른다.
 
+## 설치 — `pip install nhplug` (패키지명 `nhplug`, 저장소명 `nhplug-sdk`)
+- 배포되는 것: `nhplug`(코어) · `nhplug.realtime`(WebSocket) · `nhplug.instruments`(종목마스터 파서 + `.h` 28종).
+- 배포되지 않는 것: `snippets/` `examples/` `pipeline/` `guides/` — 저장소를 clone 해서 참고한다.
+- `pip install "nhplug[instruments]"` 로 pandas 를 함께 설치하면 마스터가 DataFrame 으로 온다.
+- ⚠️ 저장소 경로 `instruments/` 는 설치 시에만 `nhplug/instruments/` 로 매핑된다(`package-dir`).
+  **헤더 `.h` 의 GitHub 링크가 포털에 게시돼 있어 저장소 경로를 옮기면 안 된다.**
+
 ## 저장소 개요
-- `nhplug/` : 공용 클라이언트(토큰 발급·캐시, Input_0 봉투, 헤더 자동). 새 코드는 이걸 재사용한다.
+- `nhplug/` : 공용 클라이언트(토큰 발급·캐시, Input_0 봉투, 헤더 자동) + `realtime.py`. 새 코드는 이걸 재사용한다.
 - `snippets/` : 기능 단위 실행 샘플(기능당 폴더 = 호출.py + chk_검증.py). 특정 기능 구현 시 참고.
 - `examples/` : 카테고리 통합 예제.
 - `pipeline/` : 설계→검증→실행 파이프라인 골격.

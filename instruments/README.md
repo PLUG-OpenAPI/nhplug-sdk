@@ -12,10 +12,27 @@ NH투자증권이 배포하는 **종목마스터 파일 28종**을 파싱하는 
 
 ## 빠른 시작
 
+**설치해서 쓰기 (권장)**
+
+```bash
+pip install "nhplug[instruments]"   # pandas 포함. 그냥 nhplug 만 설치하면 dict 리스트 반환
+```
+
+```python
+from nhplug.instruments import load_master, list_masters
+
+list_masters()                    # 28종 키 목록
+df = load_master("m_new_stock")   # 자동 다운로드(캐시 6h) → 파싱
+```
+
+**저장소에서 직접 실행**
+
 ```bash
 pip install pandas          # 선택. 없으면 dict 리스트로 반환
 python master.py m_new_stock
 ```
+
+> 캐시는 `~/.nhplug/instruments/<도메인>/` 에 저장됩니다(`NHPLUG_INSTRUMENTS_CACHE_DIR` 로 변경 가능).
 
 ### 브랜드(도메인) — 나무 / N2
 

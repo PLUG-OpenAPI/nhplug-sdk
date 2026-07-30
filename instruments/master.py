@@ -38,7 +38,21 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 HEADER_DIR = Path(__file__).resolve().parent / "headers"
-CACHE_DIR = Path(__file__).resolve().parent / ".cache"
+
+
+def _default_cache_dir() -> Path:
+    """마스터 캐시 위치.
+
+    ⚠️ 패키지 폴더 안에 두면 안 된다 — `pip install` 후에는 site-packages 가
+    읽기 전용이거나 권한이 없어 다운로드가 실패한다. 사용자 홈을 기본으로 쓴다.
+    `NHPLUG_INSTRUMENTS_CACHE_DIR` 로 변경 가능.
+    """
+    env = (os.environ.get("NHPLUG_INSTRUMENTS_CACHE_DIR") or "").strip()
+    if env:
+        return Path(env).expanduser()
+    return Path.home() / ".nhplug" / "instruments"
+
+
 CACHE_TTL_SEC = 6 * 3600  # 6시간 이내 받은 파일은 재사용
 
 # 마스터 배포 기준 URL. 브랜드(나무/N2) 전환용 — 아래 instruments_base() 참고.
@@ -154,7 +168,7 @@ def download(key: str, dest: Path | None = None, force: bool = False, timeout: i
     url = resolve_url(lay)
     if not url:
         raise ValueError(f"{key}.h 에 @url 이 없습니다. path= 로 로컬 파일을 지정하세요.")
-    dest = dest or (CACHE_DIR / (urlsplit(url).hostname or "unknown") / lay.file)
+    dest = dest or (_default_cache_dir() / (urlsplit(url).hostname or "unknown") / lay.file)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     if not force and dest.exists() and (time.time() - dest.stat().st_mtime) < CACHE_TTL_SEC:

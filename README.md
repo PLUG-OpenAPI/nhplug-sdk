@@ -26,7 +26,26 @@ docs/              # 명세 로컬 사본(fetch_docs 로 생성, 커밋 안 함)
 AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주문형식) — 자동 로드
 ```
 
-## 빠른 시작
+## 설치
+
+```bash
+pip install nhplug                 # 공용 클라이언트 + 실시간(WebSocket) + 종목마스터 파서
+pip install "nhplug[instruments]"  # 종목마스터를 pandas DataFrame 으로 받고 싶을 때
+```
+
+```python
+from nhplug import call
+from nhplug.realtime import subscribe
+from nhplug.instruments import load_master
+
+call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
+load_master("m_new_stock")                      # 전 종목 마스터 (자동 다운로드·캐시)
+subscribe(["005930"], print, max_messages=5)    # 실시간 체결가
+```
+
+> 패키지 이름은 `nhplug`, 저장소 이름은 `nhplug-sdk` 입니다. 샘플코드(`snippets/`·`examples/`)는 패키지에 포함되지 않으니 아래처럼 저장소를 받아 참고하세요.
+
+## 저장소로 시작 (샘플코드 실행)
 
 ```bash
 git clone https://github.com/plug-support/nhplug-sdk
@@ -79,6 +98,8 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_AUTH_URL` | 토큰 발급 URL. 기본 `https://api.nhplug.com:8443`(운영 전용 — moapi 미제공) |
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
 | `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
+| `NHPLUG_INSTRUMENTS_CACHE_DIR` | 종목마스터 캐시 위치. 기본 `~/.nhplug/instruments/` |
+| `NHPLUG_WS_URL` | 실시간 WebSocket 주소를 직접 지정. 없으면 `NHPLUG_BASE_URL` 호스트에서 유도(국내 7070 · 해외 7080 · 모의 17070) |
 
 ## 계좌구분(`acct_type`) — 환경에 맞는 계좌 고르기
 

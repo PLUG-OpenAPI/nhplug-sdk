@@ -17,8 +17,11 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import master  # noqa: E402
+try:  # 설치된 패키지로 실행될 때
+    from . import master
+except ImportError:  # 저장소에서 스크립트로 직접 실행될 때
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import master  # noqa: E402
 
 
 def check(key: str, local_dir: Path | None):

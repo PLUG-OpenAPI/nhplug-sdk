@@ -20,8 +20,15 @@ from .auth import get_token, get_base_url, get_auth_url, clear_token, cache_path
 from .client import call, success_codes
 from .errors import NhplugError
 
+__version__ = "0.1.0"
+
 __all__ = [
     "call", "success_codes",
     "get_token", "get_base_url", "get_auth_url", "clear_token", "cache_path",
     "NhplugError",
+    "__version__",
 ]
+
+# 하위 모듈은 필요할 때 import 한다 (선택 의존성이 없어도 패키지가 로드되도록).
+#   from nhplug.realtime import subscribe          # websocket-client 필요
+#   from nhplug.instruments import load_master     # pandas 는 선택

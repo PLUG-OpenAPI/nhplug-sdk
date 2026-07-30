@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nhplug-sdk"
+name = "nhplug"
 version = "0.1.0"
-description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·업무성공(rsp_cd) 판정 공용 클라이언트"
+description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·rsp_cd 판정·실시간(WebSocket)·종목마스터 파서"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "NH Investment & Securities Co., Ltd.", email = "apisupport@nhsec.com" }]
@@ -28,13 +28,31 @@ dependencies = [
     "websocket-client>=1.6",
 ]
 
+[project.optional-dependencies]
+# 종목마스터를 DataFrame 으로 받고 싶을 때: pip install nhplug[instruments]
+# (없어도 동작한다 — dict 리스트로 반환)
+instruments = ["pandas>=2.0"]
+
 [project.urls]
 Homepage = "https://www.nhplug.com"
 Documentation = "https://www.nhplug.com/llms.txt"
 Repository = "https://github.com/plug-support/nhplug-sdk"
 
-# 배포 대상은 공용 클라이언트 패키지(nhplug)뿐.
-# snippets/ examples/ pipeline/ guides/ docs/ 는 저장소 참고용이라 패키지에 포함하지 않는다.
+# 배포 대상은 공용 클라이언트(nhplug)와 종목마스터 파서(nhplug.instruments).
+# snippets/ examples/ pipeline/ guides/ docs/ 는 저장소 참고용이라 포함하지 않는다.
 # (이 설정이 없으면 flat-layout 자동탐색이 최상위 폴더를 전부 패키지로 인식해 설치가 실패한다)
 [tool.setuptools]
-packages = ["nhplug"]
+packages = ["nhplug", "nhplug.instruments"]
+
+# ⚠️ 저장소의 instruments/ 를 옮기지 않고 설치 시에만 nhplug.instruments 로 매핑한다.
+#    헤더(.h) 의 GitHub 링크가 포털에 게시돼 있어 경로를 바꾸면 전부 깨지기 때문이다.
+#      저장소: instruments/headers/<키>.h
+#      설치본: nhplug/instruments/headers/<키>.h
+[tool.setuptools.package-dir]
+"nhplug" = "nhplug"
+"nhplug.instruments" = "instruments"
+
+# 구조체 헤더 28종은 코드가 아니라 데이터라 명시해야 wheel 에 포함된다.
+[tool.setuptools.package-data]
+"nhplug" = ["py.typed"]
+"nhplug.instruments" = ["headers/*.h"]
