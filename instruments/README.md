@@ -8,6 +8,7 @@ NH투자증권이 배포하는 **종목마스터 파일 28종**을 파싱하는 
 - `tools/build_headers.py` — 통합명세서(엑셀) → `.h` 생성기(관리자용).
 
 > `.mst` 원본은 저장소에 포함하지 않습니다. 매일 갱신되는 데이터라 포털이 정본입니다.
+> 다운로드는 **인증이 필요 없습니다** — 토큰·`x-client-*` 헤더 없이 공개 접근입니다.
 
 ## 빠른 시작
 
@@ -15,6 +16,23 @@ NH투자증권이 배포하는 **종목마스터 파일 28종**을 파싱하는 
 pip install pandas          # 선택. 없으면 dict 리스트로 반환
 python master.py m_new_stock
 ```
+
+### 브랜드(도메인) — 나무 / N2
+
+마스터 파일은 브랜드별로 다른 도메인에서 배포됩니다. `.h` 의 `@url` 은 **나무 기준**이므로 N2 고객은 기준 URL 을 바꿔 주세요.
+
+| 브랜드 | 다운로드 기준 URL | 설정 |
+|---|---|---|
+| 나무(Namuh) | `https://www.nhplug.com/instruments` | 기본값 (설정 불필요) |
+| N2 | `https://www.n2plug.com/instruments` | `NHPLUG_INSTRUMENTS_BASE` 지정 |
+
+```bash
+# N2 고객
+export NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments   # Windows: set / $env:
+python chk_all_masters.py
+```
+
+> 캐시는 도메인별 폴더로 분리되므로 브랜드를 바꿔도 파일이 섞이지 않습니다. 파일 구조체(`.h`)는 두 브랜드 공용입니다.
 
 ```python
 from master import load_master, list_masters

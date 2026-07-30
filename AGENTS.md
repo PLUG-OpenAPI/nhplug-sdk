@@ -14,10 +14,13 @@
 - 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)
   (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
 - 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
-- **에러 처리(중요)**: **HTTP 200 ≠ 업무 성공.** 응답 `rsp_cd` 가 `00000`/`00166` 이 아니면 실패다.
+- **에러 처리(중요)**: **HTTP 200 ≠ 업무 성공.** 응답 `rsp_cd` 가 성공 코드가 아니면 실패다.
+  성공 코드는 **`00000`·`00166`·`00221`·`13578`** (+ `rsp_msg` 에 "완료" 포함 시 성공으로 보는 안전망).
+  ⚠️ `00000`/`00166` 만 성공으로 보는 코드를 새로 쓰지 말 것 — 매수가능수량 조회는 `00221`("조회가 완료되었습니다") 로 응답한다.
   `nhplug.call()` 이 이를 자동 판정해 `NhplugError`(category: auth|rate_limit|business|network|http)를 던진다.
-  성공 코드 확장은 `NHPLUG_SUCCESS_CODES`, 예외 없이 원본이 필요하면 `call(..., raise_on_error=False)`.
+  성공 코드 교체는 `NHPLUG_SUCCESS_CODES`, 예외 없이 원본이 필요하면 `call(..., raise_on_error=False)`.
 - **토큰(중요)**: 24시간 유효. `~/.nhplug/` 에 **파일 캐시**되어 프로세스가 바뀌어도 재사용된다(재발급 1회 = 보안 알림 1건).
+  캐시 파일 권한은 OS 기본값이다(별도 chmod 없음). 공유 환경이면 `NHPLUG_TOKEN_CACHE_DIR` 로 옮기거나 `NHPLUG_TOKEN_CACHE=0`.
   **재발급은 401(토큰 무효)일 때만.** `429`(유량 초과) 재시도에는 기존 토큰을 그대로 쓴다 — 토큰을 직접 재발급하는 코드를 새로 만들지 말 것.
 - **429(IGW42902)**: 자동 재시도하지 않는다. `NhplugError(category="rate_limit")` 로 올라오며 `retry_after_ms` 를 참고해 **호출 간격을 늘려서**(실측 초당 5회 수준) 재시도할지 호출자가 결정한다.
 
@@ -42,6 +45,8 @@
 ## 종목마스터(.mst) — instruments/
 - 구조체 **정본은 `instruments/headers/<키>.h`** (오프셋·길이·코드값·다운로드 URL·레코드 크기 포함). 파서(`instruments/master.py`)가 이 헤더를 읽어 동작하므로 **필드를 추측하지 말고 헤더를 읽을 것**.
 - 사용: `from master import load_master; df = load_master("m_new_stock")` (자동 다운로드·캐시). 포털에서 받은 파일은 `path=` 로 지정.
+- **다운로드는 인증 불필요**(토큰·`x-client-*` 헤더 없이 공개 접근). 마스터 받으려고 토큰을 발급하지 말 것.
+- **브랜드**: `.h` 의 `@url` 은 나무(`www.nhplug.com/instruments`) 기준이다. **N2 는 `NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments`** 로 전환한다(캐시는 도메인별로 분리됨).
 - 공통 규칙: CP949 · 고정길이 · 파일헤더 없음 · 레코드 끝 1B LF · **반드시 "rb" 로 열 것** · NUL 종료 아님(길이 슬라이싱 후 rstrip) · **파일크기 % 레코드크기 == 0** 검증 필수.
 - 함정(파서가 이미 처리): 지수옵션 `sPrice`는 ×100이라 **/100** 필요(주식옵션 `sValue`는 스케일 없음) · 위클리 `sMonth`는 **YYMMWW(주차)** · 콜풋은 **CP949 한글 2바이트** · 지수편입은 **`=="Y"`로만** 판정(공백≠N) · 한글종목명 선두 `*`·`#`는 지수 마커.
 - `.mst` 원본은 **커밋 금지**(gitignore). 매일 갱신되며 포털이 배포 정본.

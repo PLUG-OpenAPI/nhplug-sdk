@@ -14,6 +14,12 @@
   - 반드시 "rb"(바이너리)로 열 것 — 텍스트 모드는 CRLF 축약·0x1A EOF 로 레코드가 어긋남
   - NUL 종료 문자열 아님 → strlen 금지, 길이 기반 슬라이싱 후 우측 공백 제거
 
+브랜드(도메인)
+  마스터 파일은 브랜드별로 다른 도메인에서 배포된다. `.h` 의 @url 은 나무 기준이므로,
+  N2 고객은 환경변수로 전환한다(다운로드는 인증 불필요 · 토큰·헤더 없이 공개 접근).
+      나무: https://www.nhplug.com/instruments/<파일>.mst   (기본값)
+      N2  : NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments
+
 사용:
     from master import load_master, list_masters, download
 
@@ -23,15 +29,21 @@
 """
 from __future__ import annotations
 
+import os
 import re
 import time
 import urllib.request
 from dataclasses import dataclass, field as dc_field
 from pathlib import Path
+from urllib.parse import urlsplit
 
 HEADER_DIR = Path(__file__).resolve().parent / "headers"
 CACHE_DIR = Path(__file__).resolve().parent / ".cache"
 CACHE_TTL_SEC = 6 * 3600  # 6시간 이내 받은 파일은 재사용
+
+# 마스터 배포 기준 URL. 브랜드(나무/N2) 전환용 — 아래 instruments_base() 참고.
+INSTRUMENTS_BASE_ENV = "NHPLUG_INSTRUMENTS_BASE"
+DEFAULT_INSTRUMENTS_BASE = "https://www.nhplug.com/instruments"
 
 _META_RE = re.compile(r"^\s*\*\s*@(\w+)\s+(.*?)\s*$")
 _FIELD_RE = re.compile(
@@ -103,18 +115,52 @@ def load_layout(key: str) -> Layout:
 
 # ------------------------------------------------------------------ 다운로드
 
+def instruments_base() -> str:
+    """마스터 배포 기준 URL(브랜드별로 다름).
+
+    나무(기본) https://www.nhplug.com/instruments
+    N2         NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments
+    """
+    base = (os.environ.get(INSTRUMENTS_BASE_ENV) or "").strip().rstrip("/")
+    if not base:
+        return DEFAULT_INSTRUMENTS_BASE
+    if urlsplit(base).scheme not in ("http", "https"):
+        raise ValueError(
+            f"{INSTRUMENTS_BASE_ENV} 는 http(s):// 로 시작해야 합니다: {base!r}"
+            f"  (예: https://www.n2plug.com/instruments)"
+        )
+    return base
+
+
+def resolve_url(lay: Layout) -> str:
+    """이 마스터를 내려받을 실제 URL.
+
+    `.h` 의 @url 은 나무 기준 정본이라 그대로 쓰고, 환경변수로 기준 URL 이
+    바뀐 경우(N2 등)에는 파일명만 붙여 재구성한다.
+    """
+    base = instruments_base()
+    if base == DEFAULT_INSTRUMENTS_BASE and lay.url:
+        return lay.url
+    return f"{base}/{lay.file}"
+
+
 def download(key: str, dest: Path | None = None, force: bool = False, timeout: int = 60) -> Path:
-    """마스터 파일을 URL(.h 의 @url)에서 내려받아 경로 반환. 기본은 캐시 재사용."""
+    """마스터 파일을 내려받아 경로 반환. 기본은 캐시 재사용(인증 불필요).
+
+    URL 은 `.h` 의 @url(나무 기준)이며, N2 는 NHPLUG_INSTRUMENTS_BASE 로 전환한다.
+    캐시는 도메인별로 분리해 브랜드를 바꿔도 서로 섞이지 않는다.
+    """
     lay = load_layout(key)
-    if not lay.url:
+    url = resolve_url(lay)
+    if not url:
         raise ValueError(f"{key}.h 에 @url 이 없습니다. path= 로 로컬 파일을 지정하세요.")
-    dest = dest or (CACHE_DIR / lay.file)
+    dest = dest or (CACHE_DIR / (urlsplit(url).hostname or "unknown") / lay.file)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     if not force and dest.exists() and (time.time() - dest.stat().st_mtime) < CACHE_TTL_SEC:
         return dest
 
-    req = urllib.request.Request(lay.url, headers={"User-Agent": "nhplug-sdk/instruments"})
+    req = urllib.request.Request(url, headers={"User-Agent": "nhplug-sdk/instruments"})
     with urllib.request.urlopen(req, timeout=timeout) as r, open(dest, "wb") as f:
         f.write(r.read())
     return dest
@@ -217,7 +263,7 @@ if __name__ == "__main__":
     k = sys.argv[1] if len(sys.argv) > 1 else "m_new_stock"
     lay = load_layout(k)
     print(f"{k}: {lay.group} · {lay.record}B · 필드 {len(lay.fields)}개")
-    print(f"  URL: {lay.url}")
+    print(f"  URL: {resolve_url(lay)}")
     data = load_master(k)
     n = len(data)
     print(f"  파싱 완료: {n:,} 건")

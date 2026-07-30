@@ -68,6 +68,7 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | N2 | `api.n2plug.com:8443` | `moapi.n2plug.com:8443` | `www.n2plug.com` |
 
 > ⚠️ **N2 고객**은 `.env` 의 `NHPLUG_BASE_URL` 과 `NHPLUG_AUTH_URL` 을 **둘 다** n2plug 로 바꾸세요. **AUTH_URL(토큰)까지 안 바꾸면 토큰이 나무(api.nhplug)로 가서 실패합니다.**
+> 종목마스터를 쓴다면 `NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments` 도 함께 설정하세요.
 
 ## 환경변수
 
@@ -77,6 +78,7 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_BASE_URL` | 호출 대상. 기본 `https://api.nhplug.com:8443`(운영) · 교육·시뮬레이션은 `https://moapi.nhplug.com:8443` |
 | `NHPLUG_AUTH_URL` | 토큰 발급 URL. 기본 `https://api.nhplug.com:8443`(운영 전용 — moapi 미제공) |
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
+| `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
 
 ## 오류 처리 · 토큰 캐시
 
@@ -89,11 +91,12 @@ except NhplugError as e:
     print(e.category, e.code, e.message)   # business / rate_limit / auth / network / http
 ```
 
-- **HTTP 200 이어도 `rsp_cd` 가 성공 코드(`00000`·`00166`)가 아니면 예외**입니다. 실패를 성공으로 오판하지 않습니다.
-  - 성공 코드 확장: `NHPLUG_SUCCESS_CODES=00000,00166,...`
+- **HTTP 200 이어도 `rsp_cd` 가 성공 코드가 아니면 예외**입니다. 실패를 성공으로 오판하지 않습니다.
+  - 기본 성공 코드: **`00000`·`00166`·`00221`·`13578`** (+ `rsp_msg` 에 "완료" 가 포함되면 성공으로 처리하는 안전망)
+  - 성공 코드 교체: `NHPLUG_SUCCESS_CODES=00000,00166,00221,13578,...`
   - 예외 없이 원본 응답이 필요하면: `call(..., raise_on_error=False)`
 - **토큰은 24시간 유효하며 `~/.nhplug/token-*.json` 에 캐시**되어 스크립트를 여러 번 실행해도 **재발급하지 않습니다**(재발급 1회 = 보안 알림 1건).
-  - 파일 권한 `600`(macOS·Linux). Windows 는 사용자 프로필 폴더의 기본 ACL 로 보호됩니다.
+  - 파일 권한은 **OS 기본값**을 따릅니다(별도 `chmod` 없음). 공용 계정·공유 서버에서는 `NHPLUG_TOKEN_CACHE_DIR` 로 접근이 제한된 경로를 지정하거나 `NHPLUG_TOKEN_CACHE=0` 으로 끄세요.
   - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`
   - 재발급은 **401(토큰 무효)** 일 때만 합니다. `429` 재시도에는 기존 토큰을 그대로 사용합니다.
 - **429(호출 유량 초과)** 는 자동 재시도하지 않고 `category="rate_limit"` 예외로 알립니다(실측 한도 초당 5회 수준). 호출 간격을 늘려 주세요.

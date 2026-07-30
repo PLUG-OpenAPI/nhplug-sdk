@@ -55,7 +55,8 @@ def main():
         args = [a for a in args if a != str(local_dir)]
 
     keys = args or master.list_masters()
-    src = f"로컬 폴더 {local_dir}" if local_dir else "자동 다운로드(캐시 6h)"
+    src = (f"로컬 폴더 {local_dir}" if local_dir
+           else f"자동 다운로드(캐시 6h) · {master.instruments_base()}")
     print(f"종목마스터 검증 — {len(keys)}종 · {src}\n")
     print(f"{'마스터':18s} {'상태':4s} {'레코드':>9s} {'크기(B)':>12s} {'RS':>5s} {'필드':>4s}  비고")
     print("-" * 88)
