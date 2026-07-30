@@ -6,6 +6,7 @@
 NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한 **샘플코드 · 전략 파이프라인 · 문서** 모음입니다. Python 개발자와 AI 코딩 도구(Antigravity·Cursor·Claude) 모두를 위한 개발자 키트입니다.
 
 > 대화형으로 API 를 쓰고 싶다면 로컬 MCP [`plug-support/nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) 를, 코드로 개발하려면 이 저장소를 사용하세요.
+> 두 도구는 호출 식별자가 다릅니다 — **SDK 는 URI 경로**(`/krstock/quote/v1/currentPrice`), **MCP 는 operationId**(`krstockQuoteCurrentPrice`). MCP 로 쓰던 이름을 SDK 에 그대로 넣으면 동작하지 않습니다.
 
 ## 구성
 

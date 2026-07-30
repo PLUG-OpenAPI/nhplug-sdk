@@ -31,6 +31,15 @@
   **재발급은 401(토큰 무효)일 때만.** `429`(유량 초과) 재시도에는 기존 토큰을 그대로 쓴다 — 토큰을 직접 재발급하는 코드를 새로 만들지 말 것.
 - **429(IGW42902)**: 자동 재시도하지 않는다. `NhplugError(category="rate_limit")` 로 올라오며 `retry_after_ms` 를 참고해 **호출 간격을 늘려서**(실측 초당 5회 수준) 재시도할지 호출자가 결정한다.
 
+## ⚠️ MCP 와 SDK 는 호출 식별자가 다르다 (섞지 말 것)
+- **SDK 는 URI 경로**로 호출한다: `call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})`
+- **MCP 는 operationId**로 호출한다: `call_api("krstockQuoteCurrentPrice", {...})`
+- `call("krstockQuoteCurrentPrice", ...)` 처럼 **operationId 를 SDK 에 넣으면 실패한다.**
+  MCP 로 조회하던 흐름을 그대로 코드로 옮길 때 자주 발생하는 실수다.
+- 이 차이는 의도된 것이다. **경로는 프로토콜 식별자**(실제 HTTP 주소)이고,
+  **operationId 는 명세 문서의 이름표**라 명세 재생성 시 바뀌거나 사라질 수 있다.
+- 자산군 `README.md` 표에 `URI` 와 `operationId` 가 나란히 있다 — **SDK 코드에는 `URI` 칸을 쓴다.**
+
 ## 인증·통신 규약
 - 토큰 발급: POST /oauth2/token, 쿼리파라미터 appkey, appsecretkey, grant_type=client_credentials, scope=oob,
   Content-Type: application/x-www-form-urlencoded → 응답 access_token
