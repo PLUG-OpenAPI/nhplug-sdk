@@ -9,7 +9,7 @@
 ## 0. 준비물
 
 1. **Google Antigravity** 설치 — [antigravity.google](https://antigravity.google)
-2. **Python 3.10+** 또는 **Node.js 18+** (예제는 Python 기준)
+2. **Python 3.11 이상** (`python --version` 으로 확인 — SDK 패키지 `nhplug` 의 최소 요구 버전)
 3. **NH투자증권 Open API 앱키/앱시크릿** — 포털 [www.nhplug.com](https://www.nhplug.com/intro) 에서 발급
 4. (권장) 처음엔 **모의투자 환경**으로 시작
 
@@ -38,12 +38,16 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 #   (cmd: .venv\Scripts\activate.bat  ·  macOS/Linux: source .venv/bin/activate)
 
-# 3) 이제 pip install 은 이 프로젝트 안에만 설치됨
-pip install requests python-dotenv
+# 3) NH SDK 설치 — 이 프로젝트 안에만 설치됨
+pip install nhplug
+#   종목마스터를 표(DataFrame)로 다루려면:  pip install "nhplug[instruments]"
 
 # 4) 의존성 고정 (재현성·디버깅 용이)
 pip freeze > requirements.txt
 ```
+
+> `nhplug` 를 설치하면 **인증·토큰 캐시·`Input_0` 봉투·성공코드 판정·실시간·종목마스터**가 함께 들어옵니다.
+> `requests` 로 토큰 발급을 직접 짜지 마세요 — 이미 검증된 코드가 있습니다.
 
 프롬프트 앞에 `(.venv)` 가 보이면 활성화 상태입니다. **새 터미널을 열 때마다 2)번으로 다시 활성화**하세요. `.venv/` 는 커밋하지 말고(`.gitignore` 에 추가), `requirements.txt` 만 공유하면 어디서든 `pip install -r requirements.txt` 로 동일 환경을 재현할 수 있습니다.
 
@@ -51,7 +55,7 @@ pip freeze > requirements.txt
 
 ### 1-3. API 명세 — 도메인이 정본(SSOT)
 
-명세를 저장소에 복사해 둘 필요가 없습니다. **정본은 도메인**이며, `AGENTS.md`(1-4) 에 URL 을 적어두면 AI 가 직접 참조합니다.
+명세를 저장소에 복사해 둘 필요가 없습니다. **정본은 도메인**이며, 아래 1-4 의 규칙 파일에 URL 이 적혀 있어 AI 가 직접 참조합니다.
 
 - 전체 개요·인증·공통 규약: https://www.nhplug.com/llms.txt
 - 자산군 정본: `https://www.nhplug.com/openapi-docs/<자산>/{openapi.json, overview.md, README.md}`
@@ -115,20 +119,28 @@ macOS·Linux 는 `curl -O`, 또는 브라우저로 열어 복사해도 됩니다
 ### 2-1. 컨텍스트 인식시키기 (첫 프롬프트)
 
 ```
-이 프로젝트의 AGENTS.md 규칙과 거기 적힌 NH Open API 명세(도메인 URL 또는 docs/ 로컬 사본)를 먼저 읽어줘.
-읽고 나서, 어떤 엔드포인트로 인증·계좌조회·시세조회를 하는지 요약해줘.
+이 프로젝트의 규칙 파일(AGENTS.md 또는 .cursor/rules/nhplug.mdc)을 먼저 읽어줘.
+거기 적힌 NH Open API 명세(https://www.nhplug.com/llms.txt)도 확인하고,
+인증·계좌조회·시세조회를 각각 어떻게 하는지 요약해줘.
 ```
 
 ### 2-2. 테스트 스크립트 생성 (두 번째 프롬프트)
 
 ```
-docs 명세를 기준으로, 모의투자(moapi) 환경에서 아래를 수행하는
-파이썬 스크립트 test_nh.py 를 만들어줘.
-1) /oauth2/token 으로 접근 토큰 발급 (앱키/시크릿은 .env 에서 읽기)
-2) /n2/acctinfo 로 내 계좌 목록 조회 후 출력
+nhplug SDK(pip install nhplug)를 사용해서, 모의투자(moapi) 환경에서
+아래를 수행하는 파이썬 스크립트 test_nh.py 를 만들어줘.
+
+1) 계좌 목록 조회 후 출력 (acct_type 도 함께 — 01·02=운영, 03=모의투자)
+2) 모의투자용 계좌(acct_type=03)를 골라서 잔고 조회
 3) 삼성전자(005930) 현재가 조회 후 출력
-토큰은 발급 후 재사용하고, 모든 호출에 타임아웃과 에러 처리를 넣어줘.
+
+조건:
+- 인증·토큰은 nhplug 가 처리하므로 /oauth2/token 을 직접 호출하지 말 것
+- from nhplug import call, NhplugError 를 사용하고 예외를 잡아 코드·메시지를 출력
+- 앱키/시크릿은 .env 에서 읽는다(코드에 하드코딩 금지)
 ```
+
+> ⚠️ AI 가 `requests` 로 토큰 발급 코드를 짜려 하면 **"nhplug 의 call() 을 쓰라"고 다시 지시**하세요. 직접 짠 인증 코드는 토큰 캐시가 없어 **재발급이 반복되고 보안 알림이 쌓입니다.**
 
 ### 2-3. 실행
 
@@ -137,11 +149,14 @@ Antigravity 내장 터미널에서 (가상환경 활성화 상태에서):
 ```powershell
 # 1-2 에서 만든 가상환경 활성화 (새 터미널이면 매번)
 .\.venv\Scripts\Activate.ps1
-pip install requests python-dotenv
 python test_nh.py
 ```
 
-계좌 목록과 삼성전자 현재가가 출력되면 **사전 준비 완료**입니다. 이후 "이 위에 5일/20일 이평 골든크로스 매수 로직을 붙여줘" 같은 식으로 확장하면 됩니다. (주문 로직은 반드시 모의투자에서, 부록 A의 안전규칙 적용)
+계좌 목록과 삼성전자 현재가가 출력되면 **사전 준비 완료**입니다.
+
+이후 "이 위에 5일/20일 이동평균을 계산해 신호를 출력하는 코드를 붙여줘" 같은 식으로 확장하면 됩니다.
+
+> ⚠️ **주문 로직을 붙일 때**: 반드시 모의투자(`moapi`)에서 먼저 검증하고, 주문 함수는 `dry_run=True` 를 기본으로 두세요. 규칙 파일의 안전수칙을 AI 가 함께 지킵니다. 실주문은 사람이 최종 확인합니다.
 
 > 에러가 나면 터미널 메시지를 그대로 복사해 "이 오류 고쳐줘"라고 하면 됩니다. 자주 나는 오류는 아래 표 참고.
 
