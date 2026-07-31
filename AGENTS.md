@@ -47,7 +47,7 @@
 - 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
 - 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투.
   **성공 판정은 위 「에러 처리」 절을 따른다** — `00000`·`00166`·`00221`·`13578` (+ rsp_msg 에 "완료").
-  "00000 계열" 같은 모호한 판정을 쓰지 말 것.
+  "…계열이면 정상" 같은 모호한 판정을 쓰지 말 것 — 코드 4개를 명시하거나 `nhplug.call()` 에 맡긴다.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no · acct_type. acct_no 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 
 ## 계좌구분(acct_type) — 환경과 맞는 계좌를 골라야 한다 (중요)
