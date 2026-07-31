@@ -37,6 +37,7 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 instruments/       # 종목마스터(.mst) 구조체 문서(headers/*.h) + 파서 + 28종 일괄 검증
+templates/         # AI IDE 규칙 파일 (AGENTS.md · CLAUDE.md · Cursor .mdc) — 프로젝트에 복사
 guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
 scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기
 docs/              # 명세 로컬 사본(fetch_docs 로 생성, 커밋 안 함) — 정본은 도메인
@@ -211,9 +212,23 @@ except NhplugError as e:
 - 주문 샘플은 기본 **드라이런**입니다. 실주문은 `dry_run=False`로, 반드시 모의투자(`moapi`)에서 검증 후.
 - 앱키/시크릿은 코드에 넣지 말고 `.env`로 관리(`.gitignore` 처리됨).
 
-## 가이드
+## AI IDE 로 개발하기
 
-- [Antigravity 로 바이브코딩하기](guides/antigravity.md) — 명세만으로 AI IDE(Antigravity·Cursor)에서 NH Open API 개발·테스트하는 준비와 절차
+**[`templates/`](templates/) — 프로젝트에 넣는 규칙 파일.** 규칙이 없으면 AI 가 필드명·성공코드를 추측해 틀린 코드를 만듭니다.
+
+| 도구 | 파일 | 위치 |
+|---|---|---|
+| Antigravity · Codex | [`AGENTS.md`](templates/AGENTS.md) | 프로젝트 루트 |
+| Claude Code | [`CLAUDE.md`](templates/CLAUDE.md) | 프로젝트 루트 |
+| **Cursor** | [`nhplug.mdc`](templates/cursor/nhplug.mdc) | **`.cursor/rules/`** |
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
+```
+
+> ⚠️ Cursor 의 레거시 `.cursorrules` 는 **Agent 모드에서 무시됩니다.** `.cursor/rules/` 경로를 쓰세요.
+
+- [Antigravity 로 바이브코딩하기](guides/antigravity.md) — 설치부터 첫 실행까지 절차
 
 ## 라이선스 · 문의
 

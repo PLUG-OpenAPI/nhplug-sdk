@@ -75,9 +75,32 @@ PY
 
 > `llms.txt` 와 `common` 은 필수(인증·계좌 흐름의 정본). 개발 대상 자산만 `want` 에 추가하면 됩니다.
 
-### 1-4. `AGENTS.md` 규칙 파일 작성
+### 1-4. AI 규칙 파일 넣기 ⭐
 
-Antigravity는 프로젝트 루트의 **`AGENTS.md`** 를 세션 시작 시 자동으로 읽어 규칙으로 삼습니다. 여기에 문서 위치·인증 규약·안전수칙을 적어두면 AI가 매번 정확하게 코딩합니다. **부록 A의 템플릿을 그대로 `AGENTS.md` 로 저장**하세요.
+AI 도구는 프로젝트의 **규칙 파일**을 세션 시작 시 자동으로 읽습니다. 없으면 AI 가 필드명·성공코드·환경을 **추측**해서 틀린 코드를 만듭니다.
+
+**쓰는 도구에 맞는 파일을 프로젝트에 넣으세요.**
+
+| 도구 | 파일 | 위치 |
+|---|---|---|
+| **Antigravity** · Codex | `AGENTS.md` | 루트 |
+| Claude Code | `CLAUDE.md` | 루트 |
+| **Cursor** | `nhplug.mdc` | **`.cursor/rules/`** |
+
+```powershell
+# Antigravity (PowerShell)
+iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
+
+# Cursor
+New-Item -ItemType Directory -Force .cursor\rules | Out-Null
+iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/cursor/nhplug.mdc -OutFile .cursor\rules\nhplug.mdc
+```
+
+macOS·Linux 는 `curl -O`, 또는 브라우저로 열어 복사해도 됩니다.
+
+> ⚠️ **Cursor 사용자**: 예전 방식인 `.cursorrules` 파일은 **Agent 모드에서 무시됩니다.** 반드시 `.cursor/rules/` 경로에 두세요.
+
+전체 목록과 설명: **[templates/](https://github.com/plug-support/nhplug-sdk/tree/main/templates)**
 
 ### 1-5. `.env` 파일 준비
 
@@ -130,56 +153,25 @@ python test_nh.py
 |---|---|
 | 토큰 403 "유효하지 않은 AppSecret" | 키가 그 환경용인지 확인. base url 을 키에 맞는 환경으로 (모의/실거래·개발/운영) |
 | 계좌번호 오류 | 계좌목록 응답은 `acct_no`, 잔고·주문 입력은 `act_no` — 값은 동일하니 그대로 사용 |
-| 응답 파싱 실패 | 요청 `{"Input_0": {...}}` / 응답 `Output_0`(+`Output_1`) 봉투, `rsp_cd`=`00000` 정상 |
+| 응답 파싱 실패 | 요청 `{"Input_0": {...}}` / 응답 `Output_0`(+`Output_1`) 봉투. **`Output_0` 은 객체일 수도 배열일 수도** 있으니 `openapi.json` 확인 |
+| 조회는 됐는데 실패로 처리됨 | 성공코드는 **`00000`·`00166`·`00221`·`13578`** (+`rsp_msg`에 "완료"). `00000` 만 보면 매수가능수량 조회가 항상 실패합니다 |
+| 계좌가 있는데 오류 | 계좌구분(`acct_type`) 확인 — `01`·`02`=운영(`api`), `03`=모의투자(`moapi`). 환경과 맞는 계좌를 쓰세요 |
 | 주문 거부/형식오류 | `iem_cd` 는 6자리 그대로(예: 005930, `A` 없음), `orr_pr` 은 원 단위 정수 그대로(예: 70000). 형식은 describe_api/openapi.json 최신 예시 기준 |
 | 토큰 매번 재발급 | 발급 토큰을 만료까지 캐시·재사용 |
 
 ---
 
-## 부록 A. `AGENTS.md` 붙여넣기 템플릿
+## 부록 A. 규칙 파일 — `templates/` 참조
 
-프로젝트 루트에 `AGENTS.md` 로 저장하세요.
+규칙 파일 전문은 저장소의 **[templates/](https://github.com/plug-support/nhplug-sdk/tree/main/templates)** 에 있습니다. 이 가이드에 사본을 두지 않는 이유는, **두 곳에 두면 한쪽이 낡아 잘못된 규칙을 퍼뜨리기 때문**입니다(실제로 그런 일이 있었습니다).
 
-```markdown
-# 프로젝트 규칙 — NH투자증권 Open API 개발
+| 파일 | 도구 | 위치 |
+|---|---|---|
+| [`AGENTS.md`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/AGENTS.md) | Antigravity · Codex | 프로젝트 루트 |
+| [`CLAUDE.md`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/CLAUDE.md) | Claude Code | 프로젝트 루트 |
+| [`cursor/nhplug.mdc`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/cursor/nhplug.mdc) | Cursor | `.cursor/rules/` |
 
-## 문서 (Source of Truth) — 도메인이 정본
-- API 개요·인증·공통 규약: https://www.nhplug.com/llms.txt
-- 자산군 정본: https://www.nhplug.com/openapi-docs/<자산>/openapi.json
-  (자산: common·krstock·gbstock·krfuture·gbfuture·krbond·krgold)
-- 코드 작성 전 위 문서를 먼저 참고하고, 엔드포인트·필드는 openapi.json 을 정본으로 따른다. (로컬 사본이 필요하면 docs/ 에 내려받아 사용)
-
-## 인증·통신 규약
-- 토큰 발급: POST /oauth2/token, 쿼리파라미터 appkey, appsecretkey,
-  grant_type=client_credentials, scope=oob, Content-Type: application/x-www-form-urlencoded → 응답 access_token
-- 발급 토큰은 만료 전까지 캐시·재사용 (매 호출 재발급 금지)
-- 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
-- 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투
-- 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no. 이 값을 잔고·주문의 act_no 로 사용
-- 주문 종목코드 iem_cd: 6자리 그대로 (예: 005930). 주문가격 orr_pr: 원 단위 정수 그대로 (예: 70000)
-- 필드 형식은 항상 describe_api / openapi.json 의 최신 예시를 정본으로 따른다
-
-## 환경 (Base URL)
-- 🔴 운영 (Live) [기본]:             https://api.nhplug.com:8443
-- 🟢 모의투자 (Mock) 교육·시뮬레이션: https://moapi.nhplug.com:8443
-- 접근토큰(/oauth2/token)은 운영(api) 전용 — 모의투자 미제공. 호출이 moapi 여도 토큰은 api 에서 발급.
-- 호출 대상은 .env 의 NHPLUG_BASE_URL(기본 api), 토큰은 NHPLUG_AUTH_URL(기본 api).
-
-## 보안·안전 규칙 (필수)
-- 앱키/앱시크릿은 코드에 하드코딩 금지, .env 에서 읽는다. .env 는 .gitignore 에 넣는다.
-- 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.
-- 주문(매수/매도) 실행 전 로그를 남기고, rsp_cd 가 00000 이 아니면 중단한다.
-- 실주문은 사람 확인 절차를 둔다. 완전 무인 실거래는 지양.
-
-## 개발 환경 (프로젝트 격리)
-- 이 프로젝트는 전용 가상환경 .venv 를 사용한다. 패키지를 전역(global)에 설치하지 말고, 항상 .venv 활성화 후 설치·실행한다.
-- 새 의존성을 추가하면 requirements.txt 를 갱신한다(pip freeze > requirements.txt).
-- .venv/ 와 .env 는 커밋하지 않는다(.gitignore).
-
-## 코드 스타일
-- 언어: Python(requests). 토큰/HTTP 로직은 별도 모듈로 분리.
-- 모든 API 호출에 타임아웃·예외처리·에러코드 로깅 포함.
-```
+담긴 내용: SDK 우선 사용 · 명세 정본 위치 · **성공코드 4종**(`00000`·`00166`·`00221`·`13578`) · 계좌구분(`acct_type`) · 브랜드 3줄 전환 · 종목마스터 · 실시간 · 주문 필드 형식 · 안전수칙 · MCP 혼동 방지
 
 ## 부록 B. `.env` 템플릿
 

@@ -1,0 +1,100 @@
+---
+description: NH투자증권 Open API(NHPLUG) 개발 규칙 — 인증·봉투·성공판정·안전수칙
+globs:
+  - "**/*.py"
+alwaysApply: true
+---
+
+# NH투자증권 Open API 개발 규칙
+
+<!--
+  두는 곳: 프로젝트 루트의  .cursor/rules/nhplug.mdc
+  ⚠️ 레거시 `.cursorrules` 는 Cursor Agent 모드에서 무시됩니다. 반드시 이 경로를 쓰세요.
+  정본: https://github.com/plug-support/nhplug-sdk/tree/main/templates
+-->
+
+## SDK 를 쓴다 — 직접 HTTP 를 짜지 않는다
+
+```bash
+pip install nhplug                 # 인증·토큰캐시·에러판정·실시간·종목마스터 포함
+pip install "nhplug[instruments]"  # 마스터를 DataFrame 으로 받을 때
+```
+
+```python
+from nhplug import call, NhplugError
+call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
+```
+
+토큰 발급·갱신·캐시, `Input_0` 봉투, 인증 헤더, `rsp_cd` 판정을 `call()` 이 처리한다.
+`requests` 로 `/oauth2/token` 을 직접 부르는 코드를 새로 만들지 말 것.
+
+## 명세 정본 — 도메인
+
+- https://www.nhplug.com/llms.txt (N2: https://www.n2plug.com/llms.txt)
+- 자산군: `https://www.nhplug.com/openapi-docs/<자산>/openapi.json`
+  (`common`·`krstock`·`gbstock`·`krfuture`·`gbfuture`·`krbond`·`krgold`)
+- **경로·필드명·필수여부는 `openapi.json` 이 정본. 추측 금지.**
+
+## 설정 (.env)
+
+```env
+NHPLUG_APP_KEY=...
+NHPLUG_APP_SECRET=...
+NHPLUG_BASE_URL=https://api.nhplug.com:8443    # 모의투자: moapi.nhplug.com:8443
+NHPLUG_AUTH_URL=https://api.nhplug.com:8443    # 토큰은 운영 전용
+NHPLUG_INSTRUMENTS_BASE=https://www.nhplug.com/instruments
+```
+
+키는 코드에 하드코딩 금지. `.env` 는 `.gitignore`.
+**N2 고객은 위 세 줄을 모두 n2plug 로** — 하나라도 빠지면 그 기능만 조용히 나무로 간다.
+
+## 호출 규약
+
+- 요청 `{"Input_0": {...}}` / 응답 `Output_0`(+`Output_1`) + `rsp_cd`·`rsp_msg`
+- **`Output_0` 은 객체일 수도 배열일 수도 있다.** 타입을 추측하지 말고 `openapi.json` 확인.
+- 계좌목록 `POST /n2/acctinfo` → `Output_0[].acct_no` 를 이후 `act_no` 로 사용.
+
+## ⚠️ 성공 판정 — HTTP 200 ≠ 업무 성공
+
+- 성공 코드: **`00000`·`00166`·`00221`·`13578`** (+ `rsp_msg` 에 "완료" 포함)
+- **`00000`/`00166` 만 성공으로 보지 말 것** — 매수가능수량 조회는 `00221` 로 응답한다.
+- `429`(초당 5회 초과)는 자동 재시도하지 않는다. **429 재시도에 토큰을 재발급하지 말 것**(재발급은 401 에만).
+
+## ⚠️ 계좌구분(acct_type)
+
+`01`·`02` = 운영(`api`) · `03` = 모의투자(`moapi`).
+계좌목록에 섞여 내려오므로 **첫 계좌를 그대로 쓰지 말고** 환경에 맞는 구분을 고른다.
+
+## 종목마스터
+
+```python
+from nhplug.instruments import load_master
+df = load_master("m_new_stock")     # 자동 다운로드·캐시
+```
+
+전 종목 목록은 REST API 가 없고 **마스터 파일 28종**으로 제공된다. 다운로드는 **인증 불필요**.
+
+## 실시간
+
+```python
+from nhplug.realtime import subscribe
+subscribe(["005930"], print, max_messages=5)
+```
+
+## 주문 필드 형식
+
+- `iem_cd`: 6자리 그대로(`005930`). **`A` 붙이지 않는다.** 해외는 티커(`AAPL`).
+- `orr_pr`: 원 단위 **정수**(`70000`). 지정가 `nmn_pr_tp_cd='01'` · 시장가 `'05'`.
+- 가능수량: 국내 2개 API · 해외는 `buyableAmount` 하나에서 `pcs_dit`(3=매도수량).
+
+## 🔒 안전 규칙
+
+- 키·토큰을 **로그·화면에 출력하지 않는다**(일부라도).
+- 기본이 **운영이며 주문이 실제 체결된다.** 개발·검증은 `moapi`.
+- 주문 함수는 **`dry_run=True` 기본**. 실주문은 사람 확인 절차를 둔다.
+- 모든 호출에 타임아웃·예외처리·에러코드 로깅.
+
+## ⚠️ MCP 와 혼동 금지
+
+SDK 는 **URI 경로**(`/krstock/quote/v1/currentPrice`), MCP 는 **operationId**(`krstockQuoteCurrentPrice`).
+섞어 쓰면 동작하지 않는다.
