@@ -1,7 +1,9 @@
 """REST 호출 공용 래퍼: 헤더·Input_0 봉투·토큰·업무성공(rsp_cd) 판정.
 
 핵심 규약: **HTTP 200 ≠ 업무 성공.** 응답 봉투의 `rsp_cd` 가 성공 코드가 아니면 실패다.
-성공 코드는 기본 00000·00166 이며 NHPLUG_SUCCESS_CODES 로 확장할 수 있다.
+성공 코드는 기본 00000·00166·00221·13578 (+ rsp_msg 에 "완료" 포함 시 성공으로 보는 안전망)
+이며, NHPLUG_SUCCESS_CODES 로 교체할 수 있다.
+※ 값을 바꾸면 아래 DEFAULT_SUCCESS_CODES 와 이 설명을 함께 고칠 것.
 """
 import json
 import os
