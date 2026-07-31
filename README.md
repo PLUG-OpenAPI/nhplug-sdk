@@ -5,13 +5,23 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-www.nhplug.com-informational)](https://www.nhplug.com/llms.txt)
 
-> 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
-> 대화형 AI(Claude 등)로 쓰려면 → [`nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) &nbsp;|&nbsp; 코드로 개발·자동매매하려면 → 이 저장소(`nhplug-sdk`)
+> 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 계정 [@plug-support](https://github.com/plug-support) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
 
-NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한 **샘플코드 · 전략 파이프라인 · 문서** 모음입니다. Python 개발자와 AI 코딩 도구(Antigravity·Cursor·Claude) 모두를 위한 개발자 키트입니다.
+NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한 **라이브러리 · 샘플코드 · 종목마스터 파서** 모음입니다. Python 개발자와 AI 코딩 도구(Antigravity·Cursor·Claude) 모두를 위한 개발자 키트입니다.
 
-> 대화형으로 API 를 쓰고 싶다면 로컬 MCP [`plug-support/nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) 를, 코드로 개발하려면 이 저장소를 사용하세요.
-> 두 도구는 호출 식별자가 다릅니다 — **SDK 는 URI 경로**(`/krstock/quote/v1/currentPrice`), **MCP 는 operationId**(`krstockQuoteCurrentPrice`). MCP 로 쓰던 이름을 SDK 에 그대로 넣으면 동작하지 않습니다.
+**어떻게 쓰시겠어요?**
+
+| 하고 싶은 일 | 방법 | 시작 |
+|---|---|---|
+| 내 프로그램에 넣기 (자동매매) | **PyPI** | `pip install nhplug` |
+| 예제 보며 배우기 | **이 저장소** | `git clone` 후 `snippets/` |
+| 대화로 시세·잔고 조회 (코딩 불필요) | [nhplug-mcp](https://github.com/plug-support/nhplug-mcp) | Claude 설정에 `npx` 한 줄 |
+
+### AI·에이전트로 개발한다면
+
+1. **명세 정본** — [llms.txt](https://www.nhplug.com/llms.txt) (N2: [n2plug.com/llms.txt](https://www.n2plug.com/llms.txt)) · 전체 문맥은 [llms-full.txt](https://www.nhplug.com/llms-full.txt)
+2. **개발 규칙** — [AGENTS.md](AGENTS.md) (AI IDE 가 자동 로드) · [Antigravity·Cursor 가이드](guides/antigravity.md)
+3. ⚠️ **호출 식별자 주의** — 이 SDK 는 **URI 경로**(`/krstock/quote/v1/currentPrice`), MCP 는 **operationId**(`krstockQuoteCurrentPrice`)를 씁니다. **섞어 쓰면 동작하지 않습니다.**
 
 ## 구성
 
@@ -27,10 +37,14 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 instruments/       # 종목마스터(.mst) 구조체 문서(headers/*.h) + 파서 + 28종 일괄 검증
+guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
 scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기
 docs/              # 명세 로컬 사본(fetch_docs 로 생성, 커밋 안 함) — 정본은 도메인
 AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주문형식) — 자동 로드
 ```
+
+> **패키지(`pip install nhplug`)에 포함되는 것**: `nhplug/`(코어·실시간) + `instruments/`(파서·헤더 28종)
+> **포함되지 않는 것**: `snippets/` `examples/` `pipeline/` `guides/` — 저장소를 clone 해서 참고하세요.
 
 ## 설치
 
@@ -149,16 +163,26 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 
 > ⚠️ **운영 도메인에 `03` 계좌를, 모의투자 도메인에 `01`·`02` 계좌를 쓰면 실패합니다.** 목록의 첫 계좌를 그대로 쓰지 마세요.
 
-```python
-from snippets.common.list_accounts.list_accounts import usable_accounts, current_env
+**설치해서 쓰는 경우** — 계좌목록을 받아 `acct_type` 으로 직접 거르면 됩니다.
 
-current_env()        # 'live' | 'mock'  — NHPLUG_BASE_URL 기준
-usable_accounts()    # 현재 환경에서 쓸 수 있는 계좌만
+```python
+from nhplug import call, get_base_url
+
+LIVE = {"01", "02"}          # 운영 전용 · 03 = 모의투자 전용
+env_is_live = not get_base_url().split("//")[-1].startswith("moapi")
+
+accounts = call("/n2/acctinfo", {}).get("Output_0", [])
+usable = [a for a in accounts
+          if (a.get("acct_type") in LIVE) == env_is_live]
 ```
+
+**저장소를 clone 한 경우** — 같은 판정을 해주는 샘플이 있습니다(`usable_accounts()` · `current_env()`).
 
 ```bash
 python snippets/common/list_accounts/list_accounts.py   # 계좌별 환경·사용가능 여부 표로 출력
 ```
+
+> `snippets/` 는 패키지(`pip install nhplug`)에 포함되지 않습니다. 저장소를 받아야 실행됩니다.
 
 ## 오류 처리 · 토큰 캐시
 
