@@ -45,7 +45,9 @@
   Content-Type: application/x-www-form-urlencoded → 응답 access_token
 - 발급 토큰은 만료 전까지 캐시·재사용한다(매 호출 재발급 금지). → `nhplug/auth.py` 가 이미 처리.
 - 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
-- 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투. rsp_cd 가 00000 계열이면 정상.
+- 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투.
+  **성공 판정은 위 「에러 처리」 절을 따른다** — `00000`·`00166`·`00221`·`13578` (+ rsp_msg 에 "완료").
+  "00000 계열" 같은 모호한 판정을 쓰지 말 것.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no · acct_type. acct_no 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 
 ## 계좌구분(acct_type) — 환경과 맞는 계좌를 골라야 한다 (중요)
@@ -102,7 +104,8 @@
 ## 보안·안전 규칙 (필수)
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.
 - 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.
-- 주문(매수/매도) 실행 전 로그를 남기고, rsp_cd 가 정상(00000)이 아니면 중단한다.
+- 주문(매수/매도) 실행 전 로그를 남기고, **업무 오류면 중단한다**(성공코드는 위 「에러 처리」 절 참조 — `00000`·`00166`·`00221`·`13578`).
+  `nhplug.call()` 을 쓰면 `NhplugError` 로 올라오므로 예외를 잡아 중단하면 된다.
 - 실주문은 사람 확인 절차를 둔다. 완전 무인 실거래는 지양.
 
 ## 개발 환경 (프로젝트 격리)
