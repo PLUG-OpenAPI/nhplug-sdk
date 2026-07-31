@@ -1,5 +1,10 @@
 # nhplug-sdk
 
+[![PyPI](https://img.shields.io/pypi/v/nhplug?color=0073b7&label=pip%20install%20nhplug)](https://pypi.org/project/nhplug/)
+[![Python](https://img.shields.io/pypi/pyversions/nhplug)](https://pypi.org/project/nhplug/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-www.nhplug.com-informational)](https://www.nhplug.com/llms.txt)
+
 > 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
 > 대화형 AI(Claude 등)로 쓰려면 → [`nhplug-mcp`](https://github.com/plug-support/nhplug-mcp) &nbsp;|&nbsp; 코드로 개발·자동매매하려면 → 이 저장소(`nhplug-sdk`)
 
