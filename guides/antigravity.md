@@ -93,18 +93,18 @@ AI 도구는 프로젝트의 **규칙 파일**을 세션 시작 시 자동으로
 
 ```powershell
 # Antigravity (PowerShell)
-iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
+iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
 
 # Cursor
 New-Item -ItemType Directory -Force .cursor\rules | Out-Null
-iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/cursor/nhplug.mdc -OutFile .cursor\rules\nhplug.mdc
+iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/cursor/nhplug.mdc -OutFile .cursor\rules\nhplug.mdc
 ```
 
 macOS·Linux 는 `curl -O`, 또는 브라우저로 열어 복사해도 됩니다.
 
 > ⚠️ **Cursor 사용자**: 예전 방식인 `.cursorrules` 파일은 **Agent 모드에서 무시됩니다.** 반드시 `.cursor/rules/` 경로에 두세요.
 
-전체 목록과 설명: **[templates/](https://github.com/plug-support/nhplug-sdk/tree/main/templates)**
+전체 목록과 설명: **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates)**
 
 ### 1-5. `.env` 파일 준비
 
@@ -178,13 +178,13 @@ python test_nh.py
 
 ## 부록 A. 규칙 파일 — `templates/` 참조
 
-규칙 파일 전문은 저장소의 **[templates/](https://github.com/plug-support/nhplug-sdk/tree/main/templates)** 에 있습니다. 이 가이드에 사본을 두지 않는 이유는, **두 곳에 두면 한쪽이 낡아 잘못된 규칙을 퍼뜨리기 때문**입니다(실제로 그런 일이 있었습니다).
+규칙 파일 전문은 저장소의 **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates)** 에 있습니다. 이 가이드에 사본을 두지 않는 이유는, **두 곳에 두면 한쪽이 낡아 잘못된 규칙을 퍼뜨리기 때문**입니다(실제로 그런 일이 있었습니다).
 
 | 파일 | 도구 | 위치 |
 |---|---|---|
-| [`AGENTS.md`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/AGENTS.md) | Antigravity · Codex | 프로젝트 루트 |
-| [`CLAUDE.md`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/CLAUDE.md) | Claude Code | 프로젝트 루트 |
-| [`cursor/nhplug.mdc`](https://github.com/plug-support/nhplug-sdk/blob/main/templates/cursor/nhplug.mdc) | Cursor | `.cursor/rules/` |
+| [`AGENTS.md`](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/AGENTS.md) | Antigravity · Codex | 프로젝트 루트 |
+| [`CLAUDE.md`](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/CLAUDE.md) | Claude Code | 프로젝트 루트 |
+| [`cursor/nhplug.mdc`](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/cursor/nhplug.mdc) | Cursor | `.cursor/rules/` |
 
 담긴 내용: SDK 우선 사용 · 명세 정본 위치 · **성공코드 4종**(`00000`·`00166`·`00221`·`13578`) · 계좌구분(`acct_type`) · 브랜드 3줄 전환 · 종목마스터 · 실시간 · 주문 필드 형식 · 안전수칙 · MCP 혼동 방지
 

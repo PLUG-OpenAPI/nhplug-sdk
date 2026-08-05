@@ -7,7 +7,7 @@ NH투자증권 Open API — Access Token 전역 캐시 모듈
        from nhplug import call
        call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
 
-   정본: https://github.com/plug-support/nhplug-sdk/blob/main/snippets/auth/token_cache/nh_token.py
+   정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/snippets/auth/token_cache/nh_token.py
 
 ⚠️ 왜 필요한가
   토큰은 **재발급을 요청할 때마다 새로 발급**되고, 그때마다 알림톡이 발송됩니다.

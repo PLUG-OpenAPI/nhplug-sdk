@@ -36,7 +36,7 @@ instruments = ["pandas>=2.0"]
 [project.urls]
 Homepage = "https://www.nhplug.com"
 Documentation = "https://www.nhplug.com/llms.txt"
-Repository = "https://github.com/plug-support/nhplug-sdk"
+Repository = "https://github.com/PLUG-OpenAPI/nhplug-sdk"
 
 # 배포 대상은 공용 클라이언트(nhplug)와 종목마스터 파서(nhplug.instruments).
 # snippets/ examples/ pipeline/ guides/ docs/ 는 저장소 참고용이라 포함하지 않는다.

@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-www.nhplug.com-informational)](https://www.nhplug.com/llms.txt)
 
-> 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 계정 [@plug-support](https://github.com/plug-support) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
+> 🏛️ **NH투자증권 공식 Open API(NHPLUG) 지원 저장소입니다.** &nbsp;·&nbsp; 포털 [www.nhplug.com](https://www.nhplug.com) &nbsp;·&nbsp; 계정 [@PLUG-OpenAPI](https://github.com/PLUG-OpenAPI) &nbsp;·&nbsp; 문의 apisupport@nhsec.com
 
 NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한 **라이브러리 · 샘플코드 · 종목마스터 파서** 모음입니다. Python 개발자와 AI 코딩 도구(Antigravity·Cursor·Claude) 모두를 위한 개발자 키트입니다.
 
@@ -15,7 +15,7 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 |---|---|---|
 | 내 프로그램에 넣기 (자동매매) | **PyPI** | `pip install nhplug` |
 | 예제 보며 배우기 | **이 저장소** | `git clone` 후 `snippets/` |
-| 대화로 시세·잔고 조회 (코딩 불필요) | [nhplug-mcp](https://github.com/plug-support/nhplug-mcp) | Claude 설정에 `npx` 한 줄 |
+| 대화로 시세·잔고 조회 (코딩 불필요) | [nhplug-mcp](https://github.com/PLUG-OpenAPI/nhplug-mcp) | Claude 설정에 `npx` 한 줄 |
 
 ### AI·에이전트로 개발한다면
 
@@ -69,7 +69,7 @@ subscribe(["005930"], print, max_messages=5)    # 실시간 체결가
 ## 저장소로 시작 (샘플코드 실행)
 
 ```bash
-git clone https://github.com/plug-support/nhplug-sdk
+git clone https://github.com/PLUG-OpenAPI/nhplug-sdk
 cd nhplug-sdk
 
 # 의존성 설치 (uv 권장)
@@ -223,7 +223,7 @@ except NhplugError as e:
 | **Cursor** | [`nhplug.mdc`](templates/cursor/nhplug.mdc) | **`.cursor/rules/`** |
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
+iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
 ```
 
 > ⚠️ Cursor 의 레거시 `.cursorrules` 는 **Agent 모드에서 무시됩니다.** `.cursor/rules/` 경로를 쓰세요.

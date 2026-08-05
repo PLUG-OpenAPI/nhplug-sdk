@@ -5,7 +5,7 @@
   Claude Code 가 세션 시작 시 자동으로 읽습니다.
   (Antigravity·Codex 는 `AGENTS.md`, Cursor 는 `.cursor/rules/nhplug.mdc` 를 씁니다.
    같은 내용이므로 여러 도구를 쓰면 파일을 모두 두면 됩니다.)
-  정본: https://github.com/plug-support/nhplug-sdk/tree/main/templates
+  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates
 -->
 
 ## 시작 — SDK 를 쓴다 (직접 HTTP 를 짜지 않는다)
@@ -85,7 +85,7 @@ df = load_master("m_new_stock")     # 자동 다운로드·캐시(6h) → 파싱
 
 - 전 종목 코드·종목명·업종·지수편입은 **마스터 파일(.mst) 28종**으로 제공된다(REST API 없음).
 - 다운로드는 **인증 불필요**. 마스터 받으려고 토큰을 발급하지 말 것.
-- 구조체 정본: https://github.com/plug-support/nhplug-sdk/tree/main/instruments/headers
+- 구조체 정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/instruments/headers
 
 ## 실시간 (WebSocket)
 

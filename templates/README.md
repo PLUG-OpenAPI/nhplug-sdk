@@ -17,23 +17,23 @@ AI 코딩 도구가 NH투자증권 Open API 를 **정확하게** 다루도록, �
 
 ```bash
 # 프로젝트 폴더에서 (Antigravity·Codex)
-curl -O https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md
+curl -O https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/AGENTS.md
 
 # Claude Code
-curl -O https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/CLAUDE.md
+curl -O https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/CLAUDE.md
 
 # Cursor
 mkdir -p .cursor/rules
-curl -o .cursor/rules/nhplug.mdc https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/cursor/nhplug.mdc
+curl -o .cursor/rules/nhplug.mdc https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/cursor/nhplug.mdc
 ```
 
 Windows PowerShell:
 
 ```powershell
-iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
+iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/AGENTS.md -OutFile AGENTS.md
 
 New-Item -ItemType Directory -Force .cursor\rules | Out-Null
-iwr -useb https://raw.githubusercontent.com/plug-support/nhplug-sdk/main/templates/cursor/nhplug.mdc -OutFile .cursor\rules\nhplug.mdc
+iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templates/cursor/nhplug.mdc -OutFile .cursor\rules\nhplug.mdc
 ```
 
 > 파일을 브라우저로 열어 복사해 붙여넣어도 됩니다.
