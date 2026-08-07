@@ -73,7 +73,11 @@
 - 샘플: `snippets/krstock/sellable_quantity`, `snippets/gbstock/sellable_quantity`.
 
 ## 종목마스터(.mst) — instruments/
-- 구조체 **정본은 `instruments/headers/<키>.h`** (오프셋·길이·코드값·다운로드 URL·레코드 크기 포함). 파서(`instruments/master.py`)가 이 헤더를 읽어 동작하므로 **필드를 추측하지 말고 헤더를 읽을 것**.
+- 🔴 **구조체 정본은 포털**이다 — `https://www.nhplug.com/instruments/<파일명>.h` (N2: `www.n2plug.com`).
+  `.mst` 와 1:1 대응이며 인증 없이 받을 수 있다. 필드 오프셋·길이가 필요하면 이 파일을 읽는다.
+- 저장소의 `instruments/headers/*.h` (28종)는 **포털 정본의 동봉 사본**이다. 파서(`instruments/master.py`)가
+  오프라인에서도 동작하도록 패키지에 함께 넣은 것이며, 포털이 갱신되면 뒤따라 반영한다.
+  **필드를 추측하지 말고 헤더를 읽을 것.**
 - 사용: `from master import load_master; df = load_master("m_new_stock")` (자동 다운로드·캐시). 포털에서 받은 파일은 `path=` 로 지정.
 - **다운로드는 인증 불필요**(토큰·`x-client-*` 헤더 없이 공개 접근). 마스터 받으려고 토큰을 발급하지 말 것.
 - **브랜드**: `.h` 의 `@url` 은 나무(`www.nhplug.com/instruments`) 기준이다. **N2 는 `NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments`** 로 전환한다(캐시는 도메인별로 분리됨).

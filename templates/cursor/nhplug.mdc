@@ -74,6 +74,9 @@ df = load_master("m_new_stock")     # 자동 다운로드·캐시
 
 전 종목 목록은 REST API 가 없고 **마스터 파일 28종**으로 제공된다. 다운로드는 **인증 불필요**.
 
+**구조체 정본은 포털** — `https://www.nhplug.com/instruments/<파일명>.h` (N2: `www.n2plug.com`).
+`.mst` 와 1:1 대응이며 파이썬 파서 코드가 주석에 들어 있다. 필드 오프셋·길이는 이 파일을 읽는다.
+
 ## 실시간
 
 ```python

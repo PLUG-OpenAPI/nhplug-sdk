@@ -85,7 +85,9 @@ df = load_master("m_new_stock")     # 자동 다운로드·캐시(6h) → 파싱
 
 - 전 종목 코드·종목명·업종·지수편입은 **마스터 파일(.mst) 28종**으로 제공된다(REST API 없음).
 - 다운로드는 **인증 불필요**. 마스터 받으려고 토큰을 발급하지 말 것.
-- 구조체 정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/instruments/headers
+- **구조체 정본은 포털**이다 — `https://www.nhplug.com/instruments/<파일명>.h` (N2: `www.n2plug.com`)
+  `.mst` 와 **1:1 대응**(`m_new_stock.mst` → `m_new_stock.h`) · 인증 불필요 · 파이썬 파서 코드가 주석에 포함돼 있다.
+  필드 오프셋·길이가 필요하면 **이 파일을 읽는다.** 추측하지 말 것.
 
 ## 실시간 (WebSocket)
 

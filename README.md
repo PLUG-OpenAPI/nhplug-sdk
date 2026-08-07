@@ -36,7 +36,8 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 │            └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
-instruments/       # 종목마스터(.mst) 구조체 문서(headers/*.h) + 파서 + 28종 일괄 검증
+instruments/       # 종목마스터(.mst) 파서 + 구조체 동봉본(headers/*.h 28종) + 일괄 검증
+                   #   ※ 구조체 정본은 포털 www.nhplug.com/instruments/<파일명>.h
 templates/         # AI IDE 규칙 파일 (AGENTS.md · CLAUDE.md · Cursor .mdc) — 프로젝트에 복사
 guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
 scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기
