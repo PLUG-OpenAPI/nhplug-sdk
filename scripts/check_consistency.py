@@ -236,7 +236,9 @@ def main() -> int:
     roots = [SDK]
     mcp = None
     if "--all" in args:
-        for name in ("nhplug-mcp", "github_launch/plug-support"):
+        # 조직 대문(.github/profile/README.md)은 로컬 클론이 없어 검사 대상이 아니다.
+        # (옛 github_launch/plug-support 는 차단된 계정의 죽은 클론이라 제외)
+        for name in ("nhplug-mcp",):
             p = WS / name
             if p.is_dir():
                 roots.append(p)
