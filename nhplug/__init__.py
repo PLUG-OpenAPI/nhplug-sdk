@@ -16,15 +16,18 @@ from ._env import global_env_path, load_env, loaded_files
 #   실제 환경변수 > NHPLUG_ENV_FILE > 프로젝트 .env(CWD 기준) > 전역 ~/.nhplug/.env
 load_env()
 
-from .auth import get_token, get_base_url, get_auth_url, clear_token, cache_path
+from .auth import (
+    allowed_hosts, cache_path, clear_token, get_auth_url, get_base_url, get_token,
+)
 from .client import call, success_codes
 from .errors import NhplugError
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "call", "success_codes",
     "get_token", "get_base_url", "get_auth_url", "clear_token", "cache_path",
+    "allowed_hosts",
     "NhplugError",
     "load_env", "loaded_files", "global_env_path",
     "__version__",

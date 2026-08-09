@@ -183,7 +183,34 @@ def check_mcp_ops(mcp: Path | None) -> None:
         "\n".join(f"      {b}" for b in bad) if bad else "README 표기와 번들 일치")
 
 
-# ─────────────────────────────────────────────── 8. 커밋 위생
+# ─────────────────────────────────────────────── 8. 허용 호스트 (SDK ↔ MCP)
+def check_allowed_hosts(mcp: Path | None) -> None:
+    """자격증명이 나가는 허용 호스트 목록이 SDK 와 MCP 에서 같은지.
+
+    같은 목록을 파이썬·타입스크립트 두 벌로 들고 있어 한쪽만 고치면
+    조용히 어긋난다(한쪽에서 막히고 다른 쪽에서 통과하는 상태).
+    """
+    def hosts_in(path: Path, var: str) -> list[str]:
+        m = re.search(rf"{var}\s*[:=]?\s*[=]\s*[\(\[](.*?)[\)\]]",
+                      path.read_text(encoding="utf-8"), re.S)
+        return sorted(re.findall(r'"([a-z0-9.\-]+\.[a-z]{2,})"', m.group(1))) if m else []
+
+    sdk_hosts = hosts_in(SDK / "nhplug" / "auth.py", "ALLOWED_HOSTS")
+    if not sdk_hosts:
+        add(False, "허용 호스트", "nhplug/auth.py 에서 ALLOWED_HOSTS 를 찾지 못함")
+        return
+    if not mcp or not (mcp / "src" / "config.ts").is_file():
+        add(True, f"허용 호스트 ({len(sdk_hosts)}종)", " · ".join(sdk_hosts))
+        return
+
+    mcp_hosts = hosts_in(mcp / "src" / "config.ts", "ALLOWED_HOSTS")
+    same = sdk_hosts == mcp_hosts
+    add(same, f"허용 호스트 ({len(sdk_hosts)}종)",
+        " · ".join(sdk_hosts) if same else
+        f"      SDK: {sdk_hosts}\n      MCP: {mcp_hosts}")
+
+
+# ─────────────────────────────────────────────── 9. 커밋 위생
 def check_hygiene(roots: list[Path]) -> None:
     import subprocess
     bad = []
@@ -231,6 +258,7 @@ def main() -> int:
     check_links(roots)
     check_version()
     check_mcp_ops(mcp)
+    check_allowed_hosts(mcp)
     check_hygiene(roots)
 
     fails = 0

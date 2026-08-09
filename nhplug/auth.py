@@ -10,6 +10,7 @@
 - 끄기: NHPLUG_TOKEN_CACHE=0
 - 재발급 조건은 **만료 또는 401(토큰 무효)** 뿐. 429(유량 초과)에는 재발급하지 않는다.
 """
+import difflib
 import hashlib
 import json
 import os
@@ -57,14 +58,78 @@ def check_brand_consistency() -> str | None:
     )
 
 
+# ---------------------------------------------------------------- 호스트 가드
+# 🔒 앱키·시크릿이 나가는 URL 은 반드시 검증한다.
+#    검증이 없으면 오타 한 글자로 자격증명이 엉뚱한 서버에 전송되거나,
+#    모의투자로 알고 설정한 주소가 운영이라 실주문이 체결될 수 있다.
+#    ⚠️ 호스트를 늘릴 때는 .env.example·README·MCP src/config.ts 도 함께 고칠 것.
+ALLOWED_HOSTS = (
+    "api.nhplug.com",      # 🔴 나무 운영 — 주문이 실제 체결됨
+    "moapi.nhplug.com",    # 🟢 나무 모의투자
+    "api.n2plug.com",      # 🔴 N2 운영 — 주문이 실제 체결됨
+    "moapi.n2plug.com",    # 🟢 N2 모의투자
+)
+ALLOW_HOSTS_VAR = "NHPLUG_ALLOW_HOSTS"
+
+
+def allowed_hosts() -> tuple[str, ...]:
+    """허용 호스트 목록. 사내 검증 서버 등은 NHPLUG_ALLOW_HOSTS 에 쉼표로 추가한다."""
+    extra = os.environ.get(ALLOW_HOSTS_VAR, "")
+    return ALLOWED_HOSTS + tuple(h.strip().lower() for h in extra.split(",") if h.strip())
+
+
+def _validate_url(url: str, var: str) -> str:
+    """자격증명이 나가는 URL 을 검증하고 정규화한다(끝 슬래시 제거).
+
+    포트는 검사하지 않는다 — 포트 오타는 접속 실패로 즉시 드러나지만,
+    **호스트 오타는 자격증명이 그대로 전송된 뒤에야** 드러나기 때문이다.
+    """
+    u = (url or "").strip().rstrip("/")
+    if not u:
+        raise NhplugError(
+            f"{var} 가 비어 있습니다. 예: https://api.nhplug.com:8443", category="config"
+        )
+    if not u.lower().startswith("https://"):
+        raise NhplugError(
+            f"{var} 는 https 여야 합니다 — 앱키·시크릿이 평문으로 전송됩니다: {u}",
+            category="config",
+        )
+    if "/" in u.split("://", 1)[1]:
+        raise NhplugError(
+            f"{var} 에는 경로를 넣지 마세요(호스트까지만): {u}\n"
+            f"  예: https://api.nhplug.com:8443",
+            category="config",
+        )
+    host = _host(u)
+    hosts = allowed_hosts()
+    if host not in hosts:
+        near = difflib.get_close_matches(host, hosts, n=1, cutoff=0.6)
+        hint = f"\n  혹시 '{near[0]}' 인가요?" if near else ""
+        raise NhplugError(
+            f"{var} 의 호스트 '{host}' 는 허용되지 않습니다.{hint}\n"
+            f"  허용: {', '.join(hosts)}\n"
+            f"  사내 검증 서버라면 {ALLOW_HOSTS_VAR} 에 추가하세요 "
+            f"(예: {ALLOW_HOSTS_VAR}=stg.example.com).",
+            category="config",
+        )
+    return u
+
+
 def get_base_url() -> str:
-    """호출 대상 Base URL. 기본 운영(api). 교육·시뮬레이션은 moapi 로 설정."""
-    return os.environ.get("NHPLUG_BASE_URL", "https://api.nhplug.com:8443")
+    """호출 대상 Base URL. 기본 운영(api). 교육·시뮬레이션은 moapi 로 설정.
+
+    허용 호스트가 아니면 **호출 전에** NhplugError(category='config') 로 막는다.
+    """
+    return _validate_url(
+        os.environ.get("NHPLUG_BASE_URL", "https://api.nhplug.com:8443"), "NHPLUG_BASE_URL"
+    )
 
 
 def get_auth_url() -> str:
     """토큰(/oauth2/token)은 운영(api) 전용 — moapi 미제공. 호출 대상과 무관하게 항상 api."""
-    return os.environ.get("NHPLUG_AUTH_URL", "https://api.nhplug.com:8443")
+    return _validate_url(
+        os.environ.get("NHPLUG_AUTH_URL", "https://api.nhplug.com:8443"), "NHPLUG_AUTH_URL"
+    )
 
 
 def _cache_scope() -> str:

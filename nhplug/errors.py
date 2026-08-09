@@ -9,6 +9,7 @@ class NhplugError(Exception):
     """NH Open API 호출 실패.
 
     category:
+      - "config"     : 설정 오류 — 호출하기 전에 막은 것 (허용되지 않은 호스트, https 아님 …)
       - "auth"       : 토큰 발급/인증 실패 (IGW40031, IGW40043, 401 …)
       - "rate_limit" : 호출 유량 초과 (429, IGW42902)
       - "business"   : HTTP 200 이지만 업무 오류 (rsp_cd 가 성공 코드 아님)

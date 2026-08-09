@@ -152,6 +152,25 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
 | `NHPLUG_INSTRUMENTS_CACHE_DIR` | 종목마스터 캐시 위치. 기본 `~/.nhplug/instruments/` |
 | `NHPLUG_WS_URL` | 실시간 WebSocket 주소를 직접 지정. 없으면 `NHPLUG_BASE_URL` 호스트에서 유도(국내 7070 · 해외 7080 · 모의 17070) |
+| `NHPLUG_ALLOW_HOSTS` | 사내 검증 서버 등 **허용 호스트 추가**(쉼표 구분). 보통 설정하지 않습니다 |
+
+### 🔒 주소 오타는 호출 전에 막힙니다
+
+`NHPLUG_BASE_URL`·`NHPLUG_AUTH_URL` 은 **허용된 호스트만** 통과합니다.
+
+```
+api.nhplug.com  ·  moapi.nhplug.com  ·  api.n2plug.com  ·  moapi.n2plug.com
+```
+
+한 글자만 틀려도 앱키·시크릿이 그대로 전송되기 때문에, 호출하기 전에 막고 무엇이 잘못됐는지 알려줍니다.
+
+```
+NHPLUG_BASE_URL 의 호스트 'moapi.nhplg.com' 는 허용되지 않습니다.
+  혹시 'moapi.nhplug.com' 인가요?
+  허용: api.nhplug.com, moapi.nhplug.com, api.n2plug.com, moapi.n2plug.com
+```
+
+`http://`(평문)와 경로가 붙은 주소(`…:8443/krstock`)도 같이 막습니다. 사내 검증 서버가 있다면 `NHPLUG_ALLOW_HOSTS=stg.example.com` 으로 추가하세요.
 
 ## 계좌구분(`acct_type`) — 환경에 맞는 계좌 고르기
 
