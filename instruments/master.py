@@ -1,8 +1,16 @@
 """NH투자증권 종목마스터(.mst) 파서 — 헤더(.h) 기반.
 
-설계: **`instruments/headers/*.h` 가 정본**이다. 파서는 그 헤더를 읽어
-      필드 오프셋·길이·다운로드 URL·레코드 크기를 얻는다.
-      → 문서(.h)와 코드가 어긋날 수 없고, 명세가 바뀌면 .h 만 교체하면 된다.
+설계: **구조체 정본은 포털의 `<키>.h`** 다. 파서는 `.mst` 를 받는 그 서버에서
+      `.h` 도 함께 받아(캐시 6h) 필드 오프셋·길이·레코드 크기를 얻는다.
+      → 구조체가 개정돼도 포털만 갱신되면 되고, **PyPI 재배포가 필요 없다.**
+      → 사본이 하나뿐이라 문서와 코드가 어긋날 수 없다.
+
+      `instruments/headers/*.h` 는 **오프라인 폴백**이다(정본 아님).
+      네트워크·권한 문제로 포털을 못 받을 때만 쓰인다.
+      원격을 끄려면 NHPLUG_HEADERS_REMOTE=0.
+
+      ⚠️ 포털본과 폴백본은 서로 다른 도구가 생성해 **서식이 다르다.**
+         파서는 두 서식을 모두 읽는다(_FIELD_RE·_META_ALIASES 참고).
 
 공통 규칙 (통합명세서 기준, 전 파일 적용)
   - #pragma pack(1) — 패딩 없음. sizeof = 항목길이 합계
@@ -74,10 +82,26 @@ CACHE_TTL_SEC = 6 * 3600  # 6시간 이내 받은 파일은 재사용
 INSTRUMENTS_BASE_ENV = "NHPLUG_INSTRUMENTS_BASE"
 DEFAULT_INSTRUMENTS_BASE = "https://www.nhplug.com/instruments"
 
-_META_RE = re.compile(r"^\s*\*\s*@(\w+)\s+(.*?)\s*$")
+# ── .h 서식 2종을 모두 읽는다 ────────────────────────────────────────────
+# 포털 정본과 저장소 동봉본은 **서로 다른 도구가 생성**해 서식이 다르다.
+# 둘 다 파싱해야 원격(포털)과 폴백(동봉본)이 같은 코드로 동작한다.
+#
+#   동봉본:  * @record 237      char sCode[6];  /* @0  종목코드 <shrn_iscd> */
+#   포털본:  *  @record  237    char sCode[6];  /* off=0 len=6 | 종목코드 | 원장=... */
+#
+# 메타 키에 점(.)이 들어갈 수 있다(@url.nh · @url.n2) → [\w.]+
+_META_RE = re.compile(r"^\s*\*\s*@([\w.]+)\s+(.*?)\s*$")
 _FIELD_RE = re.compile(
-    r"^\s*char\s+(?P<name>\w+)\s*\[(?P<len>\d+)\]\s*;\s*/\*\s*@(?P<off>\d+)\s+(?P<desc>.*?)\s*\*/\s*$"
+    r"^\s*char\s+(?P<name>\w+)\s*\[(?P<len>\d+)\]\s*;\s*/\*\s*"
+    r"(?:@(?P<off>\d+)|off=(?P<off2>\d+)\s+len=\d+\s*\|)\s*"
+    r"(?P<desc>.*?)\s*\*/\s*$"
 )
+
+# 포털본 → 동봉본 메타 키 대응. 왼쪽이 없을 때만 오른쪽 값을 쓴다.
+_META_ALIASES = {"file": ("mst",), "url": ("url.nh", "url.n2")}
+
+# 원격(.h) 로딩 끄기 — 오프라인·사내망·테스트용. 끄면 동봉본만 쓴다.
+HEADERS_REMOTE_ENV = "NHPLUG_HEADERS_REMOTE"
 
 
 @dataclass
@@ -112,21 +136,62 @@ def list_masters() -> list[str]:
     return sorted(p.stem for p in HEADER_DIR.glob("*.h"))
 
 
-def load_layout(key: str) -> Layout:
-    """instruments/headers/<key>.h 를 파싱해 Layout 반환."""
+def header_source(key: str) -> tuple[str, str]:
+    """`<key>.h` 원문과 출처를 돌려준다. **포털이 정본**이다.
+
+    순서: 포털 다운로드(캐시 6h) → 실패 시 패키지 동봉본.
+
+    구조체가 개정돼도 포털만 갱신되면 되므로 PyPI 재배포가 필요 없다.
+    동봉본은 오프라인·사내망을 위한 **폴백**이며 정본이 아니다.
+    """
+    if (os.environ.get(HEADERS_REMOTE_ENV, "1").strip().lower()
+            not in ("0", "false", "no")):
+        url = f"{instruments_base()}/{key}.h"
+        dest = (_default_cache_dir() / (urlsplit(url).hostname or "unknown")
+                / "headers" / f"{key}.h")
+        try:
+            if not (dest.exists() and time.time() - dest.stat().st_mtime < CACHE_TTL_SEC):
+                req = urllib.request.Request(
+                    url, headers={"User-Agent": "nhplug-sdk/instruments"})
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    body = r.read()
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                tmp = dest.with_name(dest.name + ".tmp")
+                tmp.write_bytes(body)
+                os.replace(tmp, dest)          # 원자적 교체(동시 실행 안전)
+            return dest.read_text(encoding="utf-8-sig"), str(dest)
+        except Exception:
+            pass  # 네트워크·권한 문제 → 동봉본으로 계속 진행
+
     path = HEADER_DIR / f"{key}.h"
     if not path.exists():
-        raise FileNotFoundError(f"헤더 없음: {path}  (사용 가능: {', '.join(list_masters())})")
+        raise FileNotFoundError(
+            f"헤더 없음: {path}  (사용 가능: {', '.join(list_masters())})")
+    return path.read_text(encoding="utf-8-sig"), str(path)
+
+
+def load_layout(key: str) -> Layout:
+    """`<key>.h` 를 파싱해 Layout 반환. 정본은 포털, 폴백은 동봉본."""
+    text, origin = header_source(key)
 
     meta, fields = {}, []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in text.splitlines():
         m = _FIELD_RE.match(line)
         if m:
-            fields.append(Field(m["name"], int(m["off"]), int(m["len"]), m["desc"].strip()))
+            off = int(m["off"] if m["off"] is not None else m["off2"])
+            fields.append(Field(m["name"], off, int(m["len"]), m["desc"].strip()))
             continue
         m = _META_RE.match(line)
         if m:
             meta.setdefault(m[1], m[2])
+
+    # 포털본은 @mst·@url.nh 를 쓴다 → 동봉본 키(@file·@url)로 맞춘다.
+    for canon, alts in _META_ALIASES.items():
+        if not meta.get(canon):
+            for alt in alts:
+                if meta.get(alt):
+                    meta[canon] = meta[alt]
+                    break
 
     record = int(re.sub(r"[^0-9].*$", "", meta.get("record", "0")) or 0)
     lay = Layout(

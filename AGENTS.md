@@ -75,9 +75,10 @@
 ## 종목마스터(.mst) — instruments/
 - 🔴 **구조체 정본은 포털**이다 — `https://www.nhplug.com/instruments/<파일명>.h` (N2: `www.n2plug.com`).
   `.mst` 와 1:1 대응이며 인증 없이 받을 수 있다. 필드 오프셋·길이가 필요하면 이 파일을 읽는다.
-- 저장소의 `instruments/headers/*.h` (28종)는 **포털 정본의 동봉 사본**이다. 파서(`instruments/master.py`)가
-  오프라인에서도 동작하도록 패키지에 함께 넣은 것이며, 포털이 갱신되면 뒤따라 반영한다.
-  **필드를 추측하지 말고 헤더를 읽을 것.**
+- 파서(`instruments/master.py`)는 **`.h` 를 포털에서 받아서** 쓴다(`.mst` 와 같은 서버 · 캐시 6h).
+  구조체가 개정돼도 **자동 반영**되며 PyPI 재배포가 필요 없다.
+  저장소의 `instruments/headers/*.h` (28종)는 **오프라인 폴백**이며 정본이 아니다
+  (원격을 끄려면 `NHPLUG_HEADERS_REMOTE=0`). **필드를 추측하지 말고 헤더를 읽을 것.**
 - 사용: `from master import load_master; df = load_master("m_new_stock")` (자동 다운로드·캐시). 포털에서 받은 파일은 `path=` 로 지정.
 - **다운로드는 인증 불필요**(토큰·`x-client-*` 헤더 없이 공개 접근). 마스터 받으려고 토큰을 발급하지 말 것.
 - **브랜드**: `.h` 의 `@url` 은 나무(`www.nhplug.com/instruments`) 기준이다. **N2 는 `NHPLUG_INSTRUMENTS_BASE=https://www.n2plug.com/instruments`** 로 전환한다(캐시는 도메인별로 분리됨).

@@ -36,7 +36,7 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 │            └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
-instruments/       # 종목마스터(.mst) 파서 + 구조체 동봉본(headers/*.h 28종) + 일괄 검증
+instruments/       # 종목마스터(.mst) 파서 + 구조체 오프라인 폴백(headers/*.h 28종) + 일괄 검증
                    #   ※ 구조체 정본은 포털 www.nhplug.com/instruments/<파일명>.h
 templates/         # AI IDE 규칙 파일 (AGENTS.md · CLAUDE.md · Cursor .mdc) — 프로젝트에 복사
 guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
@@ -150,7 +150,8 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_AUTH_URL` | 토큰 발급 URL. 기본 `https://api.nhplug.com:8443`(운영 전용 — moapi 미제공) |
 | `NHPLUG_DEFAULT_ACCOUNT` | 잔고 샘플 등에서 사용할 기본 계좌번호 |
 | `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
-| `NHPLUG_INSTRUMENTS_CACHE_DIR` | 종목마스터 캐시 위치. 기본 `~/.nhplug/instruments/` |
+| `NHPLUG_INSTRUMENTS_CACHE_DIR` | 종목마스터 캐시 위치. 기본 `~/.nhplug/instruments/` (`.mst` · `.h` 공용) |
+| `NHPLUG_HEADERS_REMOTE` | `0` 이면 구조체(`.h`)를 포털에서 받지 않고 패키지 폴백만 사용. 사내망·오프라인용 |
 | `NHPLUG_WS_URL` | 실시간 WebSocket 주소를 직접 지정. 없으면 `NHPLUG_BASE_URL` 호스트에서 유도(국내 7070 · 해외 7080 · 모의 17070) |
 | `NHPLUG_ALLOW_HOSTS` | 사내 검증 서버 등 **허용 호스트 추가**(쉼표 구분). 보통 설정하지 않습니다 |
 
