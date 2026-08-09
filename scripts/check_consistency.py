@@ -210,7 +210,36 @@ def check_allowed_hosts(mcp: Path | None) -> None:
         f"      SDK: {sdk_hosts}\n      MCP: {mcp_hosts}")
 
 
-# ─────────────────────────────────────────────── 9. 커밋 위생
+# ─────────────────────────────────────────────── 9. 고객 노출 연락처·계정
+# 문의 접수는 apisupport@nhsec.com 으로만 받는다. GitHub 계정만 PLUG-OpenAPI 로 이전됐고
+# 이메일은 바뀌지 않았다. 실제로 0.2.0 배포 때 plugsupport@ 가 PyPI 에 노출된 적 있다.
+SUPPORT_EMAIL = "apisupport@nhsec.com"
+FORBIDDEN_PUBLIC = (
+    "plugsupport@nhsec.com",        # 문의 접수 주소가 아님 (GitHub 로그인용)
+    "github.com/plug-support",      # 차단된 옛 계정
+    "github:plug-support/",
+    "github.com/nhsec/",            # 실재하지 않는 조직
+)
+
+
+def check_public_contacts(roots: list[Path]) -> None:
+    bad = []
+    for root in roots:
+        for p in files(root, DOC_EXT | CODE_EXT | {".toml", ".json"}):
+            try:
+                text = p.read_text(encoding="utf-8", errors="ignore")
+            except Exception:
+                continue
+            for n, line in enumerate(text.splitlines(), 1):
+                for pat in FORBIDDEN_PUBLIC:
+                    if pat in line:
+                        bad.append(f"{rel(p)}:{n}  {pat}")
+    add(not bad, f"고객 노출 연락처·계정 ({SUPPORT_EMAIL})",
+        "\n".join(f"      {b}" for b in bad) if bad
+        else f"금지 표기 0건 (plugsupport@ · plug-support · nhsec/)")
+
+
+# ─────────────────────────────────────────────── 10. 커밋 위생
 def check_hygiene(roots: list[Path]) -> None:
     import subprocess
     bad = []
@@ -236,9 +265,8 @@ def main() -> int:
     roots = [SDK]
     mcp = None
     if "--all" in args:
-        # 조직 대문(.github/profile/README.md)은 로컬 클론이 없어 검사 대상이 아니다.
-        # (옛 github_launch/plug-support 는 차단된 계정의 죽은 클론이라 제외)
-        for name in ("nhplug-mcp",):
+        # org-profile = 조직 대문 클론(PLUG-OpenAPI/.github). 정본은 profile/README.md.
+        for name in ("nhplug-mcp", "org-profile"):
             p = WS / name
             if p.is_dir():
                 roots.append(p)
@@ -261,6 +289,7 @@ def main() -> int:
     check_version()
     check_mcp_ops(mcp)
     check_allowed_hosts(mcp)
+    check_public_contacts(roots)
     check_hygiene(roots)
 
     fails = 0

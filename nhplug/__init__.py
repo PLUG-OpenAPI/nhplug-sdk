@@ -22,7 +22,7 @@ from .auth import (
 from .client import call, success_codes
 from .errors import NhplugError
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "call", "success_codes",
