@@ -19,13 +19,13 @@ load_env()
 from .auth import (
     allowed_hosts, cache_path, clear_token, get_auth_url, get_base_url, get_token,
 )
-from .client import call, success_codes
+from .client import Meta, call, paginate, rate_limit, success_codes
 from .errors import NhplugError
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 __all__ = [
-    "call", "success_codes",
+    "call", "paginate", "Meta", "success_codes", "rate_limit",
     "get_token", "get_base_url", "get_auth_url", "clear_token", "cache_path",
     "allowed_hosts",
     "NhplugError",

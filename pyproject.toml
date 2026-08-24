@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nhplug"
-version = "0.2.1"
+version = "0.3.0"
 description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·rsp_cd 판정·실시간(WebSocket)·종목마스터 파서"
 readme = "README.md"
 license = { text = "MIT" }
@@ -32,6 +32,10 @@ dependencies = [
 # 종목마스터를 DataFrame 으로 받고 싶을 때: pip install nhplug[instruments]
 # (없어도 동작한다 — dict 리스트로 반환)
 instruments = ["pandas>=2.0"]
+# 실거래 WebSocket(:7070/:7080)은 서버가 중간 CA 를 보내지 않아 파이썬 기본 OpenSSL
+# 검증이 실패한다(curl·schannel 은 OS 저장소로 자동 보완돼 성공). truststore 를 깔면
+# OS 인증서 저장소를 써서 해결된다 — 특히 Windows.  pip install "nhplug[tls]"
+tls = ["truststore>=0.9"]
 
 [project.urls]
 Homepage = "https://www.nhplug.com"
