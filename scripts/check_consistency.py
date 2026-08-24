@@ -74,6 +74,9 @@ def check_success_codes(roots: list[Path]) -> None:
     bad = []
     for root in roots:
         for p in files(root, DOC_EXT | CODE_EXT):
+            # 테스트는 코드값을 '픽스처'로 쓴다(성공/실패 케이스). 문서 주장이 아니므로 제외.
+            if "tests" in p.parts:
+                continue
             for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
                 if "00000" not in line or key in line:
                     continue                      # 최신 코드를 인지한 줄 — 정상
@@ -81,6 +84,8 @@ def check_success_codes(roots: list[Path]) -> None:
                     continue                      # 환경변수 예시
                 if "00000000000" in line:
                     continue                      # 계좌번호 자리표시자
+                if "tr_type" in line or "WSS" in line or "WS_ACK" in line:
+                    continue                      # WebSocket 구독응답 — REST 성공코드와 별개 체계
                 bad.append(f"{rel(p)}:{i}  {line.strip()[:72]}")
     add(not bad, f"성공코드 ({truth})",
         "\n".join(f"      {b}" for b in bad) if bad else f"코드 정본과 문서 일치")

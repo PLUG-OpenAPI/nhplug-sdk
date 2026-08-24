@@ -118,16 +118,69 @@ python chk_all_masters.py --local ./mst          # 포털에서 받은 폴더 �
 
 ## 제공 마스터 (28종)
 
-| 구분 | 마스터 |
-|---|---|
-| 국내주식 | `m_new_stock` |
-| 해외주식 | `m_gtsstock` |
-| 국내 선물 | `m_future`·`m_futsp`·`m_starfut`·`m_starfutsp`·`m_stkfut`·`m_stkfutsp`·`m_vfuture`·`m_vfutsp`·`m_mfuture`·`m_mfutsp`·`m_kfuture`·`m_kfutsp`·`m_new_xfuture`·`m_new_xfutsp` |
-| 국내 옵션 | `m_optksp`·`m_moption`·`m_soption`·`m_woption`·`m_qoption`·`m_optstp` |
-| 해외파생 | `foitem_h`·`fucode_h`·`fucode_fhke_h`·`opcode_h`·`opcode_ohke_h` |
-| 국내 장내채권 | `bond_hts` |
+`레코드`는 한 종목당 바이트 수입니다. **파일크기 ÷ 레코드 = 종목 수**이며 나머지는 반드시 0이어야 합니다.
 
-각 마스터의 필드 정의는 `headers/<키>.h` 를 보세요. 금현물은 마스터 파일이 없고 전문(`IVOGLDREQ01`)으로 조회합니다.
+### 주식 (2)
+
+| 키 | 내용 | 레코드 | 전문 |
+|---|---|---|---|
+| `m_new_stock` | 국내주식 | 237 | `IVDSTKMST01` |
+| `m_gtsstock` | 해외주식 | 164 | `g6925` |
+
+### 국내 선물 (14)
+
+| 키 | 내용 | 레코드 |
+|---|---|---|
+| `m_future` · `m_futsp` | 지수선물 · 스프레드 | 30 |
+| `m_mfuture` · `m_mfutsp` | 미니지수선물 · 스프레드 | 50 |
+| `m_kfuture` · `m_kfutsp` | KRX300선물 · 스프레드 | 50 |
+| `m_starfut` · `m_starfutsp` | 코스닥150선물 · 스프레드 | 50 |
+| `m_vfuture` · `m_vfutsp` | 변동성지수선물 · 스프레드 | 50 |
+| `m_stkfut` · `m_stkfutsp` | 주식선물 · 스프레드 | 97 |
+| `m_new_xfuture` · `m_new_xfutsp` | 섹터지수선물 · 스프레드 | 139 |
+
+### 국내 옵션 (6)
+
+| 키 | 내용 | 레코드 | 주의 |
+|---|---|---|---|
+| `m_optksp` | 지수옵션 | 22 | 행사가 **×100** → 파서가 `/100` |
+| `m_moption` | 미니지수옵션 | 22 | 〃 |
+| `m_soption` | 코스닥150옵션 | 23 | 〃 |
+| `m_qoption` | 코스닥150 **위클리**옵션 | 25 | `sMonth` = **YYMMWW(주차)** |
+| `m_woption` | 코스피200 **위클리**옵션 | 74 | 〃 |
+| `m_optstp` | 주식옵션 | 77 | `sValue` **스케일 없음** (`/100` 금지) |
+
+### 해외파생 (5)
+
+| 키 | 내용 | 레코드 | 전문 |
+|---|---|---|---|
+| `fucode_h` | 선물 — **CME 지수선물** | 283 | `d6890` |
+| `fucode_fhke_h` | 선물 — **홍콩선물** | 283 | `d6890` |
+| `opcode_h` | 옵션 — **OPRA 주식옵션** | 259 | `d6891` |
+| `opcode_ohke_h` | 옵션 — **홍콩옵션** | 259 | `d6891` |
+| `foitem_h` | **상품정보** (종목이 아닌 상품 마스터) | 310 | `d6892` |
+
+> 해외파생은 **선물·옵션이 거래소별로 파일이 나뉩니다.** `fucode_h`(CME)와 `fucode_fhke_h`(홍콩)는
+> 구조가 같지만(283) 담긴 종목이 다릅니다. `foitem_h` 는 개별 종목이 아니라 **상품(품목) 정의**입니다.
+
+### 채권 (1)
+
+| 키 | 내용 | 레코드 | 전문 |
+|---|---|---|---|
+| `bond_hts` | 국내 장내채권 | 251 | `IVOBONREQ04` |
+
+---
+
+각 마스터의 필드 정의는 포털 `<키>.h` 를 보세요(파서가 자동으로 받습니다).
+**금현물은 마스터 파일이 없고** 전문(`IVOGLDREQ01`)으로 조회합니다.
+
+```python
+from nhplug.instruments import list_masters, load_master
+
+list_masters()                     # 28종 키 목록
+load_master("fucode_h")            # CME 지수선물
+load_master("opcode_ohke_h")       # 홍콩옵션
+```
 
 ## 명세가 갱신되면 (관리자용)
 

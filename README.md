@@ -37,6 +37,7 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 instruments/       # 종목마스터(.mst) 파서 + 구조체 오프라인 폴백(headers/*.h 28종) + 일괄 검증
+                   #   → 자산군별 28종 목록: instruments/README.md
                    #   ※ 구조체 정본은 포털 www.nhplug.com/instruments/<파일명>.h
 templates/         # AI IDE 규칙 파일 (AGENTS.md · CLAUDE.md · Cursor .mdc) — 프로젝트에 복사
 guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
@@ -53,6 +54,7 @@ AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주�
 ```bash
 pip install nhplug                 # 공용 클라이언트 + 실시간(WebSocket) + 종목마스터 파서
 pip install "nhplug[instruments]"  # 종목마스터를 pandas DataFrame 으로 받고 싶을 때
+pip install "nhplug[tls]"          # Windows 등에서 WebSocket TLS 검증 실패 시
 ```
 
 ```python
@@ -152,8 +154,12 @@ API·필드·엔드포인트는 **완전히 동일**하고 **접속 도메인만
 | `NHPLUG_INSTRUMENTS_BASE` | 종목마스터(.mst) 다운로드 기준 URL. 기본 `https://www.nhplug.com/instruments` · **N2 는 `https://www.n2plug.com/instruments`** |
 | `NHPLUG_INSTRUMENTS_CACHE_DIR` | 종목마스터 캐시 위치. 기본 `~/.nhplug/instruments/` (`.mst` · `.h` 공용) |
 | `NHPLUG_HEADERS_REMOTE` | `0` 이면 구조체(`.h`)를 포털에서 받지 않고 패키지 폴백만 사용. 사내망·오프라인용 |
-| `NHPLUG_WS_URL` | 실시간 WebSocket 주소를 직접 지정. 없으면 `NHPLUG_BASE_URL` 호스트에서 유도(국내 7070 · 해외 7080 · 모의 17070) |
+| `NHPLUG_WS_URL` | 실시간 WebSocket 주소를 직접 지정. 없으면 `NHPLUG_BASE_URL` 호스트·`tr_cd` 에서 자동 유도 |
+| `NHPLUG_WS_MAX_KEYS` | 세션당 실시간 등록 수. 기본·상한 `10` (**낮추는 것만** 가능) |
+| `NHPLUG_WS_MAX_SESSIONS` | 동시 WebSocket 세션. 기본·상한 `2` (**낮추는 것만** 가능) |
+| `NHPLUG_WS_SUBSCRIBE_RATE` | 구독 전송 속도(초당). 기본·상한 `10` (**낮추는 것만** 가능) |
 | `NHPLUG_ALLOW_HOSTS` | 사내 검증 서버 등 **허용 호스트 추가**(쉼표 구분). 보통 설정하지 않습니다 |
+| `NHPLUG_RATE_LIMIT` | REST 자동 스로틀(초당 호출 수). 기본 `4` · 상한 `5` · `0` 이면 끔 |
 
 ### 🔒 주소 오타는 호출 전에 막힙니다
 
@@ -225,7 +231,183 @@ except NhplugError as e:
   - 파일 권한은 **OS 기본값**을 따릅니다(별도 `chmod` 없음). 공용 계정·공유 서버에서는 `NHPLUG_TOKEN_CACHE_DIR` 로 접근이 제한된 경로를 지정하거나 `NHPLUG_TOKEN_CACHE=0` 으로 끄세요.
   - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`
   - 재발급은 **401(토큰 무효)** 일 때만 합니다. `429` 재시도에는 기존 토큰을 그대로 사용합니다.
-- **429(호출 유량 초과)** 는 자동 재시도하지 않고 `category="rate_limit"` 예외로 알립니다(실측 한도 초당 5회 수준). 호출 간격을 늘려 주세요.
+- **429(호출 유량 초과)** 는 자동 재시도하지 않고 `category="rate_limit"` 예외로 알립니다. 다만 아래 **자동 스로틀**이 걸려 있어 정상 사용에서는 잘 나지 않습니다.
+
+## 호출 유량 — 자동으로 조절됩니다
+
+실측 한도가 **초당 5회** 수준이라, `call()` 이 **초당 4회**로 자동 스로틀합니다. 직접 `sleep` 을 넣지 않아도 됩니다.
+
+```python
+for code in codes:                 # 200종목을 그냥 돌려도 429 가 나지 않습니다
+    call("/krstock/quote/v1/currentPrice", {"iem_cd": code, "market_cd": "UNT"})
+```
+
+| 설정 | 값 |
+|---|---|
+| 기본 | 초당 **4회** |
+| 상한 | 초당 **5회** (실측 한도. 넘겨 설정하면 5로 깎고 경고) |
+| 변경 | `NHPLUG_RATE_LIMIT=2` |
+| 끄기 | `NHPLUG_RATE_LIMIT=0` — **권장하지 않습니다**(429 발생) |
+
+슬라이딩 1초 창 방식이라 균등 대기가 아니라 **실제로 넘칠 때만** 기다립니다. 스레드 안전합니다.
+
+## 연속조회(`cts`) — 목록이 여러 페이지로 옵니다
+
+연속조회 키가 오는 위치는 **API 마다 다릅니다.**
+
+| 위치 | 필드 | 비고 |
+|---|---|---|
+| 응답 **헤더** | `cts` · `cts_flag` | 본문만 보면 놓칩니다 |
+| 응답 **본문** `Output_*` | `ctsz16` · `ctsz18` · `ctsz20` · `ctsz30` | 자산군마다 자릿수가 다릅니다 |
+
+SDK 는 **헤더를 먼저 보고, 없으면 본문에서 찾습니다.** 어느 쪽으로 오든 동작합니다.
+
+**전체를 순회할 때 — `paginate()`**
+
+```python
+from nhplug import paginate
+
+for page in paginate("/krstock/…", {"act_no": "12345678901"}):
+    for row in page.get("Output_0", []):
+        print(row)
+```
+
+종료 판정·다음 키 전달·무한루프 방지가 모두 들어 있습니다. 호출 간격도 위 스로틀이 처리합니다.
+
+**한 페이지씩 직접 다룰 때 — `want_meta=True`**
+
+```python
+from nhplug import call
+
+data, meta = call("/krstock/…", {"act_no": "…"}, want_meta=True)
+meta.cts         # 다음 페이지 키 (헤더 → 본문 순으로 탐색)
+meta.cts_flag    # "Y" 다음 있음 / "N" 마지막
+meta.cts_source  # 키를 어디서 찾았나 — "header" / "body"
+meta.has_next    # 위를 종합한 판정
+meta.headers     # 응답 헤더 전체
+
+if meta.has_next:
+    nxt, meta = call("/krstock/…", {"act_no": "…"},
+                     cts=meta.cts, cts_flag=meta.cts_flag, want_meta=True)
+```
+
+> `want_meta` 를 주지 않으면 **기존과 똑같이 본문 dict** 만 돌려줍니다. 기존 코드는 그대로 동작합니다.
+
+### 종료 판정 규칙 (실측)
+
+| 조건 | 판정 |
+|---|---|
+| `cts` 가 비어 있음 | 종료 |
+| `cts_flag == "N"` | 종료 |
+| `cts_flag == "Y"` | 계속 |
+| `cts_flag` 없음 + 키를 **본문**에서 찾음 | 계속 |
+| `cts_flag` 없음 + 키가 **헤더** + `rsp_cd` 가 `00165`·`00218` | 계속 |
+| 🔴 **`cts` 가 직전과 동일** | **즉시 종료** |
+
+마지막 항목이 중요합니다. 같은 키를 다시 보내면 서버가 **같은 페이지를 계속** 주므로 무한루프가 됩니다. 정상 연속조회는 키가 매번 바뀌지만 **끝 2~3자만 다른 경우**가 있어 전체 문자열로 비교합니다.
+
+```python
+for page in paginate("/krstock/…", {...}, max_pages=20):   # 상한도 걸 수 있습니다
+    ...
+```
+
+## 실시간 (WebSocket)
+
+```python
+from nhplug.realtime import subscribe
+
+subscribe(["005930", "000660"], print, max_messages=10)   # 국내 체결가 통합(mc)
+subscribe(["005930"], print, tr_cd="mb")                  # 국내 호가 통합
+subscribe([], print, tr_cd="d2")                          # 체결통보 (tr_key 불필요)
+```
+
+접속 주소는 `NHPLUG_BASE_URL` 과 `tr_cd` 에서 자동으로 만들어집니다.
+
+```
+wss://api.nhplug.com:7070/websocket
+```
+
+> ⚠️ **경로 `/websocket` 이 필수**입니다. 직접 접속 코드를 짜신다면 빠뜨리지 마세요.
+
+### 채널코드는 시장별로 다릅니다
+
+REST 는 `market_cd` 파라미터로 시장을 고르지만, **실시간은 채널코드 자체가 갈립니다.**
+
+| REST `market_cd` | 체결가 | 호가 | 예상체결 | 회원사 | 프로그램매매 |
+|---|---|---|---|---|---|
+| `KRX` | `oc` | `ob` | `oa` | `t1` | `t8` |
+| `NXT` | `nc` | `nb` | `na` | `ng` | `nn` |
+| **`UNT` 통합** | **`mc`** ← 기본 | `mb` | `ma` | `mg` | `mn` |
+
+`oc` 를 쓰면 **NXT 체결이 오지 않습니다.** 오류 없이 데이터만 덜 옵니다.
+
+### 포트 — 통보 채널은 해외라도 7070
+
+| 대상 | 포트 |
+|---|---|
+| 국내 시세 | `7070` |
+| **해외 시세** (`RC`·`RH`·`rc`·`rh`) | `7080` |
+| **통보** (`d0`·`d1`·`d2`·`d3`·`de`·`dj`·`dk`·`dv`·`dn`) | **`7070`** — 국내·해외 공통 |
+| 모의투자 | `17070` — 국내·해외 공통 |
+
+> 해외파생 통보(`dk`·`dj`)를 7080 으로 보내면 **`WSS10006`** 이 납니다. SDK 가 `tr_cd` 로 자동 판별합니다.
+
+### `tr_key` 는 채널마다 넣는 값이 다릅니다
+
+| 채널 | `tr_key` | 넣는 값 |
+|---|---|---|
+| 국내 시세 (`mc`·`ob`…) | `code` | 종목코드 `005930` |
+| 시간외 (`e2`·`e4`·`e5`) | `ecn_code` | 시간외 코드 |
+| **통보** (`d0`~`d3`…) | `userid` | 사용자ID 또는 **빈 값** |
+| **해외 시세** (`RC`·`RH`) | `gicz15` | **GIC 15자리 — 티커 아님** |
+| 채권지수 (`uB`) | `jisuid` | 지수ID |
+
+### 서버 한도 — SDK 가 자동으로 지킵니다
+
+| 항목 | 한도 | 초과 시 |
+|---|---|---|
+| 앱키당 동시 세션 | **2** | `WSS10015` |
+| 세션당 실시간 등록 | **10** | close code 1000 `"Bye"` — **오류 메시지 없이 끊김** |
+| 구독 전송 | **초당 10건** | `WSS10010` |
+
+`subscribe()` 가 알아서 처리합니다.
+
+- 종목이 10개를 넘으면 **10개씩 나눠 여러 세션**으로 구독
+- 동시 세션은 **2개**를 넘지 않음(초과분은 앞 세션이 끝나면 이어서)
+- 구독 전송 간격 제어
+- 종료 시 `tr_type=2` 로 **등록 반납**
+
+> 위 한도는 서버가 강제하는 값이라 **환경변수로 올릴 수 없습니다.** 낮추는 것만 가능합니다.
+
+### 🔒 Windows 에서 TLS 오류가 난다면
+
+실거래 WebSocket(`:7070`·`:7080`)은 서버가 **중간 CA 를 보내지 않습니다.** `curl` 이나 브라우저는 OS 인증서 저장소로 자동 보완해 성공하지만, 파이썬 기본 OpenSSL 검증은 실패합니다.
+
+```bash
+pip install "nhplug[tls]"      # truststore — OS 인증서 저장소 사용
+```
+
+설치만 하면 **자동으로 적용**됩니다. 코드 수정은 필요 없습니다.
+
+> ⚠️ 검증을 끄는 방법(`CERT_NONE`)은 제공하지 않습니다. 중간자 공격에 그대로 노출됩니다.
+
+> **구독 등록 응답(ACK)은 시세로 세지 않습니다.** 서버는 구독 직후
+> `{"header":{"tr_type":"1","rsp_cd":"00000",…}}` 을 한 번 보내는데, SDK 가 이를 걸러내므로
+> `max_messages=1` 이어도 **실제 시세 1건**을 받습니다. 등록이 실패하면(`WSS10015` 등) stderr 로 알립니다.
+> 응답까지 보려면 `include_ack=True`.
+
+> **통보 채널은 실제 주문이 발생할 때만** 내려옵니다. 조용하다고 연결이 잘못된 것은 아닙니다.
+> 시세 채널도 **장 마감 시간에는 0건**이 정상입니다.
+
+**전체 채널 목록(국내 21 · 해외 6)과 `tr_key` 대응표** → [`docs/realtime_channels.md`](docs/realtime_channels.md)
+
+```bash
+python snippets/krstock/realtime_execution/chk_realtime_execution.py       # 체결가 통합(mc)
+python snippets/krstock/realtime_execution/chk_realtime_execution.py mb    # 호가
+python snippets/krstock/realtime_execution/chk_realtime_execution.py d2    # 체결통보
+```
+
+접속 주소와 보낸 구독 메시지를 함께 출력하므로, **수신 0건일 때 무엇을 확인해야 하는지** 알 수 있습니다.
 
 ## ⚠️ 안전
 
