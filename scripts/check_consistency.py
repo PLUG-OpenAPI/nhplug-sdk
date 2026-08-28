@@ -256,7 +256,24 @@ def check_python_version() -> None:
         else f"classifier·문서·문법 모두 {ver} 기준과 일치")
 
 
-# ─────────────────────────────────────────────── 10. 고객 노출 연락처·계정
+# ─────────────────────────────────────────────── 10. AI 탐색성 (/tree/ 링크)
+#: GitHub robots.txt 는 폴더 목록(/tree/)을 크롤러에 막는다(2026-08 실측).
+#: AI 는 /blob/ 와 raw.githubusercontent 만 읽을 수 있으므로, 폴더를 가리키려면
+#: 그 안의 README.md 를 /blob/ 로 가리켜야 한다. 안 그러면 AI 에게 그 폴더는 없는 것과 같다.
+def check_tree_links(roots: list[Path]) -> None:
+    pat = re.compile(r"github\.com/[^)\s\"']*/tree/[^)\s\"']*")
+    bad = []
+    for root in roots:
+        for p in files(root, DOC_EXT | CODE_EXT):
+            for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                for m in pat.findall(line):
+                    bad.append(f"{rel(p)}:{i}  {m}")
+    add(not bad, "AI 탐색성 (/tree/ 링크 금지)",
+        "\n".join(f"      {b}  → /blob/<폴더>/README.md 로 바꿀 것" for b in bad) if bad
+        else "폴더 링크 0건 — 전부 /blob/ 또는 상대경로")
+
+
+# ─────────────────────────────────────────────── 11. 고객 노출 연락처·계정
 # 문의 접수는 apisupport@nhsec.com 으로만 받는다. GitHub 계정만 PLUG-OpenAPI 로 이전됐고
 # 이메일은 바뀌지 않았다. 실제로 0.2.0 배포 때 plugsupport@ 가 PyPI 에 노출된 적 있다.
 SUPPORT_EMAIL = "apisupport@nhsec.com"
@@ -337,6 +354,7 @@ def main() -> int:
     check_mcp_ops(mcp)
     check_allowed_hosts(mcp)
     check_python_version()
+    check_tree_links(roots)
     check_public_contacts(roots)
     check_hygiene(roots)
 

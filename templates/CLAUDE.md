@@ -5,7 +5,7 @@
   Claude Code 가 세션 시작 시 자동으로 읽습니다.
   (Antigravity·Codex 는 `AGENTS.md`, Cursor 는 `.cursor/rules/nhplug.mdc` 를 씁니다.
    같은 내용이므로 여러 도구를 쓰면 파일을 모두 두면 됩니다.)
-  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates
+  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md
 -->
 
 ## 시작 — SDK 를 쓴다 (직접 HTTP 를 짜지 않는다)

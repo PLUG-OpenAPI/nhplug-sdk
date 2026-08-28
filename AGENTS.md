@@ -16,6 +16,30 @@
 - `pipeline/` : 설계→검증→실행 파이프라인 골격.
 - `docs/` : 도메인 명세의 로컬 사본 위치(`scripts/fetch_docs.py` 로 받음, 커밋 안 함). 정본은 도메인 URL(아래).
 
+## 🗺️ 파일 지도 — 무엇을 알고 싶을 때 어디를 여는가
+
+⚠️ **GitHub 은 폴더 목록(`/tree/`)을 크롤러에 막아 둔다.** 아래 링크로 직접 열어야 한다.
+파일 목록이 필요하면 이 표와 [README 「구성」 절](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/README.md)을 본다.
+
+| 알고 싶은 것 | 열어볼 파일 |
+|---|---|
+| REST 호출 · `rsp_cd` 판정 · **연속조회** · **유량 스로틀** | [nhplug/client.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/client.py) |
+| WebSocket 구독 · 포트 라우팅 · **서버 한도** · TLS | [nhplug/realtime.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/realtime.py) |
+| 토큰 발급·캐시 · **호스트 가드** · 브랜드 판정 | [nhplug/auth.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/auth.py) |
+| 오류 분류(`config`·`auth`·`rate_limit`·`business`…) | [nhplug/errors.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/errors.py) |
+| `.env` 탐색 순서 | [nhplug/\_env.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/_env.py) |
+| **실시간 채널 27종** · `tr_key` 대응표 | [docs/realtime_channels.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/docs/realtime_channels.md) |
+| **종목마스터 28종** 목록 · 파서 사용법 | [instruments/README.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/instruments/README.md) |
+| `.mst` 파싱 구현 | [instruments/master.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/instruments/master.py) |
+| **SDK 없이** 원시 호출(urllib·requests) | [snippets/standalone/README.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/snippets/standalone/README.md) |
+| 계좌구분(`acct_type`) 판정 예제 | [snippets/common/list_accounts](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/snippets/common/list_accounts/list_accounts.py) |
+| 실시간 구독 예제·검증 | [snippets/krstock/realtime_execution](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/snippets/krstock/realtime_execution/chk_realtime_execution.py) |
+| AI IDE 규칙 파일(고객 배포용) | [templates/README.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md) |
+| 설치부터 첫 실행까지 절차 | [guides/antigravity.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/guides/antigravity.md) |
+| **대화로 조회**(MCP 서버) | [nhplug-mcp](https://github.com/PLUG-OpenAPI/nhplug-mcp) |
+
+**명세 자체**를 알고 싶으면 저장소가 아니라 도메인을 본다 → 아래 「문서 (Source of Truth)」 절.
+
 ## 문서 (Source of Truth) — 도메인이 정본(SSOT)
 - 전체 개요·인증·공통 규약: https://www.nhplug.com/llms.txt (나무) · https://www.n2plug.com/llms.txt (N2)
 - 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)

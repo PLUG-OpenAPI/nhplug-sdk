@@ -104,7 +104,7 @@ macOS·Linux 는 `curl -O`, 또는 브라우저로 열어 복사해도 됩니다
 
 > ⚠️ **Cursor 사용자**: 예전 방식인 `.cursorrules` 파일은 **Agent 모드에서 무시됩니다.** 반드시 `.cursor/rules/` 경로에 두세요.
 
-전체 목록과 설명: **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates)**
+전체 목록과 설명: **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md)**
 
 ### 1-5. `.env` 파일 준비
 
@@ -178,7 +178,7 @@ python test_nh.py
 
 ## 부록 A. 규칙 파일 — `templates/` 참조
 
-규칙 파일 전문은 저장소의 **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates)** 에 있습니다. 이 가이드에 사본을 두지 않는 이유는, **두 곳에 두면 한쪽이 낡아 잘못된 규칙을 퍼뜨리기 때문**입니다(실제로 그런 일이 있었습니다).
+규칙 파일 전문은 저장소의 **[templates/](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md)** 에 있습니다. 이 가이드에 사본을 두지 않는 이유는, **두 곳에 두면 한쪽이 낡아 잘못된 규칙을 퍼뜨리기 때문**입니다(실제로 그런 일이 있었습니다).
 
 | 파일 | 도구 | 위치 |
 |---|---|---|

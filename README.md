@@ -25,28 +25,43 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 
 ## 구성
 
-```
-nhplug/            # 공용 클라이언트 (인증·토큰캐시·Input_0 봉투 자동 처리)
-snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파일 + chk_ 검증 파일)
-│   ├── auth/issue_token
-│   ├── common/list_accounts
-│   ├── krstock/{current_price, current_daily, balance, buyable_quantity, sellable_quantity, order_cash_buy, order_cash_sell, realtime_execution}
-│   │        └ realtime_execution = 실시간 체결가 WebSocket 구독 예제
-│   ├── gbstock/{current_price, balance, buyable_amount, sellable_quantity, order_buy}  # 해외주식
-│   │        └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
-│   └── standalone/  ← SDK 없이 동작하는 원시 예제 2종 (urllib / requests)
-│            └ 외부 패키지 설치 제한 환경 · 다른 언어 포팅 참조용
-examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
-pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
-instruments/       # 종목마스터(.mst) 파서 + 구조체 오프라인 폴백(headers/*.h 28종) + 일괄 검증
-                   #   → 자산군별 28종 목록: instruments/README.md
-                   #   ※ 구조체 정본은 포털 www.nhplug.com/instruments/<파일명>.h
-templates/         # AI IDE 규칙 파일 (AGENTS.md · CLAUDE.md · Cursor .mdc) — 프로젝트에 복사
-guides/            # Antigravity·Cursor 등 AI IDE 개발 가이드
-scripts/           # fetch_docs.py — 도메인에서 최신 명세를 docs/ 로 내려받기
-docs/              # 명세 로컬 사본(fetch_docs 로 생성, 커밋 안 함) — 정본은 도메인
-AGENTS.md          # AI 에이전트 규칙(인증·봉투·환경·안전·주문형식) — 자동 로드
-```
+**알고 싶은 것부터 찾아가세요.** 아래는 전부 클릭되는 링크입니다.
+
+### 라이브러리 — `nhplug/`
+
+| 파일 | 무엇이 들어 있나 |
+|---|---|
+| [`client.py`](nhplug/client.py) | REST 호출 · `Input_0` 봉투 · `rsp_cd` 판정 · **연속조회(`cts`)** · **유량 스로틀** |
+| [`realtime.py`](nhplug/realtime.py) | WebSocket 구독 · 접속 URL 유도 · **서버 한도 준수** · TLS |
+| [`auth.py`](nhplug/auth.py) | 토큰 발급·캐시(24h) · **호스트 가드** · 브랜드 판정 |
+| [`errors.py`](nhplug/errors.py) | `NhplugError` — `config`·`auth`·`rate_limit`·`business`·`network`·`http` |
+| [`_env.py`](nhplug/_env.py) | `.env` 탐색 순서(환경변수 → 프로젝트 → 전역) |
+
+### 샘플코드 — `snippets/` (기능당 폴더 = 호출 파일 + `chk_` 검증 파일)
+
+| 분류 | 예제 |
+|---|---|
+| 인증 | [`issue_token`](snippets/auth/issue_token) · [`token_cache`](snippets/auth/token_cache) |
+| 공통 | [`list_accounts`](snippets/common/list_accounts) — 계좌구분(`acct_type`) 판정 포함 |
+| 국내주식 | [`current_price`](snippets/krstock/current_price) · [`current_daily`](snippets/krstock/current_daily) · [`balance`](snippets/krstock/balance) · [`buyable_quantity`](snippets/krstock/buyable_quantity) · [`sellable_quantity`](snippets/krstock/sellable_quantity) · [`order_cash_buy`](snippets/krstock/order_cash_buy) · [`order_cash_sell`](snippets/krstock/order_cash_sell) · [`realtime_execution`](snippets/krstock/realtime_execution) |
+| 해외주식 | [`current_price`](snippets/gbstock/current_price) · [`balance`](snippets/gbstock/balance) · [`buyable_amount`](snippets/gbstock/buyable_amount) · [`sellable_quantity`](snippets/gbstock/sellable_quantity) · [`order_buy`](snippets/gbstock/order_buy) |
+| **SDK 없이** | [`standalone/`](snippets/standalone/README.md) — urllib · requests 원시 예제 2종 |
+
+> ⚠️ 해외는 매수/매도 가능수량이 `buyableAmount` **한 API**(`pcs_dit`)로 통합돼 있습니다 — [AGENTS.md](AGENTS.md) 참고.
+
+### 문서 · 도구
+
+| 경로 | 내용 |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | **AI 에이전트 규칙** — AI IDE 가 자동 로드. 파일 지도 포함 |
+| [`docs/realtime_channels.md`](docs/realtime_channels.md) | 실시간 **27채널** 표 · `tr_key` 대응 · 서버 한도 |
+| [`instruments/README.md`](instruments/README.md) | 종목마스터 **28종** 자산군별 목록 · 파서 사용법 |
+| [`instruments/master.py`](instruments/master.py) | `.mst` 파서 (구조체 `.h` 를 포털에서 자동 로딩) |
+| [`templates/README.md`](templates/README.md) | AI IDE 규칙 파일 3종 — 프로젝트에 복사해 사용 |
+| [`guides/antigravity.md`](guides/antigravity.md) | Antigravity·Cursor 개발 가이드 |
+| [`scripts/fetch_docs.py`](scripts/fetch_docs.py) | 도메인에서 최신 명세를 `docs/` 로 내려받기 |
+| [`scripts/check_consistency.py`](scripts/check_consistency.py) | 문서·코드 일관성 검사(관리자용) |
+| [`examples/krstock`](examples/krstock) · [`pipeline/`](pipeline) | 카테고리 통합 예제 · 설계→검증→실행 골격 |
 
 > **패키지(`pip install nhplug`)에 포함되는 것**: `nhplug/`(코어·실시간) + `instruments/`(파서·헤더 28종)
 > **포함되지 않는 것**: `snippets/` `examples/` `pipeline/` `guides/` — 저장소를 clone 해서 참고하세요.

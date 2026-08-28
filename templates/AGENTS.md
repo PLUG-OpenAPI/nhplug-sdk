@@ -4,7 +4,7 @@
   이 파일을 당신의 프로젝트 루트에 `AGENTS.md` 로 두면
   Antigravity · OpenAI Codex · Claude Code 등이 세션 시작 시 자동으로 읽습니다.
   Cursor 는 이 파일을 읽지 않습니다 → `cursor/nhplug.mdc` 를 쓰세요.
-  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates
+  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md
 -->
 
 ## 시작 — SDK 를 쓴다 (직접 HTTP 를 짜지 않는다)

@@ -10,7 +10,7 @@ alwaysApply: true
 <!--
   두는 곳: 프로젝트 루트의  .cursor/rules/nhplug.mdc
   ⚠️ 레거시 `.cursorrules` 는 Cursor Agent 모드에서 무시됩니다. 반드시 이 경로를 쓰세요.
-  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/tree/main/templates
+  정본: https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/README.md
 -->
 
 ## SDK 를 쓴다 — 직접 HTTP 를 짜지 않는다
