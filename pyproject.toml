@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nhplug"
-version = "0.3.0"
+version = "0.3.1"
 description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·rsp_cd 판정·실시간(WebSocket)·종목마스터 파서"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "NH Investment & Securities Co., Ltd.", email = "apisupport@nhsec.com" }]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 keywords = ["nhplug", "n2plug", "nh-investment", "open-api", "trading", "korea-stock"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -17,6 +17,7 @@ classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",

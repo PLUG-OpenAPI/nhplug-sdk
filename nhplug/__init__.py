@@ -22,7 +22,7 @@ from .auth import (
 from .client import Meta, call, paginate, rate_limit, success_codes
 from .errors import NhplugError
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "call", "paginate", "Meta", "success_codes", "rate_limit",

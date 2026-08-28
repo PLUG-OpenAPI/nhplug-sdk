@@ -27,6 +27,7 @@ CODE_EXT = {".py", ".ts", ".mjs"}
 SKIP_DIRS = {".git", "__pycache__", ".venv", "node_modules", "dist", "build", ".cache"}
 
 results: list[tuple[bool, str, str]] = []  # (ok, 항목, 상세)
+roots_cache: list[Path] = []   # check_python_version 이 문서 전체를 훑을 때 쓴다
 
 
 def add(ok: bool, item: str, detail: str = "") -> None:
@@ -215,7 +216,47 @@ def check_allowed_hosts(mcp: Path | None) -> None:
         f"      SDK: {sdk_hosts}\n      MCP: {mcp_hosts}")
 
 
-# ─────────────────────────────────────────────── 9. 고객 노출 연락처·계정
+# ─────────────────────────────────────────────── 9. 최소 파이썬 버전
+#: pyproject 의 requires-python 을 정본으로, 문서 표기와 3.11+ 전용 문법 사용을 함께 본다.
+#: ⚠️ 실측: 3.10 에서 전 기능 동작 확인(2026-08). 아래 API 를 쓰면 3.10 이 조용히 깨진다.
+PY311_ONLY = ("tomllib", "typing import Self", "ExceptionGroup", "TaskGroup",
+              "asyncio.timeout", "StrEnum", "except*")
+
+
+def check_python_version() -> None:
+    m = re.search(r'requires-python\s*=\s*">=(\d+\.\d+)"',
+                  (SDK / "pyproject.toml").read_text(encoding="utf-8"))
+    if not m:
+        add(False, "최소 파이썬 버전", "pyproject.toml 에서 requires-python 을 찾지 못함")
+        return
+    ver = m.group(1)
+    bad = []
+
+    # ① classifier 에 해당 버전이 있는지
+    if f'Python :: {ver}"' not in (SDK / "pyproject.toml").read_text(encoding="utf-8"):
+        bad.append(f"pyproject.toml classifiers 에 'Python :: {ver}' 누락")
+
+    # ② 문서가 다른 버전을 말하는지
+    for root in roots_cache:
+        for p in files(root, DOC_EXT):
+            for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                for claim in re.findall(r"Python\s*(\d+\.\d+)\s*이상", line):
+                    if claim != ver:
+                        bad.append(f"{rel(p)}:{i}  'Python {claim} 이상' (정본 {ver})")
+
+    # ③ 상위 버전 전용 문법·API 사용
+    for pat in PY311_ONLY:
+        for p in files(SDK / "nhplug", {".py"}):
+            for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                if pat in line and "PY311_ONLY" not in line:
+                    bad.append(f"{rel(p)}:{i}  3.11+ 전용 '{pat}'")
+
+    add(not bad, f"최소 파이썬 버전 ({ver})",
+        "\n".join(f"      {b}" for b in bad) if bad
+        else f"classifier·문서·문법 모두 {ver} 기준과 일치")
+
+
+# ─────────────────────────────────────────────── 10. 고객 노출 연락처·계정
 # 문의 접수는 apisupport@nhsec.com 으로만 받는다. GitHub 계정만 PLUG-OpenAPI 로 이전됐고
 # 이메일은 바뀌지 않았다. 실제로 0.2.0 배포 때 plugsupport@ 가 PyPI 에 노출된 적 있다.
 SUPPORT_EMAIL = "apisupport@nhsec.com"
@@ -284,6 +325,7 @@ def main() -> int:
             mcp = p
         del args[i:i + 2]
 
+    roots_cache[:] = roots
     print(f"일관성 검사 — 대상 {len(roots)}개 저장소\n" + "─" * 66)
 
     check_success_codes(roots)
@@ -294,6 +336,7 @@ def main() -> int:
     check_version()
     check_mcp_ops(mcp)
     check_allowed_hosts(mcp)
+    check_python_version()
     check_public_contacts(roots)
     check_hygiene(roots)
 

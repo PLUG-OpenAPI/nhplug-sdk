@@ -9,7 +9,7 @@
 ## 0. 준비물
 
 1. **Google Antigravity** 설치 — [antigravity.google](https://antigravity.google)
-2. **Python 3.11 이상** (`python --version` 으로 확인 — SDK 패키지 `nhplug` 의 최소 요구 버전)
+2. **Python 3.10 이상** (`python --version` 으로 확인 — SDK 패키지 `nhplug` 의 최소 요구 버전)
 3. **NH투자증권 Open API 앱키/앱시크릿** — 포털 [www.nhplug.com](https://www.nhplug.com/intro) 에서 발급
 4. (권장) 처음엔 **모의투자 환경**으로 시작
 
