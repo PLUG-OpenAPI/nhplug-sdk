@@ -32,8 +32,10 @@ snippets/      # ① 함수 단위 실행 샘플 (기능당 폴더 = 호출 파�
 │   ├── common/list_accounts
 │   ├── krstock/{current_price, current_daily, balance, buyable_quantity, sellable_quantity, order_cash_buy, order_cash_sell, realtime_execution}
 │   │        └ realtime_execution = 실시간 체결가 WebSocket 구독 예제
-│   └── gbstock/{current_price, balance, buyable_amount, sellable_quantity, order_buy}  # 해외주식
-│            └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
+│   ├── gbstock/{current_price, balance, buyable_amount, sellable_quantity, order_buy}  # 해외주식
+│   │        └ 해외는 매수/매도 가능수량이 buyableAmount 한 API(pcs_dit)로 통합 — AGENTS.md 참고
+│   └── standalone/  ← SDK 없이 동작하는 원시 예제 2종 (urllib / requests)
+│            └ 외부 패키지 설치 제한 환경 · 다른 언어 포팅 참조용
 examples/     # ② 카테고리 통합 예제 (krstock_functions.py + _examples.py)
 pipeline/          # ③ 설계→검증→실행 파이프라인 (골격)
 instruments/       # 종목마스터(.mst) 파서 + 구조체 오프라인 폴백(headers/*.h 28종) + 일괄 검증
@@ -100,6 +102,24 @@ python snippets/common/list_accounts/chk_list_accounts.py
 cd examples/krstock
 python krstock_examples.py
 ```
+
+### SDK 없이 쓰기 — [`snippets/standalone/`](snippets/standalone/)
+
+사내 정책상 **외부 패키지 설치가 제한**되거나, **다른 언어로 포팅**하려는 경우를 위한 원시 예제입니다.
+토큰 발급부터 실시간 시세 구독까지 **한 파일에** 들어 있어 호출 흐름이 그대로 보입니다.
+
+| 파일 | REST | WebSocket |
+|---|---|---|
+| `nhplug_stock_demo1.py` | `urllib` (표준 라이브러리) | `websocket-client` (콜백) |
+| `nhplug_stock_demo2.py` | `requests` | `websockets` (async) |
+
+```bash
+cd snippets/standalone
+cp .env.example .env       # ⚠️ 여기 .env 는 INI 형식 — 루트와 다릅니다
+python nhplug_stock_demo1.py
+```
+
+> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 `rsp_cd` 판정·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
 
 ## 설정 — 파일 하나만 관리하면 됩니다
 
