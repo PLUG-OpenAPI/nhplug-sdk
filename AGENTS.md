@@ -45,11 +45,20 @@
 - 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)
   (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
 - 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
-- **에러 처리(중요)**: **HTTP 200 ≠ 업무 성공.** 응답 `rsp_cd` 가 성공 코드가 아니면 실패다.
-  성공 코드는 **`00000`·`00166`·`00221`·`13578`** (+ `rsp_msg` 에 "완료" 포함 시 성공으로 보는 안전망).
-  ⚠️ `00000`/`00166` 만 성공으로 보는 코드를 새로 쓰지 말 것 — 매수가능수량 조회는 `00221`("조회가 완료되었습니다") 로 응답한다.
-  `nhplug.call()` 이 이를 자동 판정해 `NhplugError`(category: auth|rate_limit|business|network|http)를 던진다.
-  성공 코드 교체는 `NHPLUG_SUCCESS_CODES`, 예외 없이 원본이 필요하면 `call(..., raise_on_error=False)`.
+- 🔴 **에러 처리(가장 중요)**: **HTTP 200 ≠ 업무 성공.** 그리고 **`rsp_cd` 만으로 판정하지 말 것.**
+  **`rsp_msg` 의 내용이 우선**이다. **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있다.**
+  판정 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: https://www.n2plug.com/llms.txt).
+  ```python
+  data = call("/krstock/...", {...})
+  # 중요한 처리라면 메시지를 직접 확인한다
+  print(data.get("rsp_cd"), data.get("rsp_msg"))
+  ```
+  ⚠️ **`if rsp_cd == "00000"` 같은 코드를 쓰지 말 것.** 특정 코드값을 하드코딩한 판정은 API 를 바꾸면 무너진다.
+  `nhplug.call()` 이 1차 판정해 `NhplugError`(category: config|auth|rate_limit|business|network|http)를 던지지만,
+  **그 판정은 라이브에서 관찰된 코드 목록 + "완료" 메시지 기반이라 전수가 아니다.** 예외 없이 원본이 필요하면
+  `call(..., raise_on_error=False)` 로 받아 `rsp_msg` 를 직접 본다.
+  (관찰된 정상 응답 예: `00000` 현재가·계좌목록 / `00166` 잔고 / `00221` 매수가능수량 / `13578` 조회 내역 없음
+   — **참고용 예시이며 판정 기준이 아니다.**)
 - **토큰(중요)**: 24시간 유효. `~/.nhplug/` 에 **파일 캐시**되어 프로세스가 바뀌어도 재사용된다(재발급 1회 = 보안 알림 1건).
   캐시 파일 권한은 OS 기본값이다(별도 chmod 없음). 공유 환경이면 `NHPLUG_TOKEN_CACHE_DIR` 로 옮기거나 `NHPLUG_TOKEN_CACHE=0`.
   **재발급은 401(토큰 무효)일 때만.** `429`(유량 초과) 재시도에는 기존 토큰을 그대로 쓴다 — 토큰을 직접 재발급하는 코드를 새로 만들지 말 것.
@@ -70,8 +79,8 @@
 - 발급 토큰은 만료 전까지 캐시·재사용한다(매 호출 재발급 금지). → `nhplug/auth.py` 가 이미 처리.
 - 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
 - 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투.
-  **성공 판정은 위 「에러 처리」 절을 따른다** — `00000`·`00166`·`00221`·`13578` (+ rsp_msg 에 "완료").
-  "…계열이면 정상" 같은 모호한 판정을 쓰지 말 것 — 코드 4개를 명시하거나 `nhplug.call()` 에 맡긴다.
+  **성공 판정은 위 「에러 처리」 절을 따른다** — `rsp_msg` 우선, `rsp_cd` 단독 판정 금지.
+  특정 코드값을 하드코딩하지 말고 `nhplug.call()` 에 맡기거나 `rsp_msg` 를 직접 확인한다.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no · acct_type. acct_no 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 
 ## 계좌구분(acct_type) — 환경과 맞는 계좌를 골라야 한다 (중요)
@@ -133,7 +142,7 @@
 ## 보안·안전 규칙 (필수)
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.
 - 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.
-- 주문(매수/매도) 실행 전 로그를 남기고, **업무 오류면 중단한다**(성공코드는 위 「에러 처리」 절 참조 — `00000`·`00166`·`00221`·`13578`).
+- 주문(매수/매도) 실행 전 로그를 남기고, **업무 오류면 중단한다**(판정은 위 「에러 처리」 절 — `rsp_msg` 우선).
   `nhplug.call()` 을 쓰면 `NhplugError` 로 올라오므로 예외를 잡아 중단하면 된다.
 - 실주문은 사람 확인 절차를 둔다. 완전 무인 실거래는 지양.
 

@@ -1,9 +1,12 @@
 """REST 호출 공용 래퍼: 헤더·Input_0 봉투·토큰·업무성공(rsp_cd) 판정·연속조회·유량 제어.
 
-핵심 규약: **HTTP 200 ≠ 업무 성공.** 응답 봉투의 `rsp_cd` 가 성공 코드가 아니면 실패다.
-성공 코드는 기본 00000·00166·00221·13578 (+ rsp_msg 에 "완료" 포함 시 성공으로 보는 안전망)
-이며, NHPLUG_SUCCESS_CODES 로 교체할 수 있다.
-※ 값을 바꾸면 아래 DEFAULT_SUCCESS_CODES 와 이 설명을 함께 고칠 것.
+🔴 업무오류 판정: **HTTP 200 ≠ 업무 성공.** 그리고 **rsp_cd 만으로는 판정할 수 없다** —
+**같은 rsp_cd 값이 API 에 따라 정상일 수도 오류일 수도 있다.** 판정은 **rsp_msg 내용이 우선**이며
+규약 정본은 도메인 llms.txt 다.
+
+아래 is_success() 는 라이브에서 관찰된 코드 목록 + "완료" 메시지로 하는 **1차 판정**이며 전수가 아니다.
+호출자가 직접 확인해야 하는 중요한 처리에서는 raise_on_error=False 로 원본을 받아 rsp_msg 를 본다.
+⚠️ 판정 기준(rsp_msg 우선 규칙)이 llms.txt 에 확정되면 이 함수를 그에 맞춰 교체할 것.
 
 연속조회(cts): `cts`·`cts_flag` 는 **응답 헤더**로 내려온다. `call()` 은 기본적으로 본문만
 돌려주므로 헤더가 필요하면 `want_meta=True` 를 쓰거나, 전체 순회는 `paginate()` 를 쓴다.
@@ -26,10 +29,10 @@ from .errors import NhplugError
 
 _INVALID_TOKEN_RE = re.compile(r"유효하지\s*않은\s*token", re.IGNORECASE)
 
-#: 업무 성공으로 확인된 rsp_cd (라이브 검증 기준).
+#: 라이브에서 **정상 응답으로 관찰된** rsp_cd — 판정 기준이 아니라 참고용 표본이다.
 #:   00000 현재가·계좌목록 / 00166 잔고·자산현황·손익 / 00221 매수가능수량 / 13578 조회 내역 없음(빈 결과)
-#: NH 가 정상코드 전체 목록을 공식 문서화하지 않아, 아래 목록 + "완료" 메시지 안전망으로 판정한다.
-#: 필요 시 NHPLUG_SUCCESS_CODES=00000,00166,... 로 완전히 대체할 수 있다.
+#: ⚠️ 같은 코드가 다른 API 에서는 오류를 뜻할 수 있다. 전수 목록이 아니며 앞으로도 될 수 없다.
+#: 필요 시 NHPLUG_SUCCESS_CODES=... 로 1차 판정 기준을 바꿀 수 있다.
 DEFAULT_SUCCESS_CODES = ("00000", "00166", "00221", "13578")
 
 #: 성공 메시지 안전망. NH 성공 응답은 일관되게 "…완료되었습니다" 형태다.
@@ -45,7 +48,11 @@ def success_codes() -> set[str]:
 
 
 def is_success(rsp_cd: str | None, rsp_msg: str | None = None) -> bool:
-    """업무 성공 여부. allowlist 우선, 없으면 메시지에 '완료'가 있으면 성공으로 본다."""
+    """업무 성공 **1차 판정**. 관찰된 코드 목록에 있거나 메시지에 '완료'가 있으면 성공으로 본다.
+
+    🔴 이것은 전수 판정이 아니다. rsp_cd 는 API 마다 의미가 달라 단독 기준이 될 수 없고,
+       정확한 판정은 rsp_msg 내용을 봐야 한다(규약 정본: 도메인 llms.txt).
+    """
     if rsp_cd is None:
         return True  # 봉투에 rsp_cd 가 없는 응답(토큰 등)은 판정 대상 아님
     if str(rsp_cd) in success_codes():
@@ -230,7 +237,8 @@ def call(path: str, input_0: dict | None = None, cts: str | None = None,
     - 토큰이 무효(401/IGW40043)면 1회 재발급 후 재시도한다.
     - 429(유량 초과)는 **자동 재시도하지 않고** rate_limit 오류로 올린다(코드·retry_after 보존).
       호출 전 자동 스로틀(기본 초당 4회)이 걸리므로 정상 사용에서는 잘 나지 않는다.
-    - HTTP 200 이어도 rsp_cd 가 성공 코드가 아니면 NhplugError(category="business").
+    - HTTP 200 이어도 업무 오류면 NhplugError(category="business"). **1차 판정이며 전수가 아니다** —
+      rsp_cd 는 API 마다 의미가 다르므로 중요한 처리는 rsp_msg 를 직접 확인한다.
     - raise_on_error=False 면 예외 없이 서버 원본 응답을 그대로 돌려준다(구버전 호환).
 
     Args:

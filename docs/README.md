@@ -17,4 +17,4 @@ python scripts/fetch_docs.py
 
 > AI 에이전트에게는 위 URL 을 직접 컨텍스트로 주거나, `fetch_docs.py` 로 받은 뒤 "docs 폴더의 명세를 먼저 읽어줘"라고 지시하세요.
 
-> 에러 처리 규약(`rsp_cd` 성공 코드 `00000`·`00166`·`00221`·`13578`, `IGW…` 코드)과 호출 제한은 llms.txt·각 openapi.json 및 포털 정책을 따릅니다. 상세는 [AGENTS.md](../AGENTS.md#문서-source-of-truth--도메인이-정본ssot) 참고.
+> 에러 처리 규약(**`rsp_msg` 우선 판정** · `rsp_cd` 단독 판정 금지 · `IGW…` 코드)과 호출 제한은 llms.txt·각 openapi.json 및 포털 정책을 따릅니다. 상세는 [AGENTS.md](../AGENTS.md#문서-source-of-truth--도메인이-정본ssot) 참고.

@@ -134,7 +134,7 @@ cp .env.example .env       # ⚠️ 여기 .env 는 INI 형식 — 루트와 다
 python nhplug_stock_demo1.py
 ```
 
-> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 `rsp_cd` 판정·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
+> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 업무오류 판정(`rsp_msg` 확인)·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
 
 ## 설정 — 파일 하나만 관리하면 됩니다
 
@@ -258,10 +258,24 @@ except NhplugError as e:
     print(e.category, e.code, e.message)   # business / rate_limit / auth / network / http
 ```
 
-- **HTTP 200 이어도 `rsp_cd` 가 성공 코드가 아니면 예외**입니다. 실패를 성공으로 오판하지 않습니다.
-  - 기본 성공 코드: **`00000`·`00166`·`00221`·`13578`** (+ `rsp_msg` 에 "완료" 가 포함되면 성공으로 처리하는 안전망)
-  - 성공 코드 교체: `NHPLUG_SUCCESS_CODES=00000,00166,00221,13578,...`
-  - 예외 없이 원본 응답이 필요하면: `call(..., raise_on_error=False)`
+### 🔴 성공 여부는 `rsp_msg` 로 판단하세요
+
+**HTTP 200 이어도 업무 오류일 수 있습니다.** 그리고 **`rsp_cd` 만으로는 판정할 수 없습니다** —
+**같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도** 있기 때문입니다.
+
+```python
+data = call("/krstock/...", {...}, raise_on_error=False)
+print(data.get("rsp_cd"), data.get("rsp_msg"))   # 메시지 내용을 보고 판단
+```
+
+> ⚠️ `if rsp_cd == "00000":` 처럼 코드값을 하드코딩하지 **말 것.** 다른 API 로 옮기는 순간 틀립니다.
+> 판정 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: [n2plug.com/llms.txt](https://www.n2plug.com/llms.txt)) 입니다.
+
+`call()` 이 1차 판정해 `NhplugError` 를 던져 드립니다. 다만 **그 판정은 라이브에서 관찰된 코드 목록과
+메시지에 기반한 것이라 전수가 아닙니다.** 중요한 처리에서는 `rsp_msg` 를 직접 확인하세요.
+
+- 예외 없이 원본 응답이 필요하면: `call(..., raise_on_error=False)`
+- 1차 판정 기준을 바꾸려면: `NHPLUG_SUCCESS_CODES=...`
 - **토큰은 24시간 유효하며 `~/.nhplug/token-*.json` 에 캐시**되어 스크립트를 여러 번 실행해도 **재발급하지 않습니다**(재발급 1회 = 보안 알림 1건).
   - 파일 권한은 **OS 기본값**을 따릅니다(별도 `chmod` 없음). 공용 계정·공유 서버에서는 `NHPLUG_TOKEN_CACHE_DIR` 로 접근이 제한된 경로를 지정하거나 `NHPLUG_TOKEN_CACHE=0` 으로 끄세요.
   - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`

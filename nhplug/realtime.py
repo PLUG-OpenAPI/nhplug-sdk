@@ -65,7 +65,7 @@ MAX_KEYS_PER_SESSION = 10
 MAX_SUBSCRIBE_PER_SEC = 10
 
 #: 구독 응답(WS_ACK)의 정상 코드. **REST 의 rsp_cd 체계와 별개**다
-#: (REST 성공코드는 nhplug/client.py 의 DEFAULT_SUCCESS_CODES).
+#: (REST 업무오류 판정은 nhplug/client.py 참조 — rsp_msg 우선).
 WS_ACK_OK = "00000"
 
 #: 위 한도는 서버가 강제하는 값이라 **사용자가 올릴 수 없다.** 환경변수로 낮추는 것만 허용한다.

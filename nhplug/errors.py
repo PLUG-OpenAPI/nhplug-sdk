@@ -1,7 +1,8 @@
 """NHPLUG 공통 오류 모델.
 
 HTTP 오류와 **업무 오류(rsp_cd)** 를 하나의 예외로 표현한다.
-HTTP 200 이어도 rsp_cd 가 성공 코드가 아니면 실패다(가장 흔한 사고 원인).
+HTTP 200 이어도 업무 오류일 수 있다(가장 흔한 사고 원인).
+판정은 **rsp_msg 내용이 우선**이며, rsp_cd 는 API 마다 의미가 달라 단독 기준이 될 수 없다.
 """
 
 
@@ -12,7 +13,7 @@ class NhplugError(Exception):
       - "config"     : 설정 오류 — 호출하기 전에 막은 것 (허용되지 않은 호스트, https 아님 …)
       - "auth"       : 토큰 발급/인증 실패 (IGW40031, IGW40043, 401 …)
       - "rate_limit" : 호출 유량 초과 (429, IGW42902)
-      - "business"   : HTTP 200 이지만 업무 오류 (rsp_cd 가 성공 코드 아님)
+      - "business"   : HTTP 200 이지만 업무 오류 (client.is_success() 1차 판정 — 전수가 아니다)
       - "network"    : 네트워크/타임아웃
       - "http"       : 그 외 HTTP 오류
     """

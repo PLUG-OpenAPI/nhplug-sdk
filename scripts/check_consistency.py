@@ -58,38 +58,38 @@ def rel(p: Path) -> str:
         return str(p)
 
 
-# ─────────────────────────────────────────────── 1. 성공코드
-def check_success_codes(roots: list[Path]) -> None:
-    src = SDK / "nhplug" / "client.py"
-    m = re.search(r"DEFAULT_SUCCESS_CODES\s*=\s*\(([^)]+)\)", src.read_text(encoding="utf-8"))
-    if not m:
-        add(False, "성공코드", f"{rel(src)} 에서 DEFAULT_SUCCESS_CODES 를 찾지 못함")
-        return
-    codes = re.findall(r'"(\d+)"', m.group(1))
-    truth = " · ".join(codes)
+# ─────────────────────────────────────────────── 1. 업무오류 판정 서술
+#: 🔴 rsp_cd 만으로는 성공/실패를 판정할 수 없다 — **같은 코드값이 API 에 따라 정상일 수도 오류일 수도 있다.**
+#:    판정은 rsp_msg 내용이 우선이며, 규약 정본은 도메인 llms.txt 다.
+#: 이 검사는 "rsp_cd 를 단독 판정 기준으로 가르치는 서술"을 잡는다.
+#: (2026-09 이전에는 "성공코드 4종을 빠짐없이 나열했는가"를 검사했다 — 잘못된 사고를 제도로 굳히고 있었다.)
+CODE_ONLY_PATTERNS = (
+    "성공 코드는",          # "성공 코드는 00000·00166… 이며 그 외는 실패"
+    "성공코드는",
+    "rsp_cd 가 성공 코드가 아니면",
+    "rsp_cd 가 성공코드가 아니면",
+    'rsp_cd == "00000"',
+    "rsp_cd == '00000'",
+)
 
-    # 판정 규칙: "00000" 을 말하면서 **가장 빠뜨리기 쉬운 코드**를 함께 말하지 않으면 낡음.
-    #   기준 코드 = 00000 을 제외한 나머지 중 마지막(현재 13578). 실제로는 00221 누락이 반복됐으므로
-    #   "00000 을 언급한 줄은 00221 도 함께 언급해야 한다" 를 최소 조건으로 본다.
-    key = "00221" if "00221" in codes else (codes[-1] if codes else "")
+
+def check_business_judgment(roots: list[Path]) -> None:
     bad = []
     for root in roots:
         for p in files(root, DOC_EXT | CODE_EXT):
-            # 테스트는 코드값을 '픽스처'로 쓴다(성공/실패 케이스). 문서 주장이 아니므로 제외.
             if "tests" in p.parts:
-                continue
+                continue          # 테스트는 픽스처로 코드값을 쓴다
             for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
-                if "00000" not in line or key in line:
-                    continue                      # 최신 코드를 인지한 줄 — 정상
-                if "NHPLUG_SUCCESS_CODES=" in line:
-                    continue                      # 환경변수 예시
-                if "00000000000" in line:
-                    continue                      # 계좌번호 자리표시자
                 if "tr_type" in line or "WSS" in line or "WS_ACK" in line:
-                    continue                      # WebSocket 구독응답 — REST 성공코드와 별개 체계
-                bad.append(f"{rel(p)}:{i}  {line.strip()[:72]}")
-    add(not bad, f"성공코드 ({truth})",
-        "\n".join(f"      {b}" for b in bad) if bad else f"코드 정본과 문서 일치")
+                    continue      # WebSocket 구독응답 — REST 판정과 별개 체계
+                if any(k in line for k in ("쓰지 말", "말 것", "금지", "않는다", "아니다", "전수가 아")):
+                    continue      # "이렇게 쓰지 말 것" 같은 **금지 예시**는 정상
+                for pat in CODE_ONLY_PATTERNS:
+                    if pat in line:
+                        bad.append(f"{rel(p)}:{i}  '{pat}'")
+    add(not bad, "업무오류 판정 (rsp_msg 우선)",
+        "\n".join(f"      {b}  → rsp_cd 단독 판정 서술. rsp_msg 우선으로 바꿀 것" for b in bad) if bad
+        else "rsp_cd 단독 판정 서술 0건")
 
 
 # ─────────────────────────────────────────────── 2. WebSocket 포트
@@ -345,7 +345,7 @@ def main() -> int:
     roots_cache[:] = roots
     print(f"일관성 검사 — 대상 {len(roots)}개 저장소\n" + "─" * 66)
 
-    check_success_codes(roots)
+    check_business_judgment(roots)
     check_ws_ports(roots)
     check_master_count(roots)
     check_devapi(roots)
