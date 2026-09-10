@@ -7,6 +7,7 @@
      같은 블록 `protocol.connection` 이 "URI 는 /websocket" 이라고 명시한다. 후자가 맞다.
 - 포트: **시세**는 국내 7070 · 해외 7080 / **통보**(체결·주문내역)는 국내·해외 **모두 7070**.
   모의투자는 국내·해외 공통 17070.  해외파생 통보(dk·dj)를 7080 으로 보내면 WSS10006.
+  ⚠️ 해외 시세는 **해외주식(RH·rh·RC·rc) + 해외파생(FH·fh·FC·fc) 8종 전부** 7080 이다.
 - 구독: `{"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":"mc","tr_key":"005930"}}`
   `tr_type` 1=등록 2=해제. 채널코드(`tr_cd`)는 자산군 openapi.json 참조.
 - 푸시: `{"header":{tr_cd,tr_key},"body":{...}}` — JSON · heartbeat 불필요 · 암호화 없음
@@ -49,8 +50,18 @@ PORT_DOMESTIC = "7070"
 PORT_OVERSEAS = "7080"
 PORT_MOCK = "17070"
 
-#: 해외 **시세** 채널 — 7080 을 쓴다.
-OVERSEAS_QUOTE_CHANNELS = frozenset({"RH", "rh", "RC", "rc"})
+#: 해외 **시세** 채널 — 7080 을 쓴다. 해외주식(gbstock) 4종 + 해외파생(gbfuture) 4종.
+#:   gbstock  RH 호가 · rh 지연호가(아시아) · RC 체결가 · rc 지연체결가   (tr_key = gicz15)
+#:   gbfuture FH 호가 · fh 지연호가        · FC 체결가 · fc 지연체결가   (tr_key = isym)
+#:
+#: 🔴 **대소문자를 절대 정규화하지 말 것**(`.lower()`·`.upper()` 금지).
+#:    국내파생 지수옵션 **미니**가 `rH`(호가)·`rC`(체결가)·`rE`(예상체결)인데
+#:    해외주식 지연채널 `rh`·`rc` 와 **대소문자만 다르다.** 소문자로 바꾸면
+#:    국내파생 미니옵션 구독이 해외 포트(7080)로 새어 나가 조용히 실패한다.
+OVERSEAS_QUOTE_CHANNELS = frozenset({
+    "RH", "rh", "RC", "rc",          # 해외주식
+    "FH", "fh", "FC", "fc",          # 해외파생
+})
 
 #: **통보** 채널(체결·주문내역) — 국내·해외 구분 없이 **모두 7070**.
 #:   해외파생 dk·dj 를 7080 으로 보내면 WSS10006 이 난다.
@@ -156,7 +167,11 @@ def _ssl_context() -> ssl.SSLContext | None:
 
 
 def is_overseas_channel(tr_cd: str | None) -> bool:
-    """해외 **시세** 채널인가(포트 7080). 통보 채널은 해외라도 7070 이므로 False."""
+    """해외 **시세** 채널인가(포트 7080) — 해외주식 4종 + 해외파생 4종.
+
+    통보 채널은 해외라도 7070 이므로 False.
+    ⚠️ 대소문자를 구분한다. `rC`(국내파생 미니옵션)는 False, `rc`(해외주식 지연)는 True.
+    """
     return tr_cd in OVERSEAS_QUOTE_CHANNELS
 
 
@@ -165,7 +180,7 @@ def ws_url(overseas: bool | None = None, tr_cd: str | None = None) -> str:
 
     포트 결정:
         모의투자(moapi)      → 17070 (국내·해외 공통)
-        해외 **시세** 채널    → 7080   (RH·rh·RC·rc)
+        해외 **시세** 채널    → 7080   (해외주식 RH·rh·RC·rc / 해외파생 FH·fh·FC·fc)
         그 외 — 국내 시세 + **모든 통보 채널** → 7070
 
     `overseas` 를 명시하면 그 값이 우선하고, 생략하면 `tr_cd` 로 판별한다.
@@ -282,9 +297,13 @@ def subscribe(keys: Iterable[str], on_message: Callable[[dict], None], *,
 
     Args:
         keys: 구독 키 목록. `tr_key` 로 전달된다.
-            ⚠️ **채널마다 넣는 값이 다르다** — 시세는 종목코드(`005930`),
-            시간외는 `ecn_code`, **통보(d0·d1·d2·d3)는 사용자ID이거나 빈 값**,
-            해외 시세는 **GIC 15자리**(티커 아님), 채권지수는 `jisuid`.
+            ⚠️ **채널마다 넣는 값이 다르다 — 전부 종목코드가 아니다.**
+            국내주식 시세 `code`(6자리) · 시간외 `ecn_code` ·
+            **통보(d0·d1·d2·d3·de·dj·dk·dv·dn) `userid`** 이거나 빈 값 ·
+            **해외주식 시세 `gicz15`**(GIC 15자리 — 티커 아님) ·
+            **해외파생 시세 `isym`** · 국내파생 `fuitem`/`opitem`/`ojitem` ·
+            채권 `expcode` · 금현물 `shcode` · 채권지수 `jisuid`.
+            정본은 자산군 `openapi.json` 의 `x-realtime-channels`.
             비워 두면(`[]`) `tr_key=""` 로 한 번 구독한다(통보 채널용).
         on_message: 푸시 1건마다 호출되는 콜백.
         tr_cd: 채널 코드. 기본 `mc`(국내 체결가 **통합** = KRX+NXT).

@@ -94,7 +94,7 @@
 
 - **운영 도메인에 `03` 계좌를, 모의투자 도메인에 `01`·`02` 계좌를 쓰면 실패한다.** 첫 계좌를 무조건 집어 쓰는 코드를 쓰지 말 것.
 - 헬퍼: `snippets/common/list_accounts` 의 `usable_accounts()` 가 현재 `NHPLUG_BASE_URL` 환경에 맞는 계좌만 걸러 준다(`current_env()` 로 live/mock 판별).
-- 실시간(WebSocket): 접속 wss://<host>:7070(국내)·7080(해외)·moapi 17070. 구독 {"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":<채널코드>,"tr_key":<종목코드>}}, 해제 tr_type=2. 푸시 {"header":{tr_cd,tr_key},"body":{...}}. 토큰은 header.token 으로만 전달(운영 발급). 채널코드·필드는 자산군 openapi.json 의 x-realtime-channels 참조. 예: snippets/krstock/realtime_execution.
+- 실시간(WebSocket): 접속 wss://<host>:7070(국내 시세 + **통보 전부**)·7080(**해외 시세 8종** — 해외주식 RH·rh·RC·rc / 해외파생 FH·fh·FC·fc)·moapi 17070. ⚠️ 채널코드는 **대소문자 구분** — 해외주식 지연 `rh`·`rc`(7080) vs 국내파생 지수옵션미니 `rH`·`rC`·`rE`(7070). tr_cd 를 소문자로 정규화하지 말 것. 구독 {"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":<채널코드>,"tr_key":<종목코드>}}, 해제 tr_type=2. 푸시 {"header":{tr_cd,tr_key},"body":{...}}. 토큰은 header.token 으로만 전달(운영 발급). 채널코드·필드는 자산군 openapi.json 의 x-realtime-channels 참조. 예: snippets/krstock/realtime_execution.
 
 ## 주문가능수량 — 국내·해외 구조가 다르다 (중요)
 - **국내**: 매수 `/krstock/inquiry/v1/buyableQuantity` · 매도 `/krstock/inquiry/v1/sellableQuantity` — **API 2개로 분리**.

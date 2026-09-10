@@ -100,7 +100,10 @@ subscribe(["005930"], print, max_messages=5)              # 국내 체결가(oc)
 subscribe(["AAPL"], print, tr_cd="RC", overseas=True)     # 해외 체결가
 ```
 
-채널 코드(`tr_cd`)는 자산군 `openapi.json` 의 `x-realtime-channels` 참조. 포트는 BASE_URL 에서 자동 유도(국내 7070 · 해외 7080 · 모의 17070).
+채널 코드(`tr_cd`)는 자산군 `openapi.json` 의 `x-realtime-channels` 참조. 포트는 BASE_URL 에서 자동 유도(국내 시세·**통보 전부** 7070 · **해외 시세** 7080 · 모의 17070).
+
+- 해외 시세 8종만 7080 — 해외주식 `RH`·`rh`·`RC`·`rc` / 해외파생 `FH`·`fh`·`FC`·`fc`. 나머지는 전부 7070.
+- 🔴 **`tr_cd` 를 소문자로 바꾸지 말 것.** 해외주식 지연 `rh`·`rc`(7080) 와 국내파생 지수옵션미니 `rH`·`rC`·`rE`(7070) 는 대소문자만 다르고 포트가 다르다.
 
 ## 주문 필드 형식 (중요)
 

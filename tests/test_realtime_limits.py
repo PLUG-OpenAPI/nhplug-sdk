@@ -77,6 +77,21 @@ def main():
     check(ws_url() == f"wss://api.nhplug.com:7070{WS_PATH}", "국내 시세 7070 + 경로", ws_url())
     check(ws_url(tr_cd="RC") == f"wss://api.nhplug.com:7080{WS_PATH}", "해외 시세 7080", ws_url(tr_cd="RC"))
 
+    print("\n═══ ①-2 🔴 해외 시세 8종 전부 7080 (해외주식 4 + 해외파생 4) ═══")
+    for cd in ("RH", "rh", "RC", "rc"):
+        check(":7080" in ws_url(tr_cd=cd), f"{cd} 해외주식 → 7080", ws_url(tr_cd=cd))
+    for cd in ("FH", "fh", "FC", "fc"):
+        check(":7080" in ws_url(tr_cd=cd), f"{cd} 해외파생 → 7080", ws_url(tr_cd=cd))
+
+    print("\n═══ ①-3 🔴 대소문자 회귀 — 국내파생 미니옵션은 7070 ═══")
+    # rh·rc(해외주식 지연) 와 rH·rC(국내파생 지수옵션 미니)는 대소문자만 다르다.
+    # realtime.py 에서 tr_cd 를 .lower() 하면 이 검사가 깨진다. 절대 정규화하지 말 것.
+    for cd in ("rH", "rC", "rE"):
+        check(":7070" in ws_url(tr_cd=cd), f"{cd} 국내파생 미니 → 7070", ws_url(tr_cd=cd))
+    check(is_overseas_channel("rC") is False, "rC 는 국내파생 — 해외 아님")
+    check(is_overseas_channel("rc") is True, "rc 는 해외주식 지연 — 해외")
+    check(is_overseas_channel("fh") is True, "fh 는 해외파생 지연호가 — 해외")
+
     print("\n═══ ② 🔴 통보 채널은 해외라도 7070 (WSS10006 방지) ═══")
     for cd in ("d0", "d1", "d2", "d3", "de", "dj", "dk", "dv", "dn"):
         u = ws_url(tr_cd=cd)

@@ -9,7 +9,9 @@
 
 프로토콜 정본: 자산군 openapi.json 의 x-realtime-channels
 - 접속: wss://api.nhplug.com:7070/websocket   ← **경로 /websocket 필수**
-        해외 '시세'만 7080 · 통보는 해외라도 7070 · 모의투자 17070
+        해외 '시세' 8종만 7080 (해외주식 RH·rh·RC·rc / 해외파생 FH·fh·FC·fc)
+        통보는 해외라도 7070 · 모의투자 17070
+        ⚠️ tr_cd 는 대소문자 구분 — rh·rc(해외주식 7080) vs rH·rC(국내파생미니 7070)
 - 구독: {"header":{"token":TOKEN,"tr_type":"1"},"body":{"tr_cd":"mc","tr_key":"005930"}}
 - 푸시: {"header":{tr_cd,tr_key},"body":{...}}  (JSON, heartbeat 불필요, 암호화 없음)
 

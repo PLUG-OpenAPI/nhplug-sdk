@@ -111,6 +111,64 @@ def check_ws_ports(roots: list[Path]) -> None:
         "\n".join(f"      {b}" for b in bad) if bad else "코드 정본과 문서 일치")
 
 
+# ─────────────────────────────────────────────── 2-2. 해외 시세 채널 ↔ 7080 라우팅
+#: 명세 기준 해외 시세 채널 — 이 8종만 7080 이다(나머지 전부 7070).
+#:   해외주식(gbstock) RH·rh·RC·rc   해외파생(gbfuture) FH·fh·FC·fc
+#: 정본: 자산군 openapi.json 의 x-realtime-channels / 각 자산군 README 의 실시간 Endpoint
+EXPECTED_OVERSEAS = {"RH", "rh", "RC", "rc", "FH", "fh", "FC", "fc"}
+
+#: 대소문자만 다르고 포트가 다른 쌍 — 정규화하면 조용히 틀린다.
+#:   rh·rc = 해외주식 지연(7080)   rH·rC·rE = 국내파생 지수옵션 미니(7070)
+CASE_TRAP = ("rH", "rC", "rE")
+
+
+def check_overseas_channels(roots: list[Path]) -> None:
+    """해외 시세 채널 목록이 명세와 같고, tr_cd 를 대소문자 정규화하지 않는지."""
+    src = SDK / "nhplug" / "realtime.py"
+    text = src.read_text(encoding="utf-8")
+    m = re.search(r"OVERSEAS_QUOTE_CHANNELS\s*=\s*frozenset\(\s*\{(.*?)\}", text, re.S)
+    if not m:
+        add(False, "해외 시세 채널", f"{rel(src)} 에서 OVERSEAS_QUOTE_CHANNELS 를 찾지 못함")
+        return
+    got = set(re.findall(r'"([A-Za-z]{2})"', m.group(1)))
+    problems = []
+    if got != EXPECTED_OVERSEAS:
+        if EXPECTED_OVERSEAS - got:
+            problems.append(f"{rel(src)}  누락 {'·'.join(sorted(EXPECTED_OVERSEAS - got))}"
+                            f" → 이 채널은 7070 으로 잘못 접속된다")
+        if got - EXPECTED_OVERSEAS:
+            problems.append(f"{rel(src)}  명세에 없는 채널 {'·'.join(sorted(got - EXPECTED_OVERSEAS))}")
+
+    # 🔴 대소문자 정규화 금지 — rH·rC 가 rh·rc 로 바뀌면 국내파생이 해외 포트로 샌다.
+    for i, line in enumerate(text.splitlines(), 1):
+        if re.search(r"tr_cd[^\n]*\.(lower|upper)\(\)|\.(lower|upper)\(\)[^\n]*tr_cd", line):
+            problems.append(f"{rel(src)}:{i}  tr_cd 에 대소문자 정규화 — "
+                            f"{'·'.join(CASE_TRAP)}(국내파생) 가 해외 포트로 샌다")
+
+    # 문서 검사 — **파일 단위**로 본다(줄 단위는 통보·대소문자 설명 줄에서 오탐이 난다).
+    #   7080 을 언급하면서 해외주식 4종을 적은 문서는 해외파생 4종도 적어야 한다.
+    #   이 버그의 문서 쪽 증상이 정확히 "해외주식만 적고 해외파생을 빠뜨림" 이었다.
+    STOCK4 = ("RH", "rh", "RC", "rc")
+    FUT4 = ("FH", "fh", "FC", "fc")
+
+    def mentions(text: str, code: str) -> bool:
+        return re.search(rf"(?<![A-Za-z]){code}(?![A-Za-z])", text) is not None
+
+    for root in roots:
+        for p in files(root, DOC_EXT):
+            text = p.read_text(encoding="utf-8", errors="ignore")
+            if "7080" not in text or not any(mentions(text, c) for c in STOCK4):
+                continue
+            missing = [c for c in FUT4 if not mentions(text, c)]
+            if missing:
+                problems.append(f"{rel(p)}  해외주식 채널은 적혀 있는데 "
+                                f"해외파생 {'·'.join(missing)} 누락 (둘 다 7080)")
+
+    add(not problems, "해외 시세 채널 ↔ 7080 (8종 · 대소문자 구분)",
+        "\n".join(f"      {b}" for b in problems) if problems
+        else f"코드 {len(got)}종 일치 · tr_cd 정규화 없음")
+
+
 # ─────────────────────────────────────────────── 3. 종목마스터 수
 def check_master_count(roots: list[Path]) -> None:
     n = len(list((SDK / "instruments" / "headers").glob("*.h")))
@@ -347,6 +405,7 @@ def main() -> int:
 
     check_business_judgment(roots)
     check_ws_ports(roots)
+    check_overseas_channels(roots)
     check_master_count(roots)
     check_devapi(roots)
     check_links(roots)
