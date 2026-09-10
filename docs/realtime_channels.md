@@ -117,13 +117,29 @@ subscribe([], print, tr_cd="d0")             # 통보 — 포트 7070 자동
 
 ## `tr_key` 정리 — 전부 종목코드가 아닙니다
 
+**11종**입니다. 이 문서는 국내주식·해외주식만 다루지만, 표는 **전 자산군**을 담았습니다
+(`tr_key` 를 잘못 넣는 것이 실시간에서 가장 흔한 실패이고, 자산군을 옮길 때 특히 자주 틀립니다).
+
 | `tr_key` | 넣는 값 | 쓰는 채널 |
 |---|---|---|
-| `code` | 종목코드 6자리 | 국내 시세 전부 |
-| `ecn_code` | 시간외 코드 | `e2`·`e4`·`e5` |
-| `userid` | 사용자ID 또는 **빈 값** | 통보 `d0`·`d1`·`d2`·`d3` |
-| `gicz15` | **GIC 15자리** | 해외 시세 `RC`·`RH`·`rc`·`rh` |
+| `code` | 종목코드 6자리 | 국내주식 시세 전부 · 상품선물 예상체결 `pE` |
+| `ecn_code` | 시간외 코드 | 국내주식 시간외 `e5`·`e2`·`e4` |
+| `userid` | 사용자ID 또는 **빈 값** | **통보 9종** `d0`·`d1`·`d2`·`d3`·`de`·`dj`·`dk`·`dv`·`dn` |
+| `gicz15` | **GIC 15자리 — 티커 아님** | 해외**주식** 시세 `RH`·`rh`·`RC`·`rc` |
+| `isym` | 해외파생 종목코드 | 해외**파생** 시세 `FH`·`fh`·`FC`·`fc` |
+| `fuitem` | 선물 종목코드 | 국내 지수선물·상품선물·주식선물 (주·야간) |
+| `opitem` | 지수옵션 종목코드 | 국내 지수옵션 (주·야간) |
+| `ojitem` | **주식**옵션 종목코드 | 국내 주식옵션 `v1`·`v2` |
+| `expcode` | 표준코드 | 장내채권 `c1`~`c4` · 주식선물 예상체결 `vE` |
+| `shcode` | 금현물 종목코드 | 금현물 `g5`·`g4`·`gE` |
 | `jisuid` | 지수ID | 채권지수 `uB` |
+
+> 정본은 자산군 `openapi.json` 의 `x-realtime-channels.channels[].tr_key` 입니다.
+> 국내파생·채권·금현물·해외파생 채널 목록은 각 자산군 문서를 보세요 —
+> [krfuture](https://www.nhplug.com/openapi-docs/krfuture/README.md) ·
+> [gbfuture](https://www.nhplug.com/openapi-docs/gbfuture/README.md) ·
+> [krbond](https://www.nhplug.com/openapi-docs/krbond/README.md) ·
+> [krgold](https://www.nhplug.com/openapi-docs/krgold/README.md)
 
 ## 구독 응답(ACK)
 
