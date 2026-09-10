@@ -1,8 +1,12 @@
 """NHPLUG 공통 오류 모델.
 
-HTTP 오류와 **업무 오류(rsp_cd)** 를 하나의 예외로 표현한다.
-HTTP 200 이어도 업무 오류일 수 있다(가장 흔한 사고 원인).
-판정은 **rsp_msg 내용이 우선**이며, rsp_cd 는 API 마다 의미가 달라 단독 기준이 될 수 없다.
+🔴 **업무 오류는 이 예외로 올라오지 않는다.** SDK 는 업무 성공/실패를 판정하지 않는다.
+HTTP 200 이면 본문을 그대로 돌려주므로, 서버가 `rsp_msg` 로 무엇을 말했는지는
+**호출자가 읽고 판단**한다(`nhplug.status_of()`).
+
+이 예외가 나는 경우는 **HTTP 200 이 아닐 때**(전송·인증·유량)뿐이다.
+서버 본문은 가공 없이 `.raw` 에 담겨 있다 — 업무 서식(`rsp_cd`/`rsp_msg`)이든
+게이트웨이 서식(`error_code`/`error_description`)이든 원문 그대로다.
 """
 
 
@@ -13,16 +17,17 @@ class NhplugError(Exception):
       - "config"     : 설정 오류 — 호출하기 전에 막은 것 (허용되지 않은 호스트, https 아님 …)
       - "auth"       : 토큰 발급/인증 실패 (IGW40031, IGW40043, 401 …)
       - "rate_limit" : 호출 유량 초과 (429, IGW42902)
-      - "business"   : HTTP 200 이지만 업무 오류 (client.is_success() 1차 판정 — 전수가 아니다)
       - "network"    : 네트워크/타임아웃
-      - "http"       : 그 외 HTTP 오류
+      - "http"       : 그 외 HTTP 오류 (200 이 아닌 모든 응답)
+
+    ⚠️ "business" 카테고리는 **0.4.0 에서 없어졌다.** HTTP 200 응답은 예외가 되지 않는다.
     """
 
     def __init__(
         self,
         message: str,
         *,
-        category: str = "business",
+        category: str = "http",
         code: str | None = None,
         status: int | None = None,
         path: str | None = None,

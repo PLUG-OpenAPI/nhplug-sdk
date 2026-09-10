@@ -31,10 +31,10 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 
 | 파일 | 무엇이 들어 있나 |
 |---|---|
-| [`client.py`](nhplug/client.py) | REST 호출 · `Input_0` 봉투 · `rsp_cd` 판정 · **연속조회(`cts`)** · **유량 스로틀** |
+| [`client.py`](nhplug/client.py) | REST 호출 · `Input_0` 봉투 · **연속조회(`cts`)** · **유량 스로틀** (업무 판정 없음) |
 | [`realtime.py`](nhplug/realtime.py) | WebSocket 구독 · 접속 URL 유도 · **서버 한도 준수** · TLS |
 | [`auth.py`](nhplug/auth.py) | 토큰 발급·캐시(24h) · **호스트 가드** · 브랜드 판정 |
-| [`errors.py`](nhplug/errors.py) | `NhplugError` — `config`·`auth`·`rate_limit`·`business`·`network`·`http` |
+| [`errors.py`](nhplug/errors.py) | `NhplugError` — `config`·`auth`·`rate_limit`·`network`·`http` |
 | [`_env.py`](nhplug/_env.py) | `.env` 탐색 순서(환경변수 → 프로젝트 → 전역) |
 
 ### 샘플코드 — `snippets/` (기능당 폴더 = 호출 파일 + `chk_` 검증 파일)
@@ -134,7 +134,7 @@ cp .env.example .env       # ⚠️ 여기 .env 는 INI 형식 — 루트와 다
 python nhplug_stock_demo1.py
 ```
 
-> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 업무오류 판정(`rsp_msg` 확인)·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
+> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 토큰 캐시·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
 
 ## 설정 — 파일 하나만 관리하면 됩니다
 
@@ -255,27 +255,44 @@ from nhplug import call, NhplugError
 try:
     data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
 except NhplugError as e:
-    print(e.category, e.code, e.message)   # business / rate_limit / auth / network / http
+    print(e.category, e.code, e.message)   # rate_limit / auth / network / http / config
+    print(e.raw)                           # 서버 응답 본문 원문
 ```
 
-### 🔴 성공 여부는 `rsp_msg` 로 판단하세요
+### 🔴 SDK 는 성공/실패를 판정하지 않습니다 — `rsp_msg` 를 읽으세요
 
-**HTTP 200 이어도 업무 오류일 수 있습니다.** 그리고 **`rsp_cd` 만으로는 판정할 수 없습니다** —
-**같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도** 있기 때문입니다.
+판정 기준은 **HTTP 상태코드 하나**입니다.
+
+| HTTP | SDK 동작 |
+|---|---|
+| **200** | 응답 본문을 **그대로** 돌려줍니다. 예외 없음 |
+| **200 아님** | `NhplugError` — 서버 본문을 `.raw` 에 **그대로** 담아 올립니다 |
 
 ```python
-data = call("/krstock/...", {...}, raise_on_error=False)
-print(data.get("rsp_cd"), data.get("rsp_msg"))   # 메시지 내용을 보고 판단
+from nhplug import call, status_of
+
+data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "UNT"})
+
+rsp_cd, rsp_msg = status_of(data)       # 꺼내 줄 뿐, 판정하지 않습니다
+print(rsp_msg)                          # 서버가 보낸 문장 그대로
+
+price = (data.get("Output_0") or {}).get("stck_prpr")
+if price is None:                       # 기대한 값이 왔는지는 직접 확인
+    print("⚠️ 현재가가 없습니다. 위 rsp_msg 를 보세요.")
 ```
 
+**왜 판정하지 않나요?** **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있습니다.**
+어떤 코드 목록도 전수가 될 수 없고, SDK 가 판정하면 **정상 응답을 실패로(또는 그 반대로) 잘못 알립니다.**
+그래서 `rsp_cd`·`rsp_msg` 를 해석하지 않고 가공 없이 전달합니다.
+
 > ⚠️ `if rsp_cd == "00000":` 처럼 코드값을 하드코딩하지 **말 것.** 다른 API 로 옮기는 순간 틀립니다.
-> 판정 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: [n2plug.com/llms.txt](https://www.n2plug.com/llms.txt)) 입니다.
+> **`rsp_msg` 문장을 읽고 판단하세요.** 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: [n2plug.com/llms.txt](https://www.n2plug.com/llms.txt)) 의 「성공 판정」 절입니다.
 
-`call()` 이 1차 판정해 `NhplugError` 를 던져 드립니다. 다만 **그 판정은 라이브에서 관찰된 코드 목록과
-메시지에 기반한 것이라 전수가 아닙니다.** 중요한 처리에서는 `rsp_msg` 를 직접 확인하세요.
+> 🔴 **주문처럼 되돌릴 수 없는 처리 전에는 직전 응답의 `rsp_msg` 를 반드시 확인하세요.**
+> SDK 가 막아 주지 않습니다 — 실패한 조회 뒤에 주문이 나가는 흐름을 만들지 마세요.
 
-- 예외 없이 원본 응답이 필요하면: `call(..., raise_on_error=False)`
-- 1차 판정 기준을 바꾸려면: `NHPLUG_SUCCESS_CODES=...`
+**0.4.0 변경** — `is_success()`·`success_codes()`·`NHPLUG_SUCCESS_CODES`·`category="business"` 가 **없어졌습니다.**
+HTTP 200 응답은 더 이상 예외가 되지 않습니다. `except NhplugError` 로 업무 실패를 잡고 있었다면 위 방식으로 바꿔 주세요.
 - **토큰은 24시간 유효하며 `~/.nhplug/token-*.json` 에 캐시**되어 스크립트를 여러 번 실행해도 **재발급하지 않습니다**(재발급 1회 = 보안 알림 1건).
   - 파일 권한은 **OS 기본값**을 따릅니다(별도 `chmod` 없음). 공용 계정·공유 서버에서는 `NHPLUG_TOKEN_CACHE_DIR` 로 접근이 제한된 경로를 지정하거나 `NHPLUG_TOKEN_CACHE=0` 으로 끄세요.
   - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`

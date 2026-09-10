@@ -58,19 +58,32 @@ def rel(p: Path) -> str:
         return str(p)
 
 
-# ─────────────────────────────────────────────── 1. 업무오류 판정 서술
-#: 🔴 rsp_cd 만으로는 성공/실패를 판정할 수 없다 — **같은 코드값이 API 에 따라 정상일 수도 오류일 수도 있다.**
-#:    판정은 rsp_msg 내용이 우선이며, 규약 정본은 도메인 llms.txt 다.
-#: 이 검사는 "rsp_cd 를 단독 판정 기준으로 가르치는 서술"을 잡는다.
-#: (2026-09 이전에는 "성공코드 4종을 빠짐없이 나열했는가"를 검사했다 — 잘못된 사고를 제도로 굳히고 있었다.)
-CODE_ONLY_PATTERNS = (
-    "성공 코드는",          # "성공 코드는 00000·00166… 이며 그 외는 실패"
+# ─────────────────────────────────────────────── 1. 업무 판정 부활 방지
+#: 🔴 우리는 업무 성공/실패를 **판정하지 않는다**(0.4.0). 기준은 HTTP 상태코드 하나다.
+#:    같은 rsp_cd 값이 API 에 따라 정상일 수도 오류일 수도 있어, 어떤 코드 목록도 전수가 될 수 없다.
+#:
+#: 이 검사는 **제거한 판정이 슬그머니 되살아나는 것**을 막는다. 실제로 두 번 되살아났다
+#: (00221 누락 → 정상을 실패로 오판 / 가이드 템플릿만 00000·00166 인 채 남음).
+#: 2026-09 이전에는 "성공코드 4종을 빠짐없이 나열했는가"를 검사했다 — 잘못된 사고를 제도로 굳히고 있었다.
+REVIVED_JUDGMENT = (
+    "DEFAULT_SUCCESS_CODES",
+    "NHPLUG_SUCCESS_CODES",
+    "success_codes(",
+    "successCodes(",
+    "is_success(",
+    "isSuccess(",
+    'category="business"',
+    "category: \"business\"",
+    "성공 코드는",
     "성공코드는",
     "rsp_cd 가 성공 코드가 아니면",
     "rsp_cd 가 성공코드가 아니면",
     'rsp_cd == "00000"',
     "rsp_cd == '00000'",
 )
+
+#: 관찰된 코드값을 판정 기준처럼 나열하던 흔적. 문서·코드 어디에도 남으면 안 된다.
+RETIRED_CODES = ("00166", "00221", "13578")
 
 
 def check_business_judgment(roots: list[Path]) -> None:
@@ -81,15 +94,21 @@ def check_business_judgment(roots: list[Path]) -> None:
                 continue          # 테스트는 픽스처로 코드값을 쓴다
             for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
                 if "tr_type" in line or "WSS" in line or "WS_ACK" in line:
-                    continue      # WebSocket 구독응답 — REST 판정과 별개 체계
-                if any(k in line for k in ("쓰지 말", "말 것", "금지", "않는다", "아니다", "전수가 아")):
-                    continue      # "이렇게 쓰지 말 것" 같은 **금지 예시**는 정상
-                for pat in CODE_ONLY_PATTERNS:
+                    continue      # WebSocket 구독응답 — REST 와 별개 체계
+                if "00165" in line or "00218" in line:
+                    continue      # 연속조회 계속 코드 — 업무 판정이 아니다
+                if any(k in line for k in ("쓰지 말", "말 것", "금지", "않는다", "아니다",
+                                           "삭제", "없어졌", "되살리지")):
+                    continue      # "이렇게 쓰지 말 것" 같은 **금지 서술**은 정상
+                for pat in REVIVED_JUDGMENT:
                     if pat in line:
-                        bad.append(f"{rel(p)}:{i}  '{pat}'")
-    add(not bad, "업무오류 판정 (rsp_msg 우선)",
-        "\n".join(f"      {b}  → rsp_cd 단독 판정 서술. rsp_msg 우선으로 바꿀 것" for b in bad) if bad
-        else "rsp_cd 단독 판정 서술 0건")
+                        bad.append(f"{rel(p)}:{i}  '{pat}' — 제거된 업무 판정")
+                for code in RETIRED_CODES:
+                    if code in line:
+                        bad.append(f"{rel(p)}:{i}  '{code}' — 판정 기준처럼 쓰이던 코드값")
+    add(not bad, "업무 판정 없음 (HTTP 200 기준)",
+        "\n".join(f"      {b}" for b in bad) if bad
+        else "판정 로직·코드값 잔존 0건 — HTTP 상태코드만으로 판정")
 
 
 # ─────────────────────────────────────────────── 2. WebSocket 포트

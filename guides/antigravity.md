@@ -46,7 +46,7 @@ pip install nhplug
 pip freeze > requirements.txt
 ```
 
-> `nhplug` 를 설치하면 **인증·토큰 캐시·`Input_0` 봉투·업무오류 1차 판정·실시간·종목마스터**가 함께 들어옵니다.
+> `nhplug` 를 설치하면 **인증·토큰 캐시·`Input_0` 봉투·연속조회·유량 제어·실시간·종목마스터**가 함께 들어옵니다.
 > `requests` 로 토큰 발급을 직접 짜지 마세요 — 이미 검증된 코드가 있습니다.
 
 프롬프트 앞에 `(.venv)` 가 보이면 활성화 상태입니다. **새 터미널을 열 때마다 2)번으로 다시 활성화**하세요. `.venv/` 는 커밋하지 말고(`.gitignore` 에 추가), `requirements.txt` 만 공유하면 어디서든 `pip install -r requirements.txt` 로 동일 환경을 재현할 수 있습니다.
@@ -169,7 +169,7 @@ python test_nh.py
 | 토큰 403 "유효하지 않은 AppSecret" | 키가 그 환경용인지 확인. base url 을 키에 맞는 환경으로 (모의/실거래·개발/운영) |
 | 계좌번호 오류 | 계좌목록 응답은 `acct_no`, 잔고·주문 입력은 `act_no` — 값은 동일하니 그대로 사용 |
 | 응답 파싱 실패 | 요청 `{"Input_0": {...}}` / 응답 `Output_0`(+`Output_1`) 봉투. **`Output_0` 은 객체일 수도 배열일 수도** 있으니 `openapi.json` 확인 |
-| 조회는 됐는데 실패로 처리됨 | **`rsp_cd` 만 보고 판단하지 마세요.** 같은 코드가 API 마다 정상일 수도 오류일 수도 있습니다. `rsp_msg` 내용을 확인하세요 (`call(..., raise_on_error=False)` 로 원본을 받을 수 있습니다) |
+| 조회는 됐는데 실패로 처리됨 | **`rsp_cd` 코드값으로 판단하는 코드를 지우세요.** 같은 코드가 API 마다 정상일 수도 오류일 수도 있습니다. SDK 는 HTTP 200 이면 본문을 그대로 주므로, `status_of(data)` 로 `rsp_msg` 를 꺼내 **문장을 읽고** 판단하세요 |
 | 계좌가 있는데 오류 | 계좌구분(`acct_type`) 확인 — `01`·`02`=운영(`api`), `03`=모의투자(`moapi`). 환경과 맞는 계좌를 쓰세요 |
 | 주문 거부/형식오류 | `iem_cd` 는 6자리 그대로(예: 005930, `A` 없음), `orr_pr` 은 원 단위 정수 그대로(예: 70000). 형식은 describe_api/openapi.json 최신 예시 기준 |
 | 토큰 매번 재발급 | 발급 토큰을 만료까지 캐시·재사용 |
@@ -186,7 +186,7 @@ python test_nh.py
 | [`CLAUDE.md`](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/CLAUDE.md) | Claude Code | 프로젝트 루트 |
 | [`cursor/nhplug.mdc`](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/templates/cursor/nhplug.mdc) | Cursor | `.cursor/rules/` |
 
-담긴 내용: SDK 우선 사용 · 명세 정본 위치 · **업무오류 판정**(`rsp_msg` 우선 · `rsp_cd` 단독 금지) · 계좌구분(`acct_type`) · 브랜드 3줄 전환 · 종목마스터 · 실시간 · 주문 필드 형식 · 안전수칙 · MCP 혼동 방지
+담긴 내용: SDK 우선 사용 · 명세 정본 위치 · **에러 처리**(SDK 는 판정 안 함 · `rsp_msg` 를 읽을 것 · 코드값 비교 금지) · 계좌구분(`acct_type`) · 브랜드 3줄 전환 · 종목마스터 · 실시간 · 주문 필드 형식 · 안전수칙 · MCP 혼동 방지
 
 ## 부록 B. `.env` 템플릿
 

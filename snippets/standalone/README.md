@@ -73,7 +73,7 @@ python nhplug_stock_demo1.py
 
 예제는 흐름을 보여주는 데 집중해서, 아래는 **일부러 넣지 않았습니다.** 실제 코드에는 필요합니다.
 
-- **`rsp_cd`·`rsp_msg` 확인** — HTTP 200 이어도 업무 오류일 수 있습니다. 응답 내용을 보고 성공 여부를 판단하세요. 자세한 규약은 [llms.txt](https://www.nhplug.com/llms.txt) 참고.
+- **`rsp_msg` 문장을 읽으세요** — HTTP 200 이어도 원하는 결과가 아닐 수 있습니다. **`rsp_cd` 코드값으로 판정하지 마세요** — 같은 코드가 API 마다 정상일 수도 오류일 수도 있습니다. 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) 「성공 판정」 절.
 - **호출 간격** — 짧은 시간에 많이 호출하면 `429`(호출 유량 초과)가 납니다. 자세한 한도는 [llms.txt](https://www.nhplug.com/llms.txt) 참고.
 - **첫 WebSocket 메시지는 시세가 아닙니다** — 구독 등록 응답(ACK)이 먼저 옵니다.
   ```json

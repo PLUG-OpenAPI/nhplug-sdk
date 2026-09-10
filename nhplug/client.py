@@ -1,12 +1,16 @@
-"""REST 호출 공용 래퍼: 헤더·Input_0 봉투·토큰·업무성공(rsp_cd) 판정·연속조회·유량 제어.
+"""REST 호출 공용 래퍼: 헤더·Input_0 봉투·토큰·연속조회·유량 제어.
 
-🔴 업무오류 판정: **HTTP 200 ≠ 업무 성공.** 그리고 **rsp_cd 만으로는 판정할 수 없다** —
-**같은 rsp_cd 값이 API 에 따라 정상일 수도 오류일 수도 있다.** 판정은 **rsp_msg 내용이 우선**이며
-규약 정본은 도메인 llms.txt 다.
+🔴 **이 SDK 는 업무 성공/실패를 판정하지 않는다.** 판정 기준은 HTTP 상태코드 하나뿐이다.
 
-아래 is_success() 는 라이브에서 관찰된 코드 목록 + "완료" 메시지로 하는 **1차 판정**이며 전수가 아니다.
-호출자가 직접 확인해야 하는 중요한 처리에서는 raise_on_error=False 로 원본을 받아 rsp_msg 를 본다.
-⚠️ 판정 기준(rsp_msg 우선 규칙)이 llms.txt 에 확정되면 이 함수를 그에 맞춰 교체할 것.
+    HTTP 200      → 응답 본문을 **그대로** 돌려준다. 예외를 던지지 않는다.
+    HTTP 200 아님 → 응답 본문을 **그대로** 담아 NhplugError 로 올린다.
+
+이유: **같은 rsp_cd 값이 API 마다 정상일 수도 오류일 수도 있다.** 어떤 코드 목록도 전수가
+될 수 없고, 우리가 판정하면 정상을 오류로(또는 그 반대로) 오판해 고객에게 잘못 알린다.
+그래서 `rsp_cd`·`rsp_msg` 를 해석하지 않고 가공 없이 전달한다.
+
+➡️ **호출자가 `rsp_msg` 내용을 읽고 다음 단계를 진행할지 결정한다.** 꺼내 쓰려면 `status_of()`.
+   ⚠️ 주문 등 되돌릴 수 없는 처리 전에는 직전 응답의 `rsp_msg` 를 반드시 확인할 것.
 
 연속조회(cts): `cts`·`cts_flag` 는 **응답 헤더**로 내려온다. `call()` 은 기본적으로 본문만
 돌려주므로 헤더가 필요하면 `want_meta=True` 를 쓰거나, 전체 순회는 `paginate()` 를 쓴다.
@@ -29,35 +33,38 @@ from .errors import NhplugError
 
 _INVALID_TOKEN_RE = re.compile(r"유효하지\s*않은\s*token", re.IGNORECASE)
 
-#: 라이브에서 **정상 응답으로 관찰된** rsp_cd — 판정 기준이 아니라 참고용 표본이다.
-#:   00000 현재가·계좌목록 / 00166 잔고·자산현황·손익 / 00221 매수가능수량 / 13578 조회 내역 없음(빈 결과)
-#: ⚠️ 같은 코드가 다른 API 에서는 오류를 뜻할 수 있다. 전수 목록이 아니며 앞으로도 될 수 없다.
-#: 필요 시 NHPLUG_SUCCESS_CODES=... 로 1차 판정 기준을 바꿀 수 있다.
-DEFAULT_SUCCESS_CODES = ("00000", "00166", "00221", "13578")
+def _server_message(data) -> tuple[str | None, str | None]:
+    """오류 응답에서 `(코드, 메시지)` 를 꺼낸다 — 업무/게이트웨이 두 서식을 모두 본다.
 
-#: 성공 메시지 안전망. NH 성공 응답은 일관되게 "…완료되었습니다" 형태다.
-#: allowlist 에 없는 미지의 정상코드를 실패로 오판하지 않기 위한 2차 방어.
-_SUCCESS_MSG_RE = re.compile(r"완료")
-
-
-def success_codes() -> set[str]:
-    env = os.environ.get("NHPLUG_SUCCESS_CODES")
-    if env:
-        return {c.strip() for c in env.split(",") if c.strip()}
-    return set(DEFAULT_SUCCESS_CODES)
-
-
-def is_success(rsp_cd: str | None, rsp_msg: str | None = None) -> bool:
-    """업무 성공 **1차 판정**. 관찰된 코드 목록에 있거나 메시지에 '완료'가 있으면 성공으로 본다.
-
-    🔴 이것은 전수 판정이 아니다. rsp_cd 는 API 마다 의미가 달라 단독 기준이 될 수 없고,
-       정확한 판정은 rsp_msg 내용을 봐야 한다(규약 정본: 도메인 llms.txt).
+    둘 다 없으면 메시지 자리에 **본문 원문**을 넣는다. 서버가 보낸 말을 잃지 않기 위해서다.
     """
-    if rsp_cd is None:
-        return True  # 봉투에 rsp_cd 가 없는 응답(토큰 등)은 판정 대상 아님
-    if str(rsp_cd) in success_codes():
-        return True
-    return bool(rsp_msg and _SUCCESS_MSG_RE.search(rsp_msg))
+    if not isinstance(data, dict):
+        text = str(data or "").strip()
+        return (None, text[:500] or None)
+    code = data.get("rsp_cd") or data.get("error_code")
+    msg = data.get("rsp_msg") or data.get("error_description") or data.get("error")
+    if msg is None and not code:
+        msg = json.dumps(data, ensure_ascii=False)[:500]
+    return (str(code) if code is not None else None, msg)
+
+
+def status_of(data) -> tuple[str | None, str | None]:
+    """응답의 `(rsp_cd, rsp_msg)` 를 **가공 없이** 꺼내 돌려준다.
+
+    🔴 **이 값으로 정상/오류를 판정하지 말 것.** 같은 `rsp_cd` 가 API 마다 다른 뜻이다.
+       `rsp_msg` 내용을 읽고 다음 단계를 진행할지는 **호출자가** 결정한다.
+
+    게이트웨이 단계에서 막힌 오류는 필드명이 다르다(`error_code`·`error_description`).
+    그런 응답은 `(None, None)` 이 되니 **본문 전체**를 함께 보라.
+
+        >>> data = call("/krstock/inquiry/v1/balance", {...})
+        >>> cd, msg = status_of(data)
+        >>> print(msg)        # 서버가 보낸 문장 그대로
+    """
+    if not isinstance(data, dict):
+        return (None, None)
+    cd = data.get("rsp_cd")
+    return (str(cd) if cd is not None else None, data.get("rsp_msg"))
 
 
 # ---------------------------------------------------------------- 유량 스로틀
@@ -234,12 +241,16 @@ def call(path: str, input_0: dict | None = None, cts: str | None = None,
          cts_flag: str | None = None, want_meta: bool = False):
     """POST {BASE_URL}{path} 로 {"Input_0": input_0} 전송 후 응답 JSON 반환.
 
-    - 토큰이 무효(401/IGW40043)면 1회 재발급 후 재시도한다.
-    - 429(유량 초과)는 **자동 재시도하지 않고** rate_limit 오류로 올린다(코드·retry_after 보존).
-      호출 전 자동 스로틀(기본 초당 4회)이 걸리므로 정상 사용에서는 잘 나지 않는다.
-    - HTTP 200 이어도 업무 오류면 NhplugError(category="business"). **1차 판정이며 전수가 아니다** —
-      rsp_cd 는 API 마다 의미가 다르므로 중요한 처리는 rsp_msg 를 직접 확인한다.
-    - raise_on_error=False 면 예외 없이 서버 원본 응답을 그대로 돌려준다(구버전 호환).
+    🔴 **업무 판정을 하지 않는다.** 기준은 HTTP 상태코드 하나다.
+      - **HTTP 200 → 본문 그대로 반환. 예외 없음.** `rsp_cd`·`rsp_msg` 도 손대지 않고 그대로 들어 있다.
+        ➡️ 성공 여부는 **호출자가 `rsp_msg` 를 읽고 판단**한다(`status_of()` 로 꺼낼 수 있다).
+      - **HTTP 200 아님 → NhplugError.** 서버 본문을 `.raw` 에 **그대로** 싣는다.
+
+    편의기능(판정이 아니다):
+      - 토큰이 무효(401/IGW40043)면 1회 재발급 후 재시도한다.
+      - 429(유량 초과)는 **자동 재시도하지 않고** rate_limit 오류로 올린다(코드·retry_after 보존).
+        호출 전 자동 스로틀(기본 초당 4회)이 걸리므로 정상 사용에서는 잘 나지 않는다.
+      - raise_on_error=False 면 HTTP 오류에서도 예외 없이 원본을 돌려준다.
 
     Args:
         cts: 연속조회 키. **직전 응답의 `Meta.cts`** 를 그대로 넣는다.
@@ -291,34 +302,31 @@ def call(path: str, input_0: dict | None = None, cts: str | None = None,
     if not raise_on_error:
         return (data, _meta_of(res, data)) if want_meta else data
 
-    # ---- HTTP 오류 ----
+    # ---- HTTP 200 아님 → 오류. 본문은 가공하지 않고 raw 로 그대로 싣는다 ----
+    #      메시지 필드명이 응답마다 다르다:
+    #        업무 계층    rsp_cd · rsp_msg
+    #        게이트웨이   error_code · error_description   (예: IGW40031 유효하지 않은 AppKey)
+    #      그래서 둘 다 훑고, 못 찾으면 본문을 그대로 문자열로 쓴다.
     if not res.ok:
-        rsp_cd = data.get("rsp_cd") if isinstance(data, dict) else None
-        rsp_msg = data.get("rsp_msg") if isinstance(data, dict) else None
+        code, msg = _server_message(data)
         if res.status_code == 429:
             raise NhplugError(
-                rsp_msg or "호출 유량을 초과했습니다. 호출 간격을 늘리세요.",
-                category="rate_limit", code=rsp_cd or "IGW42902", status=429, path=path,
+                msg or "호출 유량을 초과했습니다. 호출 간격을 늘리세요.",
+                category="rate_limit", code=code or "IGW42902", status=429, path=path,
                 retryable=True, retry_after_ms=_retry_after_ms(res),
                 environment=get_base_url(), raw=data,
             )
         if _is_invalid_token(res.status_code, res.text):
-            raise NhplugError(rsp_msg or "인증 실패(토큰 무효).", category="auth",
-                              code=rsp_cd, status=res.status_code, path=path,
+            raise NhplugError(msg or "인증 실패(토큰 무효).", category="auth",
+                              code=code, status=res.status_code, path=path,
                               environment=get_base_url(), raw=data)
-        raise NhplugError(rsp_msg or f"HTTP {res.status_code}", category="http",
-                          code=rsp_cd, status=res.status_code, path=path,
+        raise NhplugError(msg or f"HTTP {res.status_code}", category="http",
+                          code=code, status=res.status_code, path=path,
                           environment=get_base_url(), raw=data)
 
-    # ---- HTTP 200 이지만 업무 오류(rsp_cd) ----
-    if isinstance(data, dict):
-        rsp_cd = data.get("rsp_cd")
-        if not is_success(rsp_cd, data.get("rsp_msg")):
-            raise NhplugError(
-                data.get("rsp_msg") or "업무 오류",
-                category="business", code=str(rsp_cd), status=200, path=path,
-                environment=get_base_url(), raw=data,
-            )
+    # ---- HTTP 200 → 본문 그대로. 업무 판정은 하지 않는다 ----
+    #      rsp_cd 를 해석하면 같은 코드가 API 마다 다른 뜻이라 반드시 오판한다.
+    #      호출자가 rsp_msg 를 읽고 판단한다(status_of() 로 꺼낼 수 있다).
     return (data, _meta_of(res, data)) if want_meta else data
 
 

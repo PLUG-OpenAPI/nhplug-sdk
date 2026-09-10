@@ -26,7 +26,7 @@
 | REST 호출 · `rsp_cd` 판정 · **연속조회** · **유량 스로틀** | [nhplug/client.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/client.py) |
 | WebSocket 구독 · 포트 라우팅 · **서버 한도** · TLS | [nhplug/realtime.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/realtime.py) |
 | 토큰 발급·캐시 · **호스트 가드** · 브랜드 판정 | [nhplug/auth.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/auth.py) |
-| 오류 분류(`config`·`auth`·`rate_limit`·`business`…) | [nhplug/errors.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/errors.py) |
+| 오류 분류(`config`·`auth`·`rate_limit`·`network`·`http`) | [nhplug/errors.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/errors.py) |
 | `.env` 탐색 순서 | [nhplug/\_env.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/_env.py) |
 | **실시간 채널 27종** · `tr_key` 대응표 | [docs/realtime_channels.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/docs/realtime_channels.md) |
 | **종목마스터 28종** 목록 · 파서 사용법 | [instruments/README.md](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/instruments/README.md) |
@@ -45,20 +45,35 @@
 - 자산군 정본(openapi.json·overview.md·README.md): https://www.nhplug.com/openapi-docs/<domain>/ (나무) · https://www.n2plug.com/openapi-docs/<domain>/ (N2)
   (domain: common · krstock · gbstock · krfuture · gbfuture · krbond · krgold)
 - 엔드포인트·필드·형식은 위 **도메인 openapi.json** 을 정본으로 따른다. 로컬 사본이 필요하면 `python scripts/fetch_docs.py` 로 `docs/` 에 받는다(커밋 안 함).
-- 🔴 **에러 처리(가장 중요)**: **HTTP 200 ≠ 업무 성공.** 그리고 **`rsp_cd` 만으로 판정하지 말 것.**
-  **`rsp_msg` 의 내용이 우선**이다. **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있다.**
-  판정 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: https://www.n2plug.com/llms.txt).
+- 🔴 **에러 처리(가장 중요)**: **SDK 는 업무 성공/실패를 판정하지 않는다.** 기준은 HTTP 상태코드 하나다.
+
+  | HTTP | `call()` 동작 |
+  |---|---|
+  | **200** | 응답 본문을 **그대로** 반환. 예외 없음. `rsp_cd`·`rsp_msg` 도 손대지 않음 |
+  | **200 아님** | `NhplugError`(category: `config`\|`auth`\|`rate_limit`\|`network`\|`http`) — 본문은 `.raw` 에 원문 그대로 |
+
   ```python
-  data = call("/krstock/...", {...})
-  # 중요한 처리라면 메시지를 직접 확인한다
-  print(data.get("rsp_cd"), data.get("rsp_msg"))
+  from nhplug import call, status_of
+
+  data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "UNT"})
+  rsp_cd, rsp_msg = status_of(data)      # 꺼내 줄 뿐 — 판정하지 않는다
+  print(rsp_msg)                         # 서버가 보낸 문장 그대로
+
+  price = (data.get("Output_0") or {}).get("stck_prpr")
+  if price is None:                      # 기대한 값이 왔는지는 호출자가 직접 확인
+      print("⚠️ 현재가 없음. 위 rsp_msg 확인")
   ```
-  ⚠️ **`if rsp_cd == "00000"` 같은 코드를 쓰지 말 것.** 특정 코드값을 하드코딩한 판정은 API 를 바꾸면 무너진다.
-  `nhplug.call()` 이 1차 판정해 `NhplugError`(category: config|auth|rate_limit|business|network|http)를 던지지만,
-  **그 판정은 라이브에서 관찰된 코드 목록 + "완료" 메시지 기반이라 전수가 아니다.** 예외 없이 원본이 필요하면
-  `call(..., raise_on_error=False)` 로 받아 `rsp_msg` 를 직접 본다.
-  (관찰된 정상 응답 예: `00000` 현재가·계좌목록 / `00166` 잔고 / `00221` 매수가능수량 / `13578` 조회 내역 없음
-   — **참고용 예시이며 판정 기준이 아니다.**)
+
+  **왜 판정하지 않나**: **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있다.** 어떤 코드 목록도
+  전수가 될 수 없고, 판정하면 정상 응답을 실패로(또는 그 반대로) 오판해 사용자에게 잘못 알린다.
+
+  ⚠️ **`if rsp_cd == "00000"` 같은 코드를 절대 쓰지 말 것.** 코드값을 비교하는 판정은 API 를 바꾸면 무너진다.
+  **`rsp_msg` 문장을 읽고 판단한다.** 규약 정본은 [llms.txt](https://www.nhplug.com/llms.txt) (N2: https://www.n2plug.com/llms.txt) 의 「성공 판정」 절.
+
+  🔴 **주문 등 되돌릴 수 없는 처리 전에는 직전 응답의 `rsp_msg` 를 반드시 확인한다.** SDK 가 막아 주지 않는다.
+
+  ⚠️ 0.4.0 에서 `is_success()`·`success_codes()`·`NHPLUG_SUCCESS_CODES`·`category="business"` 가 **삭제됐다.**
+  코드값 목록(`00000`·`00166`·`00221`·`13578`)도 코드베이스에서 사라졌다 — **되살리지 말 것.**
 - **토큰(중요)**: 24시간 유효. `~/.nhplug/` 에 **파일 캐시**되어 프로세스가 바뀌어도 재사용된다(재발급 1회 = 보안 알림 1건).
   캐시 파일 권한은 OS 기본값이다(별도 chmod 없음). 공유 환경이면 `NHPLUG_TOKEN_CACHE_DIR` 로 옮기거나 `NHPLUG_TOKEN_CACHE=0`.
   **재발급은 401(토큰 무효)일 때만.** `429`(유량 초과) 재시도에는 기존 토큰을 그대로 쓴다 — 토큰을 직접 재발급하는 코드를 새로 만들지 말 것.
@@ -79,8 +94,8 @@
 - 발급 토큰은 만료 전까지 캐시·재사용한다(매 호출 재발급 금지). → `nhplug/auth.py` 가 이미 처리.
 - 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
 - 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투.
-  **성공 판정은 위 「에러 처리」 절을 따른다** — `rsp_msg` 우선, `rsp_cd` 단독 판정 금지.
-  특정 코드값을 하드코딩하지 말고 `nhplug.call()` 에 맡기거나 `rsp_msg` 를 직접 확인한다.
+  **성공 판정은 위 「에러 처리」 절을 따른다** — SDK 는 판정하지 않으니 `rsp_msg` 를 직접 읽는다.
+  `rsp_cd` 코드값을 비교하는 코드를 만들지 말 것.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no · acct_type. acct_no 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 
 ## 계좌구분(acct_type) — 환경과 맞는 계좌를 골라야 한다 (중요)

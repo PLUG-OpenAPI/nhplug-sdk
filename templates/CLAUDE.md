@@ -21,7 +21,8 @@ from nhplug import call, NhplugError
 data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "KRX"})
 ```
 
-- 토큰 발급·갱신·캐시, `Input_0` 봉투, 인증 헤더, `rsp_cd` 판정을 **`call()` 이 전부 처리**한다.
+- 토큰 발급·갱신·캐시, `Input_0` 봉투, 인증 헤더, 연속조회, 유량 제어를 **`call()` 이 전부 처리**한다.
+  (업무 성공/실패는 판정하지 않는다 — 아래 「에러 처리」 참조)
 - `requests` 로 직접 `/oauth2/token` 을 호출하는 코드를 새로 만들지 말 것. 이미 있는 걸 재사용한다.
 
 ## 문서 (Source of Truth) — 도메인이 정본
@@ -70,13 +71,21 @@ API·필드는 완전히 같고 **도메인만 다르다.** N2 고객은 **위 �
 
 ### ⚠️ 성공 판정 — HTTP 200 ≠ 업무 성공
 
-- 🔴 **`rsp_msg` 로 판단한다. `rsp_cd` 만 보지 말 것.**
-  **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있다.** 판정 규약 정본은 llms.txt.
-- ⚠️ **`if rsp_cd == "00000"` 같은 코드를 쓰지 말 것.** 특정 코드값 하드코딩은 API 를 바꾸면 무너진다.
-- `nhplug.call()` 이 1차 판정해 `NhplugError(category: config|auth|rate_limit|business|network|http)` 를 던진다.
-  다만 그 판정은 **관찰된 코드 목록 + 메시지 기반이라 전수가 아니다.** 중요한 처리는 `rsp_msg` 를 직접 확인한다.
-  원본이 필요하면 `call(..., raise_on_error=False)`.
-- `nhplug.call()` 이 자동 판정해 `NhplugError(category: auth|rate_limit|business|network|http)` 를 던진다.
+- 🔴 **SDK 는 업무 성공/실패를 판정하지 않는다.** 기준은 HTTP 상태코드 하나다.
+  **HTTP 200 → 응답 본문 그대로 반환(예외 없음)** / **200 아님 → `NhplugError`**(본문은 `.raw` 에 원문).
+- 🔴 **`rsp_msg` 문장을 읽고 판단한다.** **같은 `rsp_cd` 값이 API 에 따라 정상일 수도 오류일 수도 있어**
+  어떤 코드 목록도 기준이 될 수 없다. 규약 정본은 llms.txt 「성공 판정」 절.
+  ```python
+  from nhplug import call, status_of
+  data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": "UNT"})
+  rsp_cd, rsp_msg = status_of(data)     # 꺼내 줄 뿐 — 판정하지 않는다
+  price = (data.get("Output_0") or {}).get("stck_prpr")
+  if price is None:
+      print("⚠️ 기대한 값 없음:", rsp_msg)
+  ```
+- ⚠️ **`if rsp_cd == "00000"` 같은 코드를 절대 쓰지 말 것.** 코드값 비교는 API 를 바꾸면 무너진다.
+- 🔴 **주문 등 되돌릴 수 없는 처리 전에는 직전 응답의 `rsp_msg` 를 반드시 확인한다.** SDK 가 막아 주지 않는다.
+- ⚠️ `is_success()`·`NHPLUG_SUCCESS_CODES`·`category="business"` 는 **0.4.0 에서 삭제됐다.** 되살리지 말 것.
 - `429`(IGW42902, 실측 초당 5회): **자동 재시도하지 않는다.** 호출 간격을 늘려서 호출자가 결정한다.
   **429 재시도에 토큰을 재발급하지 말 것**(보안 알림이 쌓인다). 재발급은 `401` 일 때만.
 

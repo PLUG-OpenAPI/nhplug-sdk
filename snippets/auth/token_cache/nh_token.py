@@ -137,9 +137,6 @@ def get_token(force: bool = False) -> str:
 # ─────────────────────────────────────────────────────────────
 # API 호출 — 토큰 무효(401)일 때만 1회 재발급 후 재시도
 # ─────────────────────────────────────────────────────────────
-SUCCESS_CODES = {"00000", "00166", "00221", "13578"}
-
-
 def api_post(path: str, input_0: dict | None = None, cts: str | None = None) -> dict:
     """POST {BASE_URL}{path} 로 {"Input_0": ...} 를 보내고 응답 JSON 을 돌려준다."""
     force = False
@@ -172,14 +169,13 @@ def api_post(path: str, input_0: dict | None = None, cts: str | None = None) -> 
                                "※ 토큰을 재발급하지 마세요.")
         break
 
-    res.raise_for_status()
-    data = res.json()
+    res.raise_for_status()        # HTTP 200 이 아니면 여기서 예외
 
-    # HTTP 200 이어도 업무 오류일 수 있습니다
-    rsp_cd, rsp_msg = data.get("rsp_cd"), data.get("rsp_msg", "")
-    if rsp_cd is not None and rsp_cd not in SUCCESS_CODES and "완료" not in rsp_msg:
-        raise RuntimeError(f"업무 오류 [{rsp_cd}] {rsp_msg}")
-    return data
+    # 🔴 업무 성공/실패를 판정하지 않습니다 — 응답을 그대로 돌려줍니다.
+    #    같은 rsp_cd 가 API 마다 정상일 수도 오류일 수도 있어 코드값으로는 판정할 수 없습니다.
+    #    ➡️ 호출하는 쪽에서 rsp_msg 문장을 읽고 다음 단계를 진행할지 결정하세요.
+    #       특히 주문처럼 되돌릴 수 없는 처리 전에는 직전 응답의 rsp_msg 를 반드시 확인하세요.
+    return res.json()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -192,8 +188,17 @@ if __name__ == "__main__":
 
     data = api_post("/krstock/quote/v1/currentPrice",
                     {"iem_cd": "005930", "market_cd": "KRX"})
-    out = data.get("Output_0", {})
-    print(f"삼성전자 현재가: {out.get('stck_prpr'):,}원")
+
+    # 서버가 보낸 응답 메시지를 그대로 봅니다 (판정하지 않습니다)
+    print(f"서버 응답: rsp_cd={data.get('rsp_cd')} rsp_msg={data.get('rsp_msg')}")
+
+    # 기대한 값이 실제로 왔는지는 직접 확인합니다
+    out = data.get("Output_0") or {}
+    price = out.get("stck_prpr")
+    if price is None:
+        print("⚠️ 현재가(stck_prpr)가 응답에 없습니다. 위 rsp_msg 내용을 확인하세요.")
+    else:
+        print(f"삼성전자 현재가: {int(price):,}원")
 
     # 두 번째 호출은 캐시를 쓰므로 재발급이 일어나지 않습니다 (알림톡 없음)
     api_post("/n2/acctinfo", {})

@@ -2,7 +2,7 @@
 # 이 예제는 SDK 없이(표준 라이브러리·requests 만으로) 동작하는 원시 예제입니다.
 #
 #   대부분의 경우  pip install nhplug  이 훨씬 짧고 안전합니다.
-#   토큰 캐시·rsp_cd 판정·호출 유량 제어·WebSocket 서버 한도를 모두 자동 처리합니다.
+#   토큰 캐시·연속조회·호출 유량 제어·WebSocket 서버 한도를 모두 자동 처리합니다.
 #       https://pypi.org/project/nhplug/
 #
 #   아래 예제는 외부 패키지 설치가 제한된 환경, 다른 언어로 포팅할 때,

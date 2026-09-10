@@ -49,7 +49,7 @@ iwr -useb https://raw.githubusercontent.com/PLUG-OpenAPI/nhplug-sdk/main/templat
 
 - **SDK 우선** — `pip install nhplug` 로 인증·토큰캐시·에러판정을 맡기고, `requests` 로 직접 짜지 않게
 - **명세 정본** — 도메인 `llms.txt` · 자산군 `openapi.json` 을 보게 (필드 추측 방지)
-- **성공 판정** — `rsp_msg` 우선. `rsp_cd` 는 API 마다 의미가 달라 단독 판정이 불가하며, 코드값 하드코딩을 막습니다
+- **성공 판정** — SDK 는 판정하지 않습니다(HTTP 200 이면 본문 그대로). `rsp_msg` 를 읽게 하고, `rsp_cd` 코드값 하드코딩을 막습니다
 - **계좌구분** — `01`·`02` 운영 / `03` 모의. 첫 계좌를 그대로 쓰지 않게
 - **브랜드** — N2 는 세 줄 모두 전환(하나라도 빠지면 조용히 나무로)
 - **주문 필드** — `iem_cd` 6자리(A 없음) · `orr_pr` 정수
