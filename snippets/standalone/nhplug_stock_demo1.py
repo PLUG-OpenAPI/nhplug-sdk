@@ -213,7 +213,8 @@ body = {
         "bnc_bse_cd": "1",      # 1:체결기준 총평가, 5:현재가기준
         "ltg_aot_dit_cd": "1",  # 1:상장종목, 9:전체
         "aet_bse": "1",         # 1:순자산, 2:총자산
-        "qut_dit_cd": "UNT",    # 시세구분: UNT(통합)/KRX/NXT
+        "qut_dit_cd": "UNT",    # 시세구분(시장): UNT(통합)/KRX/NXT
+        "aly_qut_cd": "1",      # 적용시세(시간대) 1:정규장, 2:전체장(정규장외 포함) — 필수
     }
 }
 call_api("계좌 잔고 조회", "https://api.nhplug.com:8443/krstock/inquiry/v1/balance", headers, body)

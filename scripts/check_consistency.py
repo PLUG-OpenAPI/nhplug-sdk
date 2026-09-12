@@ -266,6 +266,60 @@ def check_mcp_ops(mcp: Path | None) -> None:
         "\n".join(f"      {b}" for b in bad) if bad else "README 표기와 번들 일치")
 
 
+# ────────────────────────────────── 7-2. 스니펫이 필수 입력을 빠뜨렸나 (명세가 정본)
+def check_required_inputs(roots: list[Path], mcp: Path | None) -> None:
+    """MCP 번들 `openapi.json` 의 `Input_0.required` 를 정본으로 삼아,
+    같은 경로를 호출하는 스니펫·예제가 그 필드를 모두 넣는지 본다.
+
+    🔴 이 검사가 왜 필요한가: 명세가 **필수 입력을 추가**하면 우리 코드는 조용히 깨진다.
+       호출은 나가지만 서버가 거부한다(예: market_cd 누락 → IGW40024).
+       실제 사례 — 260911 KRX 시간연장에서 view_main_yn·aly_qut_cd 가 필수로 추가돼
+       스니펫 5곳이 한꺼번에 깨졌다. 사람이 눈으로 찾았다.
+
+    판정은 **느슨하게** 한다: 파일 전체에서 `"필드명"` 문자열을 찾으면 통과로 본다.
+    스니펫이 조건부로 키를 넣는 경우(`if lon_dt:`)가 있어 호출 dict 만 보면 오탐이 난다.
+    빠뜨린 것을 잡는 게 목적이고, 넣은 위치까지 따지는 건 목적이 아니다.
+
+    ⚠️ 대상은 **`snippets/`·`examples/` 안의 파일뿐**이다.
+       라이브러리(`nhplug/*.py`)는 경로와 dict 를 **그대로 전달**하는 래퍼라 필수 입력을 알 수 없고,
+       docstring 에 `call("/krstock/inquiry/v1/balance", {...})` 같은 **예시**를 담고 있어 오탐이 난다
+       (실제로 한 번 걸렸다). 테스트도 픽스처를 쓰므로 제외한다.
+    """
+    if not mcp or not (mcp / "specs").is_dir():
+        return
+    required: dict[str, list[str]] = {}
+    for f in (mcp / "specs").glob("*.json"):
+        spec = json.loads(f.read_text(encoding="utf-8"))
+        for path, ops in spec.get("paths", {}).items():
+            for op in ops.values():
+                if not isinstance(op, dict):
+                    continue
+                try:
+                    inp = (op["requestBody"]["content"]["application/json"]
+                           ["schema"]["properties"]["Input_0"])
+                except (KeyError, TypeError):
+                    continue
+                if inp.get("required"):
+                    required[path] = list(inp["required"])
+
+    call_re = re.compile(r'["\'](/(?:krstock|gbstock)/[a-z]+/v\d+/[A-Za-z]+)["\']')
+    bad = []
+    for root in roots:
+        for p in files(root, {".py"}):
+            # 호출자만 본다 — 라이브러리 래퍼·테스트는 대상 아님(위 docstring 참조)
+            if not ({"snippets", "examples"} & set(p.parts)) or "tests" in p.parts:
+                continue
+            text = p.read_text(encoding="utf-8", errors="ignore")
+            for path in set(call_re.findall(text)):
+                missing = [k for k in required.get(path, [])
+                           if f'"{k}"' not in text and f"'{k}'" not in text]
+                if missing:
+                    bad.append(f"{rel(p)}  {path}  필수 누락: {'·'.join(missing)}")
+    add(not bad, f"스니펫 필수 입력 (명세 {len(required)}개 경로 기준)",
+        "\n".join(f"      {b}" for b in sorted(bad)) if bad
+        else "호출하는 경로의 필수 필드를 모두 전달")
+
+
 # ─────────────────────────────────────────────── 8. 허용 호스트 (SDK ↔ MCP)
 def check_allowed_hosts(mcp: Path | None) -> None:
     """자격증명이 나가는 허용 호스트 목록이 SDK 와 MCP 에서 같은지.
@@ -430,6 +484,7 @@ def main() -> int:
     check_links(roots)
     check_version()
     check_mcp_ops(mcp)
+    check_required_inputs(roots, mcp)
     check_allowed_hosts(mcp)
     check_python_version()
     check_tree_links(roots)

@@ -98,6 +98,31 @@
   `rsp_cd` 코드값을 비교하는 코드를 만들지 말 것.
 - 계좌 목록: POST /n2/acctinfo (입력 없음) → Output_0[].acct_no · acct_type. acct_no 값을 잔고·주문의 act_no 로 사용(필드명 다름, 값 동일).
 
+## 🔴 정규장 / 전체장 — 빠뜨리기 쉬운 **필수** 파라미터 (명세 260911 · KRX 시간연장)
+
+KRX 거래시간이 연장돼 **정규장외 시세가 섞이게 되면서**, 어느 시간대 기준으로 볼지를
+호출자가 지정해야 한다. 아래 6개 API 는 이 값이 **필수**다 — 빠뜨리면 호출이 **실패**한다.
+
+| 파라미터 | 값 | 필수인 API |
+|---|---|---|
+| **`view_main_yn`** | `Y` 정규장 · `N` 전체장(정규장+정규장외) | 시세 — `currentDaily`·`currentExecution`·`period` |
+| **`aly_qut_cd`** | `1` 정규장 · `2` 전체장 | 조회 — `balance`·`assetStatus`·`realizedPnl` |
+
+- ⚠️ **`qut_dit_cd` 와 다른 축이다.** `qut_dit_cd`(UNT/KRX/NXT)는 어느 **시장**, `aly_qut_cd`는 어느 **시간대**.
+  둘 다 넣어야 한다.
+- `currentPrice`(현재가)는 **입력이 바뀌지 않았다.** 대신 응답에 정규장 기준값이 추가됐다:
+  `main_cls_prpr`·`main_cls_vrss_sign`·`main_cls_vrss`·`main_cls_ctrt` + `market_status`
+  + NXT VI 예상 `nxt_vi_antc_sdpr`·`nxt_vi_antc_mxpr`·`nxt_vi_antc_llam`
+- 실시간 체결가(`oc`·`nc`·`mc`)에도 같은 목적의 필드가 붙었다 —
+  `marketgb`(시장구분) · `main_close`·`market_sign`·`market_change`·`market_chrate`(정규장 기준).
+  예상체결(`oa`·`na`·`ma`)에는 `vi_exch_code`(VI 발동 거래소).
+- 기존 동작을 유지하려면 **정규장(`Y`/`1`)** 을 쓴다. 전체장으로 바꾸면 시간외가 섞여 결과가 달라진다.
+
+## 주문 코드값 변경 (명세 260911)
+- `orr_cnd_dit_cd` 주문조건에 **`05.GTP` 추가** (기존 `00.없음` `01.IOC` `02.FOK`).
+- 🔴 **매수(`cashBuy`)에서 `81.시간외단일가` 가 없어졌다.** 매도(`cashSell`)·신용에는 그대로 있다.
+  매수에 `81` 을 쓰던 코드는 깨진다.
+
 ## 계좌구분(acct_type) — 환경과 맞는 계좌를 골라야 한다 (중요)
 - `/n2/acctinfo` 는 **여러 구분의 계좌를 섞어서** 내려준다. 계좌구분이 호출 환경을 결정한다.
 

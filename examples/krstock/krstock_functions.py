@@ -8,10 +8,11 @@ def current_price(iem_cd: str, market_cd: str = "KRX") -> dict:
     return call("/krstock/quote/v1/currentPrice", {"iem_cd": iem_cd, "market_cd": market_cd})
 
 
-def balance(act_no: str) -> dict:
+def balance(act_no: str, aly_qut_cd: str = "1") -> dict:
+    """국내주식 잔고. aly_qut_cd 는 필수(1=정규장 / 2=전체장) — 명세 260911."""
     return call("/krstock/inquiry/v1/balance", {
         "act_no": act_no, "bnc_bse_cd": "5", "ltg_aot_dit_cd": "9",
-        "aet_bse": "2", "qut_dit_cd": "UNT",
+        "aet_bse": "2", "qut_dit_cd": "UNT", "aly_qut_cd": aly_qut_cd,
     })
 
 

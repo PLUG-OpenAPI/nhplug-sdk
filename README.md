@@ -299,6 +299,36 @@ HTTP 200 응답은 더 이상 예외가 되지 않습니다. `except NhplugError
   - 재발급은 **401(토큰 무효)** 일 때만 합니다. `429` 재시도에는 기존 토큰을 그대로 사용합니다.
 - **429(호출 유량 초과)** 는 자동 재시도하지 않고 `category="rate_limit"` 예외로 알립니다. 다만 아래 **자동 스로틀**이 걸려 있어 정상 사용에서는 잘 나지 않습니다.
 
+## 🔴 정규장 / 전체장 — 빠뜨리면 실패하는 필수 파라미터
+
+KRX 거래시간이 연장돼(명세 **260911**) 정규장외 시세가 섞이게 됐습니다. 그래서 **어느 시간대 기준으로
+볼지**를 호출할 때 지정해야 합니다. 아래 6개 API 는 이 값이 **필수**입니다.
+
+| 파라미터 | 값 | 필수인 API |
+|---|---|---|
+| **`view_main_yn`** | `Y` 정규장 · `N` 전체장(정규장+정규장외) | `currentDaily` · `currentExecution` · `period` |
+| **`aly_qut_cd`** | `1` 정규장 · `2` 전체장 | `balance` · `assetStatus` · `realizedPnl` |
+
+```python
+call("/krstock/inquiry/v1/balance", {
+    "act_no": act_no, "bnc_bse_cd": "5", "ltg_aot_dit_cd": "9", "aet_bse": "2",
+    "qut_dit_cd": "UNT",   # 어느 **시장**의 시세 (UNT/KRX/NXT)
+    "aly_qut_cd": "1",     # 어느 **시간대**의 시세 (1=정규장) ← 필수
+})
+```
+
+> ⚠️ **`qut_dit_cd` 와 혼동하지 마세요.** 두 값은 **다른 축**이고 **둘 다** 넣어야 합니다.
+> `qut_dit_cd`=시장(통합/KRX/NXT) · `aly_qut_cd`=시간대(정규장/전체장).
+
+**기존 동작을 그대로 유지하려면 정규장(`Y`/`1`)** 을 쓰세요. 전체장으로 바꾸면 시간외 체결이 섞여
+평가금액·일자별 시세가 달라집니다. SDK 의 스니펫·예제는 모두 정규장을 기본값으로 둡니다.
+
+`currentPrice`(현재가)는 **입력이 바뀌지 않았습니다.** 대신 응답에 정규장 기준값이 추가됐습니다 —
+`main_cls_prpr`·`main_cls_vrss_sign`·`main_cls_vrss`·`main_cls_ctrt`·`market_status`,
+그리고 NXT VI 예상가 `nxt_vi_antc_sdpr`·`nxt_vi_antc_mxpr`·`nxt_vi_antc_llam`.
+
+실시간 체결가(`oc`·`nc`·`mc`)에도 같은 목적의 필드가 붙었습니다 — [docs/realtime_channels.md](docs/realtime_channels.md) 참조.
+
 ## 호출 유량 — 자동으로 조절됩니다
 
 실측 한도가 **초당 5회** 수준이라, `call()` 이 **초당 4회**로 자동 스로틀합니다. 직접 `sleep` 을 넣지 않아도 됩니다.

@@ -67,6 +67,13 @@ NHPLUG_INSTRUMENTS_BASE=https://www.nhplug.com/instruments
   원본이 필요하면 `call(..., raise_on_error=False)`.
 - `429`(초당 5회 초과)는 자동 재시도하지 않는다. **429 재시도에 토큰을 재발급하지 말 것**(재발급은 401 에만).
 
+## 🔴 정규장 / 전체장 — 빠뜨리면 호출 실패 (명세 260911 · KRX 시간연장)
+
+- **`view_main_yn`** (`Y`정규장 / `N`전체장) **필수** — `currentDaily` · `currentExecution` · `period`
+- **`aly_qut_cd`** (`1`정규장 / `2`전체장) **필수** — `balance` · `assetStatus` · `realizedPnl`
+- ⚠️ `qut_dit_cd`(UNT/KRX/NXT)는 **시장**, 위 둘은 **시간대**. 별개 축이라 둘 다 넣는다.
+- 기존 동작 유지 = 정규장(`Y`/`1`). `currentPrice` 는 입력 불변(응답에 `main_cls_*` 추가).
+
 ## ⚠️ 계좌구분(acct_type)
 
 `01`·`02` = 운영(`api`) · `03` = 모의투자(`moapi`).
