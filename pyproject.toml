@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nhplug"
-version = "0.4.0"
+version = "0.4.1"
 description = "NH투자증권 Open API 파이썬 SDK — 인증·토큰캐시·연속조회·유량제어·실시간(WebSocket)·종목마스터 파서"
 readme = "README.md"
 license = { text = "MIT" }

@@ -119,15 +119,22 @@ def main():
     check(sent[0]["header"]["tr_type"] == "1", "등록 tr_type=1")
     check(sent[-1]["header"]["tr_type"] == "2", "종료 시 해제 tr_type=2 (등록 반납)")
 
-    print("\n═══ ⑤ 세션당 10건 초과 → 자동 분할 ═══")
+    # 🔴 표본을 상수에서 유도한다 — 하드코딩하면 한도가 바뀔 때 검증이 조용히 무의미해진다.
+    #    (실제로 한도가 10 → 30 으로 올랐을 때 "25건 → 3세션" 이 1세션으로 끝나 버렸다.)
+    n_keys = MAX_KEYS_PER_SESSION * 2 + 5        # 꽉 찬 세션 2개 + 남는 세션 1개
+    want_sessions = -(-n_keys // MAX_KEYS_PER_SESSION)   # 올림 나눗셈 → 3
+    print(f"\n═══ ⑤ 세션당 {MAX_KEYS_PER_SESSION}건 초과 → 자동 분할 ═══")
     sent, urls, _ = install()
-    subscribe([f"{i:06d}" for i in range(25)], lambda m: None, timeout=1)
-    check(len(urls) == 3, "25건 → 세션 3개(10+10+5)", f"{len(urls)}개")
+    subscribe([f"{i:06d}" for i in range(n_keys)], lambda m: None, timeout=1)
+    check(len(urls) == want_sessions,
+          f"{n_keys}건 → 세션 {want_sessions}개"
+          f"({MAX_KEYS_PER_SESSION}+{MAX_KEYS_PER_SESSION}+{n_keys - MAX_KEYS_PER_SESSION * 2})",
+          f"{len(urls)}개")
     reg = [m for m in sent if m["header"]["tr_type"] == "1"]
     unreg = [m for m in sent if m["header"]["tr_type"] == "2"]
-    check(len(reg) == 25, "등록 25건 전부 전송", f"{len(reg)}건")
-    check(len(unreg) == 25, "해제도 25건", f"{len(unreg)}건")
-    check(len({m["body"]["tr_key"] for m in reg}) == 25, "키 중복·누락 없음")
+    check(len(reg) == n_keys, f"등록 {n_keys}건 전부 전송", f"{len(reg)}건")
+    check(len(unreg) == n_keys, f"해제도 {n_keys}건", f"{len(unreg)}건")
+    check(len({m["body"]["tr_key"] for m in reg}) == n_keys, "키 중복·누락 없음")
 
     print("\n═══ ⑥ 동시 세션 2 제한 (WSS10015 방지) ═══")
     check(FakeWS.peak <= MAX_SESSIONS, f"동시 접속 최대 {FakeWS.peak} ≤ {MAX_SESSIONS}")

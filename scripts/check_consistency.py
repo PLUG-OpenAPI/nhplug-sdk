@@ -266,6 +266,59 @@ def check_mcp_ops(mcp: Path | None) -> None:
         "\n".join(f"      {b}" for b in bad) if bad else "README 표기와 번들 일치")
 
 
+# ─────────────────────────────── 2-3. WS 서버 한도 — 숫자는 두 곳에만
+def check_ws_limits(roots: list[Path]) -> None:
+    """`realtime.py` 의 MAX_* 상수 ↔ `docs/realtime_channels.md` 표를 대조하고,
+    **다른 곳에 숫자가 흩어지지 않았는지** 본다.
+
+    🔴 배경: 한 숫자(세션당 등록)가 **9개 파일 13곳**에 복사돼 있었다.
+       명세가 10 → 30 으로 바뀌자 전부 손으로 찾아 고쳐야 했다.
+       그래서 숫자를 **코드 상수 + 문서 표 두 곳**으로 줄이고, 나머지는 참조·링크로 바꿨다.
+       이 검사는 그 상태가 유지되는지 지킨다.
+
+    ⚠️ 세션당 등록(30)과 전송 속도(초당 10)는 **다른 값**이다. 한때 둘 다 10이라
+       서술이 섞였다. 그래서 항목별로 따로 본다.
+    """
+    src = SDK / "nhplug" / "realtime.py"
+    text = src.read_text(encoding="utf-8")
+    consts = {k: int(v) for k, v in
+              re.findall(r"^(MAX_SESSIONS|MAX_KEYS_PER_SESSION|MAX_SUBSCRIBE_PER_SEC)\s*=\s*(\d+)",
+                         text, re.M)}
+    if len(consts) != 3:
+        add(False, "WS 서버 한도", f"{rel(src)} 에서 MAX_* 상수 3종을 찾지 못함 ({sorted(consts)})")
+        return
+
+    doc = SDK / "docs" / "realtime_channels.md"
+    dtext = doc.read_text(encoding="utf-8", errors="ignore")
+    problems = []
+    for label, key in (("앱키당 동시 세션", "MAX_SESSIONS"),
+                       ("세션당 실시간 등록", "MAX_KEYS_PER_SESSION"),
+                       ("구독 전송", "MAX_SUBSCRIBE_PER_SEC")):
+        row = next((l for l in dtext.splitlines() if l.startswith(f"| {label}")), None)
+        if row is None:
+            problems.append(f"{rel(doc)}  '{label}' 행이 없음")
+        elif str(consts[key]) not in row:
+            problems.append(f"{rel(doc)}  '{label}' 행이 상수({consts[key]})와 다름 → {row.strip()}")
+
+    # 코드·문서 정본 밖에서 숫자를 다시 적었는지
+    allowed = {rel(src), rel(doc)}
+    stray = re.compile(r"(세션당\s*(?:실시간\s*)?등록\s*\**\s*\d|"
+                       r"\d+\s*건\s*/\s*세션|등록\s*\d+\s*건|동시\s*\d+\s*세션)")
+    for root in roots:
+        for p in files(root, DOC_EXT | CODE_EXT):
+            if rel(p) in allowed or "tests" in p.parts:
+                continue
+            for i, line in enumerate(p.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                if stray.search(line):
+                    problems.append(f"{rel(p)}:{i}  한도 숫자를 직접 적음 → 링크로 바꿀 것")
+
+    add(not problems,
+        f"WS 서버 한도 (세션 {consts['MAX_SESSIONS']} · 등록 {consts['MAX_KEYS_PER_SESSION']}"
+        f" · 초당 {consts['MAX_SUBSCRIBE_PER_SEC']})",
+        "\n".join(f"      {b}" for b in problems) if problems
+        else "코드 상수 ↔ 문서 표 일치 · 다른 곳에 숫자 없음")
+
+
 # ────────────────────────────────── 7-2. 스니펫이 필수 입력을 빠뜨렸나 (명세가 정본)
 def check_required_inputs(roots: list[Path], mcp: Path | None) -> None:
     """MCP 번들 `openapi.json` 의 `Input_0.required` 를 정본으로 삼아,
@@ -479,6 +532,7 @@ def main() -> int:
     check_business_judgment(roots)
     check_ws_ports(roots)
     check_overseas_channels(roots)
+    check_ws_limits(roots)
     check_master_count(roots)
     check_devapi(roots)
     check_links(roots)

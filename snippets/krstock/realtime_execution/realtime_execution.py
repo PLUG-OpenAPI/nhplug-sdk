@@ -18,7 +18,8 @@
 ⚠️ 채널코드는 시장별로 갈린다 — 통합 mc / KRX oc / NXT nc.
    REST 의 market_cd 파라미터와 달리 **코드 자체가 다르다.** oc 를 쓰면 NXT 체결이 빠진다.
 
-서버 한도는 SDK 가 자동으로 지킨다(10건/세션 · 동시 2세션 · 초당 10건).
+서버 한도(세션당 등록 · 동시 세션 · 전송 속도)는 SDK 가 자동으로 지킨다.
+값은 nhplug/realtime.py 의 MAX_* 상수 — docs/realtime_channels.md 참조.
 """
 import sys
 from pathlib import Path

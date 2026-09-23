@@ -14,10 +14,11 @@
 - 토큰: REST `/oauth2/token` 으로 발급(운영 전용). WS 는 `header.token` 으로만 전달하며
   `Authorization`·`x-client-*` 헤더는 쓰지 않는다.
 
-서버 한도(실측) — 초과 시 조용히 끊기거나 오류가 난다. 아래 상수가 자동으로 지킨다.
-    앱키당 동시 세션      2      초과 시 WSS10015
-    세션당 실시간 등록    10     초과 시 close code 1000 "Bye" (오류 메시지 없음)
-    구독 전송            10건/초 초과 시 WSS10010
+서버 한도 — 초과 시 조용히 끊기거나 오류가 난다. 아래 MAX_* 상수가 자동으로 지킨다.
+    MAX_SESSIONS           앱키당 동시 세션    초과 시 WSS10015
+    MAX_KEYS_PER_SESSION   세션당 실시간 등록  초과 시 close code 1000 "Bye" (오류 메시지 없음)
+    MAX_SUBSCRIBE_PER_SEC  구독 전송 속도      초과 시 WSS10010
+⚠️ **숫자는 상수 정의에만 둔다.** 여기에 옮겨 적으면 두 곳이 어긋난다.
 
 사용:
     from nhplug.realtime import subscribe
@@ -68,11 +69,17 @@ OVERSEAS_QUOTE_CHANNELS = frozenset({
 NOTICE_CHANNELS = frozenset({"d0", "d1", "d2", "d3", "de", "dj", "dk", "dv", "dn"})
 
 # ---------------------------------------------------------------- 서버 한도
+# 🔴 **이 세 줄이 한도의 유일한 정본이다.** 다른 파일·주석에 숫자를 옮겨 적지 말 것.
+#    사람이 읽는 표는 docs/realtime_channels.md 한 곳뿐이고,
+#    scripts/check_consistency.py 가 이 상수와 그 표를 대조한다.
+#    (한때 같은 숫자가 9개 파일 13곳에 흩어져 있었다.)
+
 #: 앱키당 동시 WebSocket 세션. 초과 시 WSS10015.
 MAX_SESSIONS = 2
 #: 세션 하나가 등록할 수 있는 실시간 건수. 초과 시 close code 1000 "Bye"(오류 메시지 없음).
-MAX_KEYS_PER_SESSION = 10
-#: 구독 메시지 전송 속도. 초과 시 WSS10010.
+#: 명세 260911 기준 30 (x-rate-limits.websocket "채널당 최대 30건").
+MAX_KEYS_PER_SESSION = 30
+#: 구독 메시지 전송 속도(초당). 초과 시 WSS10010. ⚠️ 위 등록 한도와 다른 값이다.
 MAX_SUBSCRIBE_PER_SEC = 10
 
 #: 구독 응답(WS_ACK)의 정상 코드. **REST 의 rsp_cd 체계와 별개**다
@@ -233,7 +240,7 @@ def _run_session(keys: list[str], on_message, *, tr_cd: str, url: str,
         received = 0
         try:
             for k in keys:
-                _throttle_send()          # 초당 10건 미만(WSS10010)
+                _throttle_send()          # MAX_SUBSCRIBE_PER_SEC 미만(WSS10010)
                 ws.send(json.dumps({"header": {"token": token, "tr_type": "1"},
                                     "body": {"tr_cd": tr_cd, "tr_key": k}}))
             while not stop.is_set():
@@ -290,9 +297,9 @@ def subscribe(keys: Iterable[str], on_message: Callable[[dict], None], *,
     """`keys` 를 실시간 구독하고 푸시마다 `on_message(dict)` 를 호출한다.
 
     서버 한도를 자동으로 지킨다.
-      - 등록이 **10건을 넘으면 10개씩 나눠 여러 세션**으로 처리한다.
-      - 동시 세션은 **2개**를 넘지 않는다(초과분은 앞 세션이 끝나면 이어서 실행).
-      - 구독 전송은 **초당 10건 미만**으로 제한한다.
+      - 등록이 `MAX_KEYS_PER_SESSION` 을 넘으면 그만큼씩 나눠 **여러 세션**으로 처리한다.
+      - 동시 세션은 `MAX_SESSIONS` 를 넘지 않는다(초과분은 앞 세션이 끝나면 이어서 실행).
+      - 구독 전송은 `MAX_SUBSCRIBE_PER_SEC` 미만으로 제한한다.
       - 종료 시 `tr_type=2` 로 **등록을 반납**한다.
 
     Args:
@@ -330,7 +337,7 @@ def subscribe(keys: Iterable[str], on_message: Callable[[dict], None], *,
                             max_messages=max_messages, timeout=timeout, stop=stop,
                             include_ack=include_ack)
 
-    # 10건을 넘으면 여러 세션으로 나눈다. 동시 실행 수는 세마포어가 2로 묶는다.
+    # 한도를 넘으면 여러 세션으로 나눈다. 동시 실행 수는 세마포어가 MAX_SESSIONS 로 묶는다.
     lock = threading.Lock()
     total = [0]
 
