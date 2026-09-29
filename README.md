@@ -118,14 +118,13 @@ cd examples/krstock
 python krstock_examples.py
 ```
 
-### SDK 없이 쓰기 — [`snippets/standalone/`](snippets/standalone/)
+### SDK 없이 쓰기 — [`snippets/standalone/`](snippets/standalone/README.md)
 
-사내 정책상 **외부 패키지 설치가 제한**되거나, **다른 언어로 포팅**하려는 경우를 위한 원시 예제입니다.
-토큰 발급부터 실시간 시세 구독까지 **한 파일에** 들어 있어 호출 흐름이 그대로 보입니다.
+API 호출 흐름을 이해하기 위한 **단독 실행 예제**입니다. 토큰 발급부터 실시간 시세까지 한 파일에 들어 있습니다.
 
 | 파일 | REST | WebSocket |
 |---|---|---|
-| `nhplug_stock_demo1.py` | `urllib` (표준 라이브러리) | `websocket-client` (콜백) |
+| `nhplug_stock_demo1.py` | `urllib` (표준 라이브러리) | `websocket-client` |
 | `nhplug_stock_demo2.py` | `requests` | `websockets` (async) |
 
 ```bash
@@ -133,8 +132,6 @@ cd snippets/standalone
 cp .env.example .env       # ⚠️ 여기 .env 는 INI 형식 — 루트와 다릅니다
 python nhplug_stock_demo1.py
 ```
-
-> 대부분의 경우 **SDK 쪽이 훨씬 짧고 안전합니다.** 원시 예제는 토큰 캐시·호출 유량·WebSocket 서버 한도를 직접 다뤄야 합니다.
 
 ## 설정 — 파일 하나만 관리하면 됩니다
 
