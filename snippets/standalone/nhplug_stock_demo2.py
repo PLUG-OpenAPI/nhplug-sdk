@@ -75,14 +75,7 @@ call_api("/krstock/inquiry/v1/balance", {"Input_0": {
 }})
 
 
-# 5) 현재가
-call_api("/krstock/quote/v1/currentPrice", {"Input_0": {
-    "iem_cd": IEM_CD,
-    "market_cd": "UNT",     # 시장: UNT(통합)/KRX/NXT
-}})
-
-
-# 6) 실시간 시세 — 등록 → 5초간 수신 → 해제
+# 5) 실시간 시세 — 등록 → 수신 (수신 중 현재가 REST 호출) → 해제
 TR_CDS = ("mc", "mb")  # mc: 체결가(통합), mb: 호가(통합)
 
 
@@ -96,19 +89,28 @@ async def send(ws, tr_type):
 
 
 async def receive(ws):
+    """수신해 출력 (등록·해제 응답 + 실시간 데이터)"""
     async for message in ws:
         print(json.dumps(json.loads(message), ensure_ascii=False, indent=2))
 
 
 async def realtime():
     async with websockets.connect(WS_URL) as ws:
-        await send(ws, "1")  # 등록
-        try:
-            await asyncio.wait_for(receive(ws), timeout=5)
-        except asyncio.TimeoutError:
-            pass
-        await send(ws, "2")  # 해제
-    print("\n5초 경과, 실시간 해제 후 종료합니다.")
+        await send(ws, "1")                          # 등록
+        receiver = asyncio.create_task(receive(ws))  # 수신은 백그라운드에서 계속된다
+        await asyncio.sleep(3)
+
+        # 실시간 수신 중 REST 호출 — 별도 스레드에서 실행해 수신을 막지 않는다
+        await asyncio.to_thread(call_api, "/krstock/quote/v1/currentPrice", {"Input_0": {
+            "iem_cd": IEM_CD,
+            "market_cd": "UNT",     # 시장: UNT(통합)/KRX/NXT
+        }})
+        await asyncio.sleep(3)
+
+        await send(ws, "2")     # 해제
+        await asyncio.sleep(1)  # 해제 응답 확인
+        receiver.cancel()
+    print("\n실시간 해제 후 종료합니다.")
 
 
 asyncio.run(realtime())

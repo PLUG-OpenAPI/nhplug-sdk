@@ -6,6 +6,7 @@ import configparser
 import json
 import os
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta
@@ -33,8 +34,11 @@ def call_api(path, body):
         method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {access_token}"},
     )
-    with urllib.request.urlopen(request, timeout=15) as response:
-        result = json.loads(response.read())
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            result = json.loads(response.read())
+    except urllib.error.HTTPError as e:  # HTTP 200 이 아니어도 서버 응답 본문을 그대로 출력
+        result = json.loads(e.read())
     print(f"\n[{path}]")
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return result
@@ -91,14 +95,7 @@ call_api("/krstock/inquiry/v1/balance", {"Input_0": {
 }})
 
 
-# 5) 현재가
-call_api("/krstock/quote/v1/currentPrice", {"Input_0": {
-    "iem_cd": IEM_CD,
-    "market_cd": "UNT",     # 시장: UNT(통합)/KRX/NXT
-}})
-
-
-# 6) 실시간 시세 — 등록 → 5초간 수신 → 해제
+# 5) 실시간 시세 — 등록 → 수신 (수신 중 현재가 REST 호출) → 해제
 TR_CDS = ("mc", "mb")  # mc: 체결가(통합), mb: 호가(통합)
 
 
@@ -111,16 +108,28 @@ def send(ws, tr_type):
         }))
 
 
+def receive(ws, seconds):
+    """seconds 초 동안 수신해 출력 (등록·해제 응답 + 실시간 데이터)"""
+    deadline = time.time() + seconds
+    while time.time() < deadline:
+        try:
+            print(json.dumps(json.loads(ws.recv()), ensure_ascii=False, indent=2))
+        except websocket.WebSocketTimeoutException:
+            pass  # 1초간 수신 없음 — 계속 대기
+
+
 ws = websocket.create_connection(WS_URL, timeout=1)
-send(ws, "1")  # 등록
+send(ws, "1")   # 등록
+receive(ws, 3)
 
-deadline = time.time() + 5
-while time.time() < deadline:
-    try:
-        print(json.dumps(json.loads(ws.recv()), ensure_ascii=False, indent=2))
-    except websocket.WebSocketTimeoutException:
-        pass  # 1초간 수신 없음 — 계속 대기
+# 실시간 연결을 유지한 채 REST 호출 — 그 사이 도착한 실시간 데이터는 다음 receive 에서 이어 받는다
+call_api("/krstock/quote/v1/currentPrice", {"Input_0": {
+    "iem_cd": IEM_CD,
+    "market_cd": "UNT",     # 시장: UNT(통합)/KRX/NXT
+}})
+receive(ws, 3)
 
-send(ws, "2")  # 해제
+send(ws, "2")   # 해제
+receive(ws, 1)  # 해제 응답 확인
 ws.close()
-print("\n5초 경과, 실시간 해제 후 종료합니다.")
+print("\n실시간 해제 후 종료합니다.")
