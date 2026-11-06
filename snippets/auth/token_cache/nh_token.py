@@ -143,8 +143,6 @@ def api_post(path: str, input_0: dict | None = None, cts: str | None = None) -> 
     for attempt in range(2):
         headers = {
             "content-type": "application/json; charset=utf-8",
-            "x-client-id": APP_KEY,
-            "x-client-secret": APP_SECRET,
             "authorization": f"Bearer {get_token(force=force)}",
         }
         if cts:

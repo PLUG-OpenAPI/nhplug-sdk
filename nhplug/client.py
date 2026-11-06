@@ -147,7 +147,7 @@ def _parse(res):
 
 # ---------------------------------------------------------------- 연속조회(cts)
 #: `cts_flag` 헤더가 없을 때 "다음 페이지가 있다"로 보는 업무코드(실측).
-CONTINUE_CODES = ("00165", "00218")
+CONTINUE_CODES = ("00165", "00218", "XA109")  # XA109 = 모의투자 (명세 261015)
 
 #: 응답 **본문**의 연속조회키 필드명(ctsz16·ctsz18·ctsz20·ctsz30).
 #: ⚠️ 구 명세에만 있던 필드다 — 실측은 헤더(cts)였고 2026-09-28 명세에서 본문 필드가 삭제됐다.
@@ -260,17 +260,13 @@ def call(path: str, input_0: dict | None = None, cts: str | None = None,
         `want_meta=False`(기본) → 응답 본문(dict)
         `want_meta=True`       → `(본문, Meta)` — `Meta.cts`·`Meta.cts_flag`·`Meta.has_next`
     """
-    app_key = os.environ.get("NHPLUG_APP_KEY") or os.environ.get("APP_KEY")
-    app_sec = os.environ.get("NHPLUG_APP_SECRET") or os.environ.get("APP_SECRET")
     url = f"{get_base_url()}{path}"
     body = json.dumps({"Input_0": input_0 or {}})
 
     force_token = False  # 401 일 때만 True. 429 등 다른 오류에는 절대 재발급하지 않는다.
     res = None
     for attempt in range(2):
-        headers = {
-            "x-client-id": app_key,
-            "x-client-secret": app_sec,
+        headers = {  # 인증 헤더는 Bearer 하나뿐 (x-client-id·x-client-secret 불필요 — 명세 260908)
             "authorization": f"Bearer {get_token(force=force_token)}",
             "content-type": "application/json; charset=UTF-8",
         }
@@ -336,7 +332,7 @@ def paginate(path: str, input_0: dict | None = None, *, max_pages: int | None = 
     종료 판정(실측 기준):
       - `cts_flag == "N"`  → 종료
       - `cts_flag == "Y"`  → 계속
-      - `cts_flag` 헤더가 없고 `rsp_cd` 가 00165·00218 → 계속
+      - `cts_flag` 헤더가 없고 `rsp_cd` 가 CONTINUE_CODES(00165·00218·XA109) → 계속
       - `cts` 가 비면 종료
       - 🔴 **`cts` 가 직전과 같으면 즉시 종료** — 서버가 진행하지 않는 것이므로 무한루프가 된다.
         정상 연속조회는 매번 바뀌지만 **끝 2~3자만 다른 경우**가 있어 전체 문자열로 비교한다.

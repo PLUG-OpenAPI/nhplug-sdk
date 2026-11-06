@@ -92,7 +92,7 @@
 - 토큰 발급: POST /oauth2/token, 쿼리파라미터 appkey, appsecretkey, grant_type=client_credentials, scope=oob,
   Content-Type: application/x-www-form-urlencoded → 응답 access_token
 - 발급 토큰은 만료 전까지 캐시·재사용한다(매 호출 재발급 금지). → `nhplug/auth.py` 가 이미 처리.
-- 이후 REST 호출 헤더: Authorization: Bearer {token} + x-client-id(앱키) + x-client-secret(앱시크릿)
+- 이후 REST 호출 헤더: **Authorization: Bearer {token} 하나뿐.** x-client-id·x-client-secret 는 보내지 않는다(명세상 불필요).
 - 요청 바디 {"Input_0": {...}}, 응답 Output_0(+Output_1) + rsp_cd/rsp_msg 봉투.
   **성공 판정은 위 「에러 처리」 절을 따른다** — SDK 는 판정하지 않으니 `rsp_msg` 를 직접 읽는다.
   `rsp_cd` 코드값을 비교하는 코드를 만들지 말 것.
