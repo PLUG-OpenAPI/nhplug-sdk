@@ -41,10 +41,10 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 
 | 분류 | 예제 |
 |---|---|
-| 인증 | [`issue_token`](snippets/auth/issue_token) · [`token_cache`](snippets/auth/token_cache) |
-| 공통 | [`list_accounts`](snippets/common/list_accounts) — 계좌구분(`acct_type`) 판정 포함 |
-| 국내주식 | [`current_price`](snippets/krstock/current_price) · [`current_daily`](snippets/krstock/current_daily) · [`balance`](snippets/krstock/balance) · [`buyable_quantity`](snippets/krstock/buyable_quantity) · [`sellable_quantity`](snippets/krstock/sellable_quantity) · [`order_cash_buy`](snippets/krstock/order_cash_buy) · [`order_cash_sell`](snippets/krstock/order_cash_sell) · [`realtime_execution`](snippets/krstock/realtime_execution) |
-| 해외주식 | [`current_price`](snippets/gbstock/current_price) · [`balance`](snippets/gbstock/balance) · [`buyable_amount`](snippets/gbstock/buyable_amount) · [`sellable_quantity`](snippets/gbstock/sellable_quantity) · [`order_buy`](snippets/gbstock/order_buy) |
+| 인증 | [`issue_token`](snippets/auth/issue_token/issue_token.py) · [`token_cache`](snippets/auth/token_cache/README.md) |
+| 공통 | [`list_accounts`](snippets/common/list_accounts/list_accounts.py) — 계좌구분(`acct_type`) 판정 포함 |
+| 국내주식 | [`current_price`](snippets/krstock/current_price/current_price.py) · [`current_daily`](snippets/krstock/current_daily/current_daily.py) · [`balance`](snippets/krstock/balance/balance.py) · [`buyable_quantity`](snippets/krstock/buyable_quantity/buyable_quantity.py) · [`sellable_quantity`](snippets/krstock/sellable_quantity/sellable_quantity.py) · [`order_cash_buy`](snippets/krstock/order_cash_buy/order_cash_buy.py) · [`order_cash_sell`](snippets/krstock/order_cash_sell/order_cash_sell.py) · [`realtime_execution`](snippets/krstock/realtime_execution/realtime_execution.py) |
+| 해외주식 | [`current_price`](snippets/gbstock/current_price/current_price.py) · [`balance`](snippets/gbstock/balance/balance.py) · [`buyable_amount`](snippets/gbstock/buyable_amount/buyable_amount.py) · [`sellable_quantity`](snippets/gbstock/sellable_quantity/sellable_quantity.py) · [`order_buy`](snippets/gbstock/order_buy/order_buy.py) |
 | **SDK 없이** | [`standalone/`](snippets/standalone/README.md) — urllib · requests 원시 예제 2종 |
 
 > ⚠️ 해외는 매수/매도 가능수량이 `buyableAmount` **한 API**(`pcs_dit`)로 통합돼 있습니다 — [AGENTS.md](AGENTS.md) 참고.
@@ -61,7 +61,7 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 | [`guides/antigravity.md`](guides/antigravity.md) | Antigravity·Cursor 개발 가이드 |
 | [`scripts/fetch_docs.py`](scripts/fetch_docs.py) | 도메인에서 최신 명세를 `docs/` 로 내려받기 |
 | [`scripts/check_consistency.py`](scripts/check_consistency.py) | 문서·코드 일관성 검사(관리자용) |
-| [`examples/krstock`](examples/krstock) · [`pipeline/`](pipeline) | 카테고리 통합 예제 · 설계→검증→실행 골격 |
+| [`examples/krstock`](examples/krstock/krstock_examples.py) · [`pipeline/`](pipeline/README.md) | 카테고리 통합 예제 · 설계→검증→실행 골격 |
 
 > **패키지(`pip install nhplug`)에 포함되는 것**: `nhplug/`(코어·실시간) + `instruments/`(파서·헤더 28종)
 > **포함되지 않는 것**: `snippets/` `examples/` `pipeline/` `guides/` — 저장소를 clone 해서 참고하세요.
@@ -71,7 +71,7 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 ```bash
 pip install nhplug                 # 공용 클라이언트 + 실시간(WebSocket) + 종목마스터 파서
 pip install "nhplug[instruments]"  # 종목마스터를 pandas DataFrame 으로 받고 싶을 때
-pip install "nhplug[tls]"          # Windows 등에서 WebSocket TLS 검증 실패 시
+pip install "nhplug[tls]"          # WebSocket 인증서 검증 실패(CERTIFICATE_VERIFY_FAILED) 시
 ```
 
 ```python
@@ -96,7 +96,7 @@ cd nhplug-sdk
 uv sync           # 또는: pip install requests python-dotenv
 
 # 자격증명 설정
-cp .env.example .env   # .env 에 APP_KEY / APP_SECRET / BASE_URL 입력
+cp .env.example .env   # .env 에 NHPLUG_APP_KEY / NHPLUG_APP_SECRET 입력
 
 # (선택) 도메인에서 최신 API 명세를 docs/ 로 내려받기 (AI 컨텍스트·오프라인용)
 python scripts/fetch_docs.py
@@ -290,6 +290,9 @@ if price is None:                       # 기대한 값이 왔는지는 직접 �
 
 **0.4.0 변경** — `is_success()`·`success_codes()`·`NHPLUG_SUCCESS_CODES`·`category="business"` 가 **없어졌습니다.**
 HTTP 200 응답은 더 이상 예외가 되지 않습니다. `except NhplugError` 로 업무 실패를 잡고 있었다면 위 방식으로 바꿔 주세요.
+
+### 토큰 캐시 · 재발급 · 유량 초과
+
 - **토큰은 24시간 유효하며 `~/.nhplug/token-*.json` 에 캐시**되어 스크립트를 여러 번 실행해도 **재발급하지 않습니다**(재발급 1회 = 보안 알림 1건).
   - 파일 권한은 **OS 기본값**을 따릅니다(별도 `chmod` 없음). 공용 계정·공유 서버에서는 `NHPLUG_TOKEN_CACHE_DIR` 로 접근이 제한된 경로를 지정하거나 `NHPLUG_TOKEN_CACHE=0` 으로 끄세요.
   - 끄기: `NHPLUG_TOKEN_CACHE=0` · 위치 변경: `NHPLUG_TOKEN_CACHE_DIR`
@@ -452,7 +455,8 @@ REST 는 `market_cd` 파라미터로 시장을 고르지만, **실시간은 채�
 | 국내 시세 (`mc`·`ob`…) | `code` | 종목코드 `005930` |
 | 시간외 (`e2`·`e4`·`e5`) | `ecn_code` | 시간외 코드 |
 | **통보** (`d0`~`d3`…) | `userid` | 사용자ID 또는 **빈 값** |
-| **해외 시세** (`RC`·`RH`) | `gicz15` | **GIC 15자리 — 티커 아님** |
+| **해외주식 시세** (`RC`·`RH`) | `gicz15` | **GIC 15자리 — 티커 아님** |
+| **해외파생 시세** (`FC`·`FH`) | `isym` | 해외파생 종목코드 (예: `ESU26`) |
 | 채권지수 (`uB`) | `jisuid` | 지수ID |
 
 ### 서버 한도 — SDK 가 자동으로 지킵니다
@@ -467,9 +471,9 @@ REST 는 `market_cd` 파라미터로 시장을 고르지만, **실시간은 채�
 > 한도 값(동시 세션 · 세션당 등록 · 전송 속도)은 **[docs/realtime_channels.md](docs/realtime_channels.md#서버-한도)** 에 정리돼 있습니다.
 > 서버가 강제하는 값이라 **환경변수로 올릴 수 없고** 낮추는 것만 가능합니다.
 
-### 🔒 Windows 에서 TLS 오류가 난다면
+### 🔒 인증서 검증 오류(`CERTIFICATE_VERIFY_FAILED`)가 난다면
 
-실거래 WebSocket(`:7070`·`:7080`)은 서버가 **중간 CA 를 보내지 않습니다.** `curl` 이나 브라우저는 OS 인증서 저장소로 자동 보완해 성공하지만, 파이썬 기본 OpenSSL 검증은 실패합니다.
+실거래 WebSocket(`:7070`·`:7080`)은 서버가 **중간 CA 를 보내지 않습니다.** `curl`·브라우저·Windows schannel 은 OS 인증서 저장소로 자동 보완해 성공하지만, 파이썬 기본 OpenSSL 검증은 실패할 수 있습니다(특히 macOS·Linux).
 
 ```bash
 pip install "nhplug[tls]"      # truststore — OS 인증서 저장소 사용
@@ -505,7 +509,7 @@ python snippets/krstock/realtime_execution/chk_realtime_execution.py d2    # 체
 
 ## AI IDE 로 개발하기
 
-**[`templates/`](templates/) — 프로젝트에 넣는 규칙 파일.** 규칙이 없으면 AI 가 필드명·성공코드를 추측해 틀린 코드를 만듭니다.
+**[`templates/`](templates/README.md) — 프로젝트에 넣는 규칙 파일.** 규칙이 없으면 AI 가 필드명·성공 판정을 추측해 틀린 코드를 만듭니다.
 
 | 도구 | 파일 | 위치 |
 |---|---|---|

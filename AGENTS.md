@@ -23,7 +23,7 @@
 
 | 알고 싶은 것 | 열어볼 파일 |
 |---|---|
-| REST 호출 · `rsp_cd` 판정 · **연속조회** · **유량 스로틀** | [nhplug/client.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/client.py) |
+| REST 호출 · `rsp_cd`·`rsp_msg` 꺼내기(판정 없음) · **연속조회** · **유량 스로틀** | [nhplug/client.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/client.py) |
 | WebSocket 구독 · 포트 라우팅 · **서버 한도** · TLS | [nhplug/realtime.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/realtime.py) |
 | 토큰 발급·캐시 · **호스트 가드** · 브랜드 판정 | [nhplug/auth.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/auth.py) |
 | 오류 분류(`config`·`auth`·`rate_limit`·`network`·`http`) | [nhplug/errors.py](https://github.com/PLUG-OpenAPI/nhplug-sdk/blob/main/nhplug/errors.py) |
@@ -183,7 +183,9 @@ KRX 거래시간이 연장돼 **정규장외 시세가 섞이게 되면서**, �
 - 앱키/앱시크릿은 코드에 하드코딩하지 않는다. .env(NHPLUG_APP_KEY/NHPLUG_APP_SECRET)에서 읽는다. .env 는 커밋 금지.
 - 기본 호출 대상은 운영(api). 개발·교육·시뮬레이션은 모의투자(moapi)로 전환한다.
 - 주문(매수/매도) 실행 전 로그를 남기고, **업무 오류면 중단한다**(판정은 위 「에러 처리」 절 — `rsp_msg` 우선).
-  `nhplug.call()` 을 쓰면 `NhplugError` 로 올라오므로 예외를 잡아 중단하면 된다.
+  🔴 **업무 오류는 예외가 아니다.** HTTP 200 으로 오므로 `try/except NhplugError` 만으로는 잡히지 않는다.
+  주문 직전 단계(잔고·가능수량 조회 등)의 응답마다 **기대한 값이 있는지 + `rsp_msg`** 를 확인하고, 아니면 주문하지 말고 중단하는 코드를 쓴다.
+  `NhplugError` 는 HTTP 200 이 아닐 때(인증·유량·네트워크 등)만 올라온다.
 - 실주문은 사람 확인 절차를 둔다. 완전 무인 실거래는 지양.
 
 ## 개발 환경 (프로젝트 격리)
