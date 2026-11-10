@@ -31,7 +31,7 @@ data = call("/krstock/quote/v1/currentPrice", {"iem_cd": "005930", "market_cd": 
 - 자산군 정본: `https://www.nhplug.com/openapi-docs/<자산>/openapi.json`
   (자산: `common` · `krstock` · `gbstock` · `krfuture` · `gbfuture` · `krbond` · `krgold`)
 - **엔드포인트 경로·필드명·필수여부는 `openapi.json` 을 정본으로 따른다. 추측하지 않는다.**
-- 전체 문맥이 한 번에 필요하면 https://www.nhplug.com/llms-full.txt (약 160KB)
+- 전체 문맥이 한 번에 필요하면 https://www.nhplug.com/llms-full.txt
 
 ## 설정 — `.env` 한 곳에서 읽는다
 
