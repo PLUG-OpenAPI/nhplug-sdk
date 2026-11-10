@@ -43,11 +43,15 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 |---|---|
 | 인증 | [`issue_token`](snippets/auth/issue_token/issue_token.py) · [`token_cache`](snippets/auth/token_cache/README.md) |
 | 공통 | [`list_accounts`](snippets/common/list_accounts/list_accounts.py) — 계좌구분(`acct_type`) 판정 포함 |
-| 국내주식 | [`current_price`](snippets/krstock/current_price/current_price.py) · [`current_daily`](snippets/krstock/current_daily/current_daily.py) · [`balance`](snippets/krstock/balance/balance.py) · [`buyable_quantity`](snippets/krstock/buyable_quantity/buyable_quantity.py) · [`sellable_quantity`](snippets/krstock/sellable_quantity/sellable_quantity.py) · [`order_cash_buy`](snippets/krstock/order_cash_buy/order_cash_buy.py) · [`order_cash_sell`](snippets/krstock/order_cash_sell/order_cash_sell.py) · [`realtime_execution`](snippets/krstock/realtime_execution/realtime_execution.py) |
-| 해외주식 | [`current_price`](snippets/gbstock/current_price/current_price.py) · [`balance`](snippets/gbstock/balance/balance.py) · [`buyable_amount`](snippets/gbstock/buyable_amount/buyable_amount.py) · [`sellable_quantity`](snippets/gbstock/sellable_quantity/sellable_quantity.py) · [`order_buy`](snippets/gbstock/order_buy/order_buy.py) |
+| 국내주식 시세 | [`current_price`](snippets/krstock/current_price/current_price.py) · [`current_daily`](snippets/krstock/current_daily/current_daily.py) · [`period`](snippets/krstock/period/period.py) (일·주·월·년봉) · [`current_execution`](snippets/krstock/current_execution/current_execution.py) · [`current_investor`](snippets/krstock/current_investor/current_investor.py) · [`etf_current`](snippets/krstock/etf_current/etf_current.py) · [`realtime_execution`](snippets/krstock/realtime_execution/realtime_execution.py) |
+| 국내주식 계좌·주문 | [`balance`](snippets/krstock/balance/balance.py) · [`buyable_quantity`](snippets/krstock/buyable_quantity/buyable_quantity.py) · [`sellable_quantity`](snippets/krstock/sellable_quantity/sellable_quantity.py) · [`order_cash_buy`](snippets/krstock/order_cash_buy/order_cash_buy.py) · [`order_cash_sell`](snippets/krstock/order_cash_sell/order_cash_sell.py) |
+| 해외주식 시세 | [`current_price`](snippets/gbstock/current_price/current_price.py) · [`period`](snippets/gbstock/period/period.py) (일·주·월봉) |
+| 해외주식 계좌·주문 | [`balance`](snippets/gbstock/balance/balance.py) · [`buyable_amount`](snippets/gbstock/buyable_amount/buyable_amount.py) · [`sellable_quantity`](snippets/gbstock/sellable_quantity/sellable_quantity.py) · [`order_buy`](snippets/gbstock/order_buy/order_buy.py) |
 | **SDK 없이** | [`standalone/`](snippets/standalone/README.md) — urllib · requests 원시 예제 2종 |
 
 > ⚠️ 해외는 매수/매도 가능수량이 `buyableAmount` **한 API**(`pcs_dit`)로 통합돼 있습니다 — [AGENTS.md](AGENTS.md) 참고.
+>
+> ⚠️ 기간별 시세의 주기 코드(`gubun`)는 **국내와 해외가 다릅니다** — 국내 `1`=일, 해외 `1`=틱. 각 `period.py` 의 상수(`DAY`·`WEEK`…)를 쓰세요.
 
 ### 문서 · 도구
 

@@ -165,6 +165,15 @@ KRX 거래시간이 연장돼 **정규장외 시세가 섞이게 되면서**, �
 - 시세 조회(현재가 등) 종목코드도 iem_cd(6자리) + market_cd(KRX/NXT/UNT) 를 쓴다. (구 shrn_iscd 폐지)
 - 형식이 의심되면 해당 자산군 openapi.json 의 operation 예시를 확인한다: https://www.nhplug.com/openapi-docs/<domain>/openapi.json (또는 `python scripts/fetch_docs.py` 후 docs/<domain>/openapi.json).
 
+## 🔴 기간별 시세 함정 (명세 261015 · 실측 2026-11-10)
+- **주기 코드 `gubun` 이 국내·해외 반대다.** 국내 `/krstock/quote/v1/period` 1.일 2.주 3.월 4.년 5.분 6.초 7.틱 /
+  해외 `/gbstock/quote/v1/period` 1.틱 2.분 3.일 4.주 5.월. 국내 값을 해외에 옮기면 **오류 없이** 틱이 온다.
+  샘플 `snippets/{krstock,gbstock}/period/period.py` 의 상수(`DAY`·`WEEK`·`MONTH`)를 쓴다.
+- **국내 `market_cd=UNT` + `view_main_yn=Y`(정규장) 는 2026-09-14 이후 데이터만 온다** — `period`·`currentDaily` 모두.
+  연속조회로도 늘지 않는다. 긴 기간(백테스트 등)은 `market_cd=KRX` 로 조회한다.
+- 해외 `period` 는 필수 입력 8개(`iem_cd`·`end_dt`·`count`·`maxavg`·`gubun`·`xtick`·`today_cls`·`market_cls`). 일·주·월봉은 `xtick="0001"`.
+- 캔들은 국내·해외 모두 `Output_1`(최신이 앞). 국내는 값이 문자열, 해외는 숫자로 온다.
+
 ## 환경 (Base URL) — 호출 대상은 .env 의 NHPLUG_BASE_URL, 기본값 api(운영)
 - 🔴 운영 (Live) [기본]:             https://api.nhplug.com:8443
 - 🟢 모의투자 (Mock) 교육·시뮬레이션: https://moapi.nhplug.com:8443
