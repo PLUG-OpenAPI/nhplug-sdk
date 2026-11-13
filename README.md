@@ -15,7 +15,7 @@ NH투자증권 **NHPLUG** REST Open API 를 파이썬으로 쉽게 쓰기 위한
 |---|---|---|
 | 내 프로그램에 넣기 (자동매매) | **PyPI** | `pip install nhplug` |
 | 예제 보며 배우기 | **이 저장소** | `git clone` 후 `snippets/` |
-| 대화로 시세·잔고 조회 (코딩 불필요) | [nhplug-mcp](https://github.com/PLUG-OpenAPI/nhplug-mcp) | Claude 설정에 `npx` 한 줄 |
+| 대화로 시세·잔고 조회 (코딩 불필요) | [nhplug-mcp](https://github.com/PLUG-OpenAPI/nhplug-mcp) | Claude·ChatGPT 데스크톱 앱에 등록 ([방법](https://github.com/PLUG-OpenAPI/nhplug-mcp#3-ai-앱에-연결)) |
 
 ### AI·에이전트로 개발한다면
 
